@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Users/dpiriz/JARS/selenium-2.42.1/selenium-java-2.42.1.jar" sourcepath="C:/Users/dpiriz/JARS/selenium-2.42.1/selenium-java-2.42.1-srcs.jar"/>
+	<classpathentry kind="lib" path="C:/Users/dpiriz/JARS/selenium-server-standalone-2.42.1.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
