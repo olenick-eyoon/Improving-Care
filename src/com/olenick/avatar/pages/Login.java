@@ -29,12 +29,13 @@ public class Login {
 	}
 	
 
-
 	//TODO: return MainPage object
-	public void login(String user, String pass) {
+	public Landing login(String user, String pass) throws InterruptedException {
 		setUser(user);
 		setPassword(pass);
 		txtPassword.submit();
+		Landing landingPage = new Landing(driver, true);
+		return landingPage;
 	}
 
 	

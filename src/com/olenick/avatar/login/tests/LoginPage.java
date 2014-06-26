@@ -31,7 +31,7 @@ public class LoginPage {
 	}
 	
 	@Test
-	public void loginUser(){
+	public void loginUser() throws InterruptedException{
 		Login loginPage = new Login(driver);
 		loginPage.open(false).login("dash@avatarsolutions.com", "password");
 		assertEquals("Intelligent Surveys Online", driver.getTitle());
