@@ -1,6 +1,7 @@
 package com.olenick.avatar.pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -22,6 +23,7 @@ public class ICare2 {
 	
 	public ICare2 (WebDriver driver, boolean loaded) {
 		this.driver = driver;
+		
 	}
 
 	public ICare2 switchToNewWindow() throws InterruptedException, ICare2PageNotDisplayed {
@@ -41,7 +43,13 @@ public class ICare2 {
 		return driver.getWindowHandles().size();
 	}
 
-	public ICare2 detectMenuBarItems() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid {
+	public ICare2 detectMenuBarItems() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException {
+		Thread.sleep(10000);
+		try{
+			WebElement coso = driver.findElement(By.xpath(menuBarXpath));
+		} catch (NoSuchElementException e) {
+			System.out.println("NO HAY MENU BAR");
+		}
 		home = driver.findElement(By.xpath(menuBarXpath+"/div[1]"));
 		patientExperience = driver.findElement(By.xpath(menuBarXpath+"/div[2]"));
 		surveyControlCenter = driver.findElement(By.xpath(menuBarXpath+"/div[3]"));

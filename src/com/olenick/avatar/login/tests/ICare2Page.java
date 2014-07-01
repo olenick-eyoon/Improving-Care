@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -33,14 +32,14 @@ public class ICare2Page {
 		driver.quit();
 	}
 
-	@Ignore
+	//@Ignore
 	@Test
 	public void createIcare2Page() {
 		iCare2Page = new ICare2(driver, false);
 		assertNotNull(iCare2Page);
 	}
 	
-	@Ignore
+	//@Ignore
 	@Test
 	public void verifyTitle() throws InterruptedException, ICare2PageNotDisplayed {
 		iCare2Page = new Login(driver).open(true).login("rferrari@avatarsolutions.com", "password")
@@ -50,7 +49,7 @@ public class ICare2Page {
 		assertEquals("iCare Enhanced Platform", driver.getTitle());
 	}
 
-	@Ignore
+	//@Ignore
 	@Test
 	public void findMenuBar() throws InterruptedException, ICare2PageNotDisplayed, HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid {
 		iCare2Page = new Login(driver).open(true).login("rferrari@avatarsolutions.com", "password")
@@ -60,7 +59,7 @@ public class ICare2Page {
 		
 	}
 	
-	@Ignore
+	//@Ignore
 	@Test
 	public void accessHomeTab() throws InterruptedException, ICare2PageNotDisplayed, HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid {
 		iCare2Page = new Login(driver).open(true).login("rferrari@avatarsolutions.com", "password")
