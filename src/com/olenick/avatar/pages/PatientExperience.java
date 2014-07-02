@@ -1,7 +1,5 @@
 package com.olenick.avatar.pages;
 
-import net.sf.cglib.proxy.Factory;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -14,6 +12,7 @@ public class PatientExperience {
 	WebElement home, patientExperience, surveyControlCenter;
 	WebDriver driver;
 	WebDriverWait wait;
+	
 	/**
 	 * @return the home
 	 */
@@ -227,8 +226,45 @@ public class PatientExperience {
 	WebElement system, organization, department, location;
 	WebElement surveyType, patientType, composite, item;
 	WebElement fromMonth, toMonth, fromYear, toYear;
-	WebElement mean, topBox;
+	WebElement mean, topBox, demographicLink;
+	/**
+	 * @return the demographicLink
+	 */
+	public WebElement getDemographicLink() {
+		return demographicLink;
+	}
+
 	Select systemSelect, organizationSelect, departmentSelect, locationSelect;
+	/**
+	 * @return the surveyTypeSelect
+	 */
+	public Select getSurveyTypeSelect() {
+		return surveyTypeSelect;
+	}
+
+	/**
+	 * @return the patientTypeSelect
+	 */
+	public Select getPatientTypeSelect() {
+		return patientTypeSelect;
+	}
+
+	/**
+	 * @return the compositeSelect
+	 */
+	public Select getCompositeSelect() {
+		return compositeSelect;
+	}
+
+	/**
+	 * @return the itemSelect
+	 */
+	public Select getItemSelect() {
+		return itemSelect;
+	}
+
+	Select surveyTypeSelect, patientTypeSelect, compositeSelect, itemSelect;
+	
 	
 	/**
 	 * @return the organizationSelect
@@ -276,6 +312,8 @@ public class PatientExperience {
 		composite = driver.findElement(By.id("factor"));
 		item = driver.findElement(By.id("item"));
 		
+		demographicLink = driver.findElement(By.name("DEMOGRPH"));
+		
 		return this;
 	}
 
@@ -292,6 +330,19 @@ public class PatientExperience {
 			break;
 		case "location":
 			locationSelect = new Select(location);
+			break;
+		
+		case "surveyType":
+			surveyTypeSelect = new Select(surveyType);
+			break;
+		case "patientType":
+			patientTypeSelect = new Select(patientType);
+			break;
+		case "composite":
+			compositeSelect = new Select(composite);
+			break;
+		case "item":
+			itemSelect = new Select(item);
 			break;
 		
 		}

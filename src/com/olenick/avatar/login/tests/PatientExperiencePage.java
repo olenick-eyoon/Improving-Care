@@ -7,7 +7,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
 import com.olenick.avatar.exceptions.HomeLinkInvalid;
@@ -73,6 +72,7 @@ public class PatientExperiencePage {
 		
 	}
 	
+	@Ignore
 	@Test
 	public void convertSystemElementToSelect() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -82,6 +82,7 @@ public class PatientExperiencePage {
 		assertNotNull(patientExperiencePage.getSystemSelect());
 	}
 	
+	@Ignore
 	@Test
 	public void convertOrganizationElementToSelect() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -91,6 +92,7 @@ public class PatientExperiencePage {
 		assertNotNull(patientExperiencePage.getOrganizationSelect());
 	}
 	
+	@Ignore
 	@Test
 	public void convertDepartmentElementToSelect() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -100,6 +102,7 @@ public class PatientExperiencePage {
 		assertNotNull(patientExperiencePage.getDepartmentSelect());
 	}
 	
+	@Ignore
 	@Test
 	public void convertLocationElementToSelect() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -109,5 +112,54 @@ public class PatientExperiencePage {
 		assertNotNull(patientExperiencePage.getLocationSelect());
 	}
 	
+	@Ignore
+	@Test
+	public void convertSurveyTypeElementToSelect() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
+		loginPage = new Login(driver);
+		patientExperiencePage = loginPage.open(true).login("rferrari@avatarsolutions.com", "password").drillDownAdvancedReports().accessEnhancedReports()
+				.switchToNewWindow().switchToMainIFrame().detectMenuBarItems().accessPatientExperienceTab().detectFilters();
+		patientExperiencePage.convertToSelect("surveyType");
+		assertNotNull(patientExperiencePage.getSurveyTypeSelect());
+	}
+
+	@Ignore
+	@Test
+	public void convertPatientTypeElementToSelect() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
+		loginPage = new Login(driver);
+		patientExperiencePage = loginPage.open(true).login("rferrari@avatarsolutions.com", "password").drillDownAdvancedReports().accessEnhancedReports()
+				.switchToNewWindow().switchToMainIFrame().detectMenuBarItems().accessPatientExperienceTab().detectFilters();
+		patientExperiencePage.convertToSelect("patientType");
+		assertNotNull(patientExperiencePage.getPatientTypeSelect());
+	}
+
+	@Ignore
+	@Test
+	public void convertCompositeElementToSelect() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
+		loginPage = new Login(driver);
+		patientExperiencePage = loginPage.open(true).login("rferrari@avatarsolutions.com", "password").drillDownAdvancedReports().accessEnhancedReports()
+				.switchToNewWindow().switchToMainIFrame().detectMenuBarItems().accessPatientExperienceTab().detectFilters();
+		patientExperiencePage.convertToSelect("composite");
+		assertNotNull(patientExperiencePage.getCompositeSelect());
+	}
+
+	@Ignore
+	@Test
+	public void convertItemElementToSelect() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
+		loginPage = new Login(driver);
+		patientExperiencePage = loginPage.open(true).login("rferrari@avatarsolutions.com", "password").drillDownAdvancedReports().accessEnhancedReports()
+				.switchToNewWindow().switchToMainIFrame().detectMenuBarItems().accessPatientExperienceTab().detectFilters();
+		patientExperiencePage.convertToSelect("item");
+		assertNotNull(patientExperiencePage.getItemSelect());
+	}
 	
+	//TODO: Agregar la conversion de los filtros de fechas y agregar los radiobuttons
+	
+	@Ignore
+	@Test
+	public void detectDemographicFiltersLink() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
+		loginPage = new Login(driver);
+		patientExperiencePage = loginPage.open(true).login("rferrari@avatarsolutions.com", "password").drillDownAdvancedReports().accessEnhancedReports()
+				.switchToNewWindow().switchToMainIFrame().detectMenuBarItems().accessPatientExperienceTab().detectFilters();
+		assertNotNull(patientExperiencePage.getDemographicLink());
+	}
 }
