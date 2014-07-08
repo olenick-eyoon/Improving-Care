@@ -9,6 +9,71 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class PatientExperience {
 	
+	/*
+	 * TABS!
+	 */
+	WebElement overviewTab, compositeTab, sbsTab, demographicTab;
+	
+	/**
+	 * @return the overviewTab
+	 */
+	public WebElement getOverviewTab() {
+		return overviewTab;
+	}
+
+	/**
+	 * @param overviewTab the overviewTab to set
+	 */
+	public void setOverviewTab(WebElement overviewTab) {
+		this.overviewTab = overviewTab;
+	}
+
+	/**
+	 * @return the compositeTab
+	 */
+	public WebElement getCompositeTab() {
+		return compositeTab;
+	}
+
+	/**
+	 * @param compositeTab the compositeTab to set
+	 */
+	public void setCompositeTab(WebElement compositeTab) {
+		this.compositeTab = compositeTab;
+	}
+
+	/**
+	 * @return the sbsTab
+	 */
+	public WebElement getSbsTab() {
+		return sbsTab;
+	}
+
+	/**
+	 * @param sbsTab the sbsTab to set
+	 */
+	public void setSbsTab(WebElement sbsTab) {
+		this.sbsTab = sbsTab;
+	}
+
+	/**
+	 * @return the demographicTab
+	 */
+	public WebElement getDemographicTab() {
+		return demographicTab;
+	}
+
+	/**
+	 * @param demographicTab the demographicTab to set
+	 */
+	public void setDemographicTab(WebElement demographicTab) {
+		this.demographicTab = demographicTab;
+	}
+
+	/*
+	 * RESTO!
+	 * 
+	 */
 	WebElement home, patientExperience, surveyControlCenter;
 	WebDriver driver;
 	WebDriverWait wait;
@@ -225,8 +290,22 @@ public class PatientExperience {
 
 	WebElement system, organization, department, location;
 	WebElement surveyType, patientType, composite, item;
-	WebElement fromMonth, toMonth, fromYear, toYear;
-	WebElement mean, topBox, demographicLink;
+	/**
+	 * @return the groupBy
+	 */
+	public WebElement getGroupBy() {
+		return groupBy;
+	}
+
+	WebElement fromMonth, toMonth, fromYear, toYear, groupBy;
+	WebElement mean, topBox, demographicLink, applyButton;
+	/**
+	 * @return the applyButton
+	 */
+	public WebElement getApplyButton() {
+		return applyButton;
+	}
+
 	/**
 	 * @return the demographicLink
 	 */
@@ -264,8 +343,44 @@ public class PatientExperience {
 	}
 
 	Select surveyTypeSelect, patientTypeSelect, compositeSelect, itemSelect;
+	Select fromMonthSelect, toMonthSelect, fromYearSelect, toYearSelect, groupBySelect;
 	
 	
+	/**
+	 * @return the fromMonthSelect
+	 */
+	public Select getFromMonthSelect() {
+		return fromMonthSelect;
+	}
+
+	/**
+	 * @return the toMonthSelect
+	 */
+	public Select getToMonthSelect() {
+		return toMonthSelect;
+	}
+
+	/**
+	 * @return the fromYearSelect
+	 */
+	public Select getFromYearSelect() {
+		return fromYearSelect;
+	}
+
+	/**
+	 * @return the toYearSelect
+	 */
+	public Select getToYearSelect() {
+		return toYearSelect;
+	}
+
+	/**
+	 * @return the groupBySelect
+	 */
+	public Select getGroupBySelect() {
+		return groupBySelect;
+	}
+
 	/**
 	 * @return the organizationSelect
 	 */
@@ -312,7 +427,19 @@ public class PatientExperience {
 		composite = driver.findElement(By.id("factor"));
 		item = driver.findElement(By.id("item"));
 		
+		
+		fromMonth = driver.findElement(By.id("from_mnth"));
+		toMonth = driver.findElement(By.id("to_mnth"));
+		fromYear = driver.findElement(By.id("from_year"));
+		toYear = driver.findElement(By.id("to_year"));
+		groupBy = driver.findElement(By.id("date_option"));
+
+		mean = driver.findElement(By.id("top_box_0"));
+		topBox = driver.findElement(By.id("top_box_1"));
+		
 		demographicLink = driver.findElement(By.name("DEMOGRPH"));
+		
+		applyButton = driver.findElement(By.id("button2"));
 		
 		return this;
 	}
@@ -344,12 +471,42 @@ public class PatientExperience {
 		case "item":
 			itemSelect = new Select(item);
 			break;
-		
+		case "fromMonth":
+			fromMonthSelect = new Select(fromMonth);
+			break;
+		case "toMonth":
+			toMonthSelect = new Select(toMonth);
+			break;
+		case "fromYear":
+			fromYearSelect = new Select(fromYear);
+			break;
+		case "toYear":
+			toYearSelect = new Select(toYear);
+			break;
+		case "groupBy":
+			groupBySelect = new Select(groupBy);
+			break;
+			
 		}
 		return this;
 	}
+
+	public void detectOverviewTab() {
+		setOverviewTab(driver.findElement(By.id("tabitem4")));
+		
+	}
+
+	public void detectCompositeTab() {
+		setCompositeTab(driver.findElement(By.id("tabitem2")));
+	}
 	
+	public void detectSbsTab() {
+		setSbsTab(driver.findElement(By.id("tabitem3")));
+	}
 	
+	public void detectDemographicTab() {
+		setDemographicTab(driver.findElement(By.id("tabitem1")));
+	}
 	
 	
 }

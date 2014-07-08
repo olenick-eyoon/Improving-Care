@@ -152,8 +152,75 @@ public class PatientExperiencePage {
 		assertNotNull(patientExperiencePage.getItemSelect());
 	}
 	
-	//TODO: Agregar la conversion de los filtros de fechas y agregar los radiobuttons
+
+	/*
+	 * DATE RANGE
+	 */
+	@Ignore
+	@Test
+	public void detectDateRangeItems() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
+		loginPage = new Login(driver);
+		patientExperiencePage = loginPage.open(true).login("rferrari@avatarsolutions.com", "password").drillDownAdvancedReports().accessEnhancedReports()
+				.switchToNewWindow().switchToMainIFrame().detectMenuBarItems().accessPatientExperienceTab().detectFilters();
+		assertNotNull(patientExperiencePage.getFromMonth());
+		assertNotNull(patientExperiencePage.getFromYear());
+		assertNotNull(patientExperiencePage.getToMonth());
+		assertNotNull(patientExperiencePage.getToYear());
+		assertNotNull(patientExperiencePage.getGroupBy());
+		
+	}
 	
+	@Ignore
+	@Test
+	public void convertDateRangeItemsToSelect() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
+		loginPage = new Login(driver);
+		patientExperiencePage = loginPage.open(true).login("rferrari@avatarsolutions.com", "password").drillDownAdvancedReports().accessEnhancedReports()
+				.switchToNewWindow().switchToMainIFrame().detectMenuBarItems().accessPatientExperienceTab().detectFilters();
+		patientExperiencePage.convertToSelect("fromMonth");
+		patientExperiencePage.convertToSelect("fromYear");
+		patientExperiencePage.convertToSelect("toMonth");
+		patientExperiencePage.convertToSelect("toYear");
+		patientExperiencePage.convertToSelect("groupBy");
+		
+		assertNotNull(patientExperiencePage.getFromMonthSelect());
+		assertNotNull(patientExperiencePage.getFromYearSelect());
+		assertNotNull(patientExperiencePage.getToMonthSelect());
+		assertNotNull(patientExperiencePage.getToYearSelect());
+		assertNotNull(patientExperiencePage.getGroupBySelect());
+	}
+	
+	
+	/*
+	 * CALCULATION
+	 */
+
+	@Ignore
+	@Test
+	public void detectCalculationRadios() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
+		loginPage = new Login(driver);
+		patientExperiencePage = loginPage.open(true).login("rferrari@avatarsolutions.com", "password").drillDownAdvancedReports().accessEnhancedReports()
+				.switchToNewWindow().switchToMainIFrame().detectMenuBarItems().accessPatientExperienceTab().detectFilters();
+		assertNotNull(patientExperiencePage.getMean());
+		assertNotNull(patientExperiencePage.getTopBox());
+	}
+	
+	/*
+	 * BUTTONS
+	 */
+	
+	@Ignore
+	@Test
+	public void detectButtons() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
+		loginPage = new Login(driver);
+		patientExperiencePage = loginPage.open(true).login("rferrari@avatarsolutions.com", "password").drillDownAdvancedReports().accessEnhancedReports()
+				.switchToNewWindow().switchToMainIFrame().detectMenuBarItems().accessPatientExperienceTab().detectFilters();
+		assertNotNull(patientExperiencePage.getApplyButton());
+	}
+	
+	
+	/*
+	 * ADVANCED FILTERS
+	 */
 	@Ignore
 	@Test
 	public void detectDemographicFiltersLink() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
@@ -162,4 +229,50 @@ public class PatientExperiencePage {
 				.switchToNewWindow().switchToMainIFrame().detectMenuBarItems().accessPatientExperienceTab().detectFilters();
 		assertNotNull(patientExperiencePage.getDemographicLink());
 	}
+	
+	/*
+	 * TABS!
+	 * 
+	 */
+	
+	@Ignore
+	@Test
+	public void detectOverviewTab() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
+		loginPage = new Login(driver);
+		patientExperiencePage = loginPage.open(true).login("rferrari@avatarsolutions.com", "password").drillDownAdvancedReports().accessEnhancedReports()
+				.switchToNewWindow().switchToMainIFrame().detectMenuBarItems().accessPatientExperienceTab().detectFilters();
+		patientExperiencePage.detectOverviewTab();
+		assertNotNull(patientExperiencePage.getOverviewTab());
+	}
+	
+	@Ignore
+	@Test
+	public void detectCompositeTab() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
+		loginPage = new Login(driver);
+		patientExperiencePage = loginPage.open(true).login("rferrari@avatarsolutions.com", "password").drillDownAdvancedReports().accessEnhancedReports()
+				.switchToNewWindow().switchToMainIFrame().detectMenuBarItems().accessPatientExperienceTab().detectFilters();
+		patientExperiencePage.detectCompositeTab();
+		assertNotNull(patientExperiencePage.getCompositeTab());
+	}
+	
+	@Ignore
+	@Test
+	public void detectSbsTab() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
+		loginPage = new Login(driver);
+		patientExperiencePage = loginPage.open(true).login("rferrari@avatarsolutions.com", "password").drillDownAdvancedReports().accessEnhancedReports()
+				.switchToNewWindow().switchToMainIFrame().detectMenuBarItems().accessPatientExperienceTab().detectFilters();
+		patientExperiencePage.detectSbsTab();
+		assertNotNull(patientExperiencePage.getSbsTab());
+	}
+	
+	@Ignore
+	@Test
+	public void detectDemographicTab() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
+		loginPage = new Login(driver);
+		patientExperiencePage = loginPage.open(true).login("rferrari@avatarsolutions.com", "password").drillDownAdvancedReports().accessEnhancedReports()
+				.switchToNewWindow().switchToMainIFrame().detectMenuBarItems().accessPatientExperienceTab().detectFilters();
+		patientExperiencePage.detectDemographicTab();
+		assertNotNull(patientExperiencePage.getDemographicTab());
+	}
+	
 }
