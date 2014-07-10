@@ -491,21 +491,44 @@ public class PatientExperience {
 		return this;
 	}
 
-	public void detectOverviewTab() {
+	public PatientExperience detectOverviewTab() {
 		setOverviewTab(driver.findElement(By.id("tabitem4")));
-		
+		return this;
 	}
 
-	public void detectCompositeTab() {
+	public PatientExperience detectCompositeTab() {
 		setCompositeTab(driver.findElement(By.id("tabitem2")));
+		return this;
 	}
 	
-	public void detectSbsTab() {
+	public PatientExperience detectSbsTab() {
 		setSbsTab(driver.findElement(By.id("tabitem3")));
+		return this;
 	}
 	
-	public void detectDemographicTab() {
+	public PatientExperience detectDemographicTab() {
 		setDemographicTab(driver.findElement(By.id("tabitem1")));
+		return this;
+	}
+
+	public PatientExperience accessOverviewTab() {
+		overviewTab.click();
+		return this;
+	}
+
+	public PatientExperience accessCompositeTab() {
+		compositeTab.click();
+		return this;
+	}
+
+	public PatientExperience accessSbsTab() {
+		sbsTab.click();
+		return this;
+	}
+
+	public PatientExperience accessDemographicsTab() {
+		demographicTab.click();
+		return this;
 	}
 	
 	
