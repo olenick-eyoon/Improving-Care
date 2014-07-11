@@ -530,6 +530,17 @@ public class PatientExperience {
 		demographicTab.click();
 		return this;
 	}
+
+	public boolean isLoadingSingPresent() {
+		int i = 0;
+		if (driver.findElement(By.id("loadingiframe")).getAttribute("style").contains("block")){
+			return true;
+		} else {
+			return false;
+		}
+	    
+	}
+	
 	
 	
 }

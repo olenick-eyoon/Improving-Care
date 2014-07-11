@@ -39,9 +39,9 @@ public class PatientExperiencePage {
 		driver.quit();
 	}
 	
-	//@Ignore
+	@Ignore
 	@Test
-	public void openPage() throws InterruptedException, ICare2PageNotDisplayed, HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid{
+	public void openPage() throws Exception{
 		loginPage = new Login(driver);
 		landingPage = loginPage.open(true).login("rferrari@avatarsolutions.com", "password");
 		iCare2Page = landingPage.drillDownAdvancedReports().accessEnhancedReports().switchToNewWindow().switchToMainIFrame().detectMenuBarItems();
@@ -49,7 +49,7 @@ public class PatientExperiencePage {
 		assertNotNull(patientExperiencePage);
 	}
 	
-	//@Ignore
+	@Ignore
 	@Test
 	public void detectFilters() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -72,7 +72,7 @@ public class PatientExperiencePage {
 		
 	}
 	
-	//@Ignore
+	@Ignore
 	@Test
 	public void convertSystemElementToSelect() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -82,7 +82,7 @@ public class PatientExperiencePage {
 		assertNotNull(patientExperiencePage.getSystemSelect());
 	}
 	
-	//@Ignore
+	@Ignore
 	@Test
 	public void convertOrganizationElementToSelect() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -92,7 +92,7 @@ public class PatientExperiencePage {
 		assertNotNull(patientExperiencePage.getOrganizationSelect());
 	}
 	
-	//@Ignore
+	@Ignore
 	@Test
 	public void convertDepartmentElementToSelect() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -102,7 +102,7 @@ public class PatientExperiencePage {
 		assertNotNull(patientExperiencePage.getDepartmentSelect());
 	}
 	
-	//@Ignore
+	@Ignore
 	@Test
 	public void convertLocationElementToSelect() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -112,7 +112,7 @@ public class PatientExperiencePage {
 		assertNotNull(patientExperiencePage.getLocationSelect());
 	}
 	
-	//@Ignore
+	@Ignore
 	@Test
 	public void convertSurveyTypeElementToSelect() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -122,7 +122,7 @@ public class PatientExperiencePage {
 		assertNotNull(patientExperiencePage.getSurveyTypeSelect());
 	}
 
-	//@Ignore
+	@Ignore
 	@Test
 	public void convertPatientTypeElementToSelect() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -132,7 +132,7 @@ public class PatientExperiencePage {
 		assertNotNull(patientExperiencePage.getPatientTypeSelect());
 	}
 
-	//@Ignore
+	@Ignore
 	@Test
 	public void convertCompositeElementToSelect() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -142,7 +142,7 @@ public class PatientExperiencePage {
 		assertNotNull(patientExperiencePage.getCompositeSelect());
 	}
 
-	//@Ignore
+	@Ignore
 	@Test
 	public void convertItemElementToSelect() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -156,7 +156,7 @@ public class PatientExperiencePage {
 	/*
 	 * DATE RANGE
 	 */
-	//@Ignore
+	@Ignore
 	@Test
 	public void detectDateRangeItems() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -170,7 +170,7 @@ public class PatientExperiencePage {
 		
 	}
 	
-	//@Ignore
+	@Ignore
 	@Test
 	public void convertDateRangeItemsToSelect() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -194,7 +194,7 @@ public class PatientExperiencePage {
 	 * CALCULATION
 	 */
 
-	//@Ignore
+	@Ignore
 	@Test
 	public void detectCalculationRadios() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -208,7 +208,7 @@ public class PatientExperiencePage {
 	 * BUTTONS
 	 */
 	
-	//@Ignore
+	@Ignore
 	@Test
 	public void detectButtons() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -221,7 +221,7 @@ public class PatientExperiencePage {
 	/*
 	 * ADVANCED FILTERS
 	 */
-	//@Ignore
+	@Ignore
 	@Test
 	public void detectDemographicFiltersLink() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -235,7 +235,7 @@ public class PatientExperiencePage {
 	 * 
 	 */
 	
-	//@Ignore
+	@Ignore
 	@Test
 	public void detectOverviewTab() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -245,7 +245,7 @@ public class PatientExperiencePage {
 		assertNotNull(patientExperiencePage.getOverviewTab());
 	}
 	
-	//@Ignore
+	@Ignore
 	@Test
 	public void detectCompositeTab() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -255,7 +255,7 @@ public class PatientExperiencePage {
 		assertNotNull(patientExperiencePage.getCompositeTab());
 	}
 	
-	//@Ignore
+	@Ignore
 	@Test
 	public void detectSbsTab() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -265,7 +265,7 @@ public class PatientExperiencePage {
 		assertNotNull(patientExperiencePage.getSbsTab());
 	}
 	
-	//@Ignore
+	@Ignore
 	@Test
 	public void detectDemographicTab() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -275,7 +275,7 @@ public class PatientExperiencePage {
 		assertNotNull(patientExperiencePage.getDemographicTab());
 	}
 	
-	//@Ignore
+	@Ignore
 	@Test
 	public void accessOverviewTab() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -285,7 +285,7 @@ public class PatientExperiencePage {
 		
 	}
 	
-	//@Ignore
+	@Ignore
 	@Test
 	public void accessCompositeTab() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -295,7 +295,7 @@ public class PatientExperiencePage {
 		
 	}
 	
-	//@Ignore
+	@Ignore
 	@Test
 	public void accessSbsTab() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
@@ -305,7 +305,7 @@ public class PatientExperiencePage {
 		
 	}
 	
-	//@Ignore
+	@Ignore
 	@Test
 	public void accessDemographicsTab() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 		loginPage = new Login(driver);
