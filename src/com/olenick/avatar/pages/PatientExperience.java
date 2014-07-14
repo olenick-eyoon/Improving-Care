@@ -491,7 +491,8 @@ public class PatientExperience {
 		return this;
 	}
 
-	public PatientExperience detectOverviewTab() {
+	public PatientExperience detectOverviewTab() throws InterruptedException {
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("Panel_1_1"));
 		setOverviewTab(driver.findElement(By.id("tabitem4")));
 		return this;
 	}
@@ -511,34 +512,37 @@ public class PatientExperience {
 		return this;
 	}
 
-	public PatientExperience accessOverviewTab() {
+	public PatientExperience accessOverviewTab() throws InterruptedException {
+		assurePDLoaded();
 		overviewTab.click();
 		return this;
 	}
 
-	public PatientExperience accessCompositeTab() {
+	public PatientExperience accessCompositeTab() throws InterruptedException {
+		assurePDLoaded();
 		compositeTab.click();
 		return this;
 	}
 
-	public PatientExperience accessSbsTab() {
+	public PatientExperience accessSbsTab() throws InterruptedException {
+		assurePDLoaded();
 		sbsTab.click();
 		return this;
 	}
 
-	public PatientExperience accessDemographicsTab() {
+	public PatientExperience accessDemographicsTab() throws InterruptedException {
+		assurePDLoaded();
 		demographicTab.click();
 		return this;
 	}
 
-	public boolean isLoadingSingPresent() {
+	private void assurePDLoaded() throws InterruptedException {
 		int i = 0;
-		if (driver.findElement(By.id("loadingiframe")).getAttribute("style").contains("block")){
-			return true;
-		} else {
-			return false;
+	    while (driver.findElement(By.id("loadingiframe")).getAttribute("style").contains("block")){
+			Thread.sleep(1000);
+			++i;
+			if (i >= 200) throw new java.util.NoSuchElementException("PATIENT DEMOGRAPHIC IS TAKING TOO LONG TO LOAD (200 seconds elapsed");
 		}
-	    
 	}
 	
 	

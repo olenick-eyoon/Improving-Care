@@ -1,7 +1,6 @@
 package com.olenick.avatar.pages;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -45,11 +44,7 @@ public class ICare2 {
 
 	public ICare2 detectMenuBarItems() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException {
 		Thread.sleep(10000);
-		try{
-			WebElement coso = driver.findElement(By.xpath(menuBarXpath));
-		} catch (NoSuchElementException e) {
-			System.out.println("NO HAY MENU BAR");
-		}
+		//assurePDLoaded();
 		home = driver.findElement(By.xpath(menuBarXpath+"/div[1]"));
 		patientExperience = driver.findElement(By.xpath(menuBarXpath+"/div[2]"));
 		surveyControlCenter = driver.findElement(By.xpath(menuBarXpath+"/div[3]"));
@@ -72,15 +67,29 @@ public class ICare2 {
 		return this;
 	}
 
-	public PatientExperience accessPatientExperienceTab() { //TODO: Must return a Patient Experience Object
+	public PatientExperience accessPatientExperienceTab() throws InterruptedException {
+		
 		patientExperience.click();
 		PatientExperience patientExperiencePage = new PatientExperience(driver, true);
+		
+		
+		
 		return patientExperiencePage;
 	}
 	
-	public SurveyControlCenter accessSurveyControlCenterTab() { //TODO: Must return a Survey Control Center Object
+	public SurveyControlCenter accessSurveyControlCenterTab() { 
 		surveyControlCenter.click();
 		SurveyControlCenter surveyControlCenterPage = new SurveyControlCenter(driver, true);
 		return surveyControlCenterPage;
+	}
+	
+	
+	private void assurePDLoaded() throws InterruptedException {
+		int i = 0;
+	    while (driver.findElement(By.id("loadingiframe")).getAttribute("style").contains("block")){
+			Thread.sleep(1000);
+			++i;
+			if (i >= 200) throw new java.util.NoSuchElementException("PATIENT DEMOGRAPHIC IS TAKING TOO LONG TO LOAD (200 seconds elapsed");
+		}
 	}
 }

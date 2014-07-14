@@ -1,18 +1,12 @@
 package com.olenick.avatar.login.tests;
 
-import static org.junit.Assert.*;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
-import com.olenick.avatar.exceptions.HomeLinkInvalid;
-import com.olenick.avatar.exceptions.ICare2PageNotDisplayed;
-import com.olenick.avatar.exceptions.PatientExperienceLinkInvalid;
-import com.olenick.avatar.exceptions.SurveyControlCenterLinkInvalid;
 import com.olenick.avatar.pages.ICare2;
 import com.olenick.avatar.pages.Landing;
 import com.olenick.avatar.pages.Login;
@@ -45,7 +39,6 @@ public class OverviewTab {
 		iCare2Page = landingPage.drillDownAdvancedReports().accessEnhancedReports().switchToNewWindow().switchToMainIFrame().detectMenuBarItems();
 		patientExperiencePage = iCare2Page.accessPatientExperienceTab().detectFilters();
 		overviewTab = patientExperiencePage.detectOverviewTab().accessOverviewTab();
-		overviewTab.isLoadingSingPresent();
 	}
 
 	

@@ -13,7 +13,7 @@ import com.olenick.avatar.pages.ICare2;
 import com.olenick.avatar.pages.Landing;
 import com.olenick.avatar.pages.Login;
 
-@Ignore
+//@Ignore
 public class LandingPage {
 
 	WebDriver driver = new FirefoxDriver();
