@@ -77,17 +77,16 @@ public class Avatar_v3_0 {
 			landingPage = new Landing(driver, true);
 			iCare2Page = landingPage.drillDownAdvancedReports().accessEnhancedReports().switchToNewWindow().switchToMainIFrame().detectMenuBarItems();
 			patientExperiecePage = iCare2Page.accessPatientExperienceTab().detectOverviewTab().detectCompositeTab().detectDemographicTab().detectSbsTab();
-			patientExperiecePage.accessOverviewTab();
-
-			//patientExperience contains Overview Tab
-			//Verificar que el reporte se cargo o no data avilable esta visible.
-			wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("ovrvwframe"));
-			Thread.sleep(10000);
-			System.out.println("CAMBIE A OVERVIEW FRAME");
-			wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("visframe"));
-			System.out.println("CAMBIE A OVERVIEW VISFRAME");
 			
-			assurePDLoaded();
+			//patientExperiecePage.accessOverviewTab();
+			//patientExperiecePage.validateOverviewTabData();
+			//patientExperiecePage.accessCompositeTab();
+			//patientExperiecePage.validateCompositeTabData();
+			//patientExperiecePage.accessSbsTab();
+			//patientExperiecePage.validateSbsTabData();
+			//patientExperiecePage.accessDemographicsTab();
+			//patientExperiecePage.validateDemographicsTabData();			
+			
 				
 			System.out.println("Pase");
 		
@@ -97,7 +96,7 @@ public class Avatar_v3_0 {
 		 * Bloque de cierre
 		 */
 			//TODO: Clean up mess
-			//driver.quit();
+			driver.quit();
 			
 			
 	}
@@ -130,7 +129,11 @@ public class Avatar_v3_0 {
 		
 		private static boolean isElementPresent (String elementId) {
 			try {
-				driver.findElement(By.id(elementId));
+				if (!elementId.equalsIgnoreCase("center") && !elementId.equalsIgnoreCase("table")){
+					driver.findElement(By.id(elementId));
+					} else {
+						driver.findElement(By.tagName(elementId));
+					}
 				return true;
 			} catch (NoSuchElementException e) {
 				return false;

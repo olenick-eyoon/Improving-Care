@@ -1,6 +1,7 @@
 package com.olenick.avatar.pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -514,37 +515,149 @@ public class PatientExperience {
 
 	public PatientExperience accessOverviewTab() throws InterruptedException {
 		assurePDLoaded();
+		accessPanelFrame();
 		overviewTab.click();
 		return this;
 	}
 
 	public PatientExperience accessCompositeTab() throws InterruptedException {
 		assurePDLoaded();
+		accessPanelFrame();
 		compositeTab.click();
 		return this;
 	}
 
 	public PatientExperience accessSbsTab() throws InterruptedException {
 		assurePDLoaded();
+		accessPanelFrame();
 		sbsTab.click();
 		return this;
 	}
 
 	public PatientExperience accessDemographicsTab() throws InterruptedException {
 		assurePDLoaded();
+		accessPanelFrame();
 		demographicTab.click();
 		return this;
 	}
 
 	private void assurePDLoaded() throws InterruptedException {
 		int i = 0;
-	    while (driver.findElement(By.id("loadingiframe")).getAttribute("style").contains("block")){
+	    try{
+			while (driver.findElement(By.id("loadingiframe")).getAttribute("style").contains("block")){
+				Thread.sleep(1000);
+				++i;
+				if (i >= 200) throw new java.util.NoSuchElementException("PATIENT DEMOGRAPHIC IS TAKING TOO LONG TO LOAD (200 seconds elapsed");
+			}
+	    } catch (NoSuchElementException e){
+	    }
+	}
+	
+	public PatientExperience validateOverviewTabData() throws InterruptedException {
+		
+		accessPanelFrame();
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("ovrvwframe"));
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("visframe"));
+		waitForGraphs();
+		
+		validateResultsOnScreen();
+		
+		return this;
+	}
+	
+
+	private boolean isElementPresent (String elementId) {
+		try {
+			if (!elementId.equalsIgnoreCase("center") && !elementId.equalsIgnoreCase("table")){
+				driver.findElement(By.id(elementId));
+				} else {
+					driver.findElement(By.tagName(elementId));
+				}
+			return true;
+		} catch (NoSuchElementException e) {
+			return false;
+		}
+	}
+
+	public PatientExperience validateCompositeTabData() throws InterruptedException {
+		
+		accessPanelFrame();
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("rptfactor"));
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("reportCGbar"));
+		waitForGraphs();
+		accessPanelFrame();
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("rptfactor"));
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("reportCGbar1"));
+		waitForGraphs();
+		accessPanelFrame();
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("rptfactor"));
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("reportCGline"));
+		waitForGraphs();
+		accessPanelFrame();
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("rptfactor"));
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("reportCGgrid"));
+		waitForGraphs();
+		
+		validateResultsOnScreen();
+		
+		return this;
+	}
+	
+	public PatientExperience validateSbsTabData() throws InterruptedException {
+		
+		accessPanelFrame();
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("sdframe"));
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("iframe91"));
+		waitForGraphs();
+		
+		validateResultsOnScreen();
+		
+		return this;
+		
+	}
+
+	private void validateResultsOnScreen() {
+		if ((isElementPresent("table") || isElementPresent("jschart_HOLD_0"))) { 
+			System.out.println("Page displayed");
+		} else if (isElementPresent("center")){
+			System.out.println("No data available");
+		}
+	}
+
+	private void waitForGraphs() throws InterruptedException {
+		int i = 0;
+		while (!isElementPresent("center") && (!isElementPresent("table") || (!isElementPresent("jschart_HOLD_0"))) && i < 60){
 			Thread.sleep(1000);
 			++i;
-			if (i >= 200) throw new java.util.NoSuchElementException("PATIENT DEMOGRAPHIC IS TAKING TOO LONG TO LOAD (200 seconds elapsed");
 		}
 	}
 	
-	
-	
+	private void accessPanelFrame() throws InterruptedException {
+		driver.switchTo().defaultContent();
+		driver.switchTo().frame(0);
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("Panel_1_1"));
+	}
+
+	public PatientExperience validateDemographicsTabData() throws InterruptedException {
+		
+		accessPanelFrame();
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("report3"));
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("report1"));
+		waitForGraphs();
+		accessPanelFrame();
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("report3"));
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("report2"));
+		waitForGraphs();
+		accessPanelFrame();
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("report3"));
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("report33"));
+		waitForGraphs();
+		
+		validateResultsOnScreen();
+		
+		return this;
+		
+	}
+
+
 }
