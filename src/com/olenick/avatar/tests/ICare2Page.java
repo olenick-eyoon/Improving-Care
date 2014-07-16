@@ -1,4 +1,4 @@
-package com.olenick.avatar.login.tests;
+package com.olenick.avatar.tests;
 
 import static org.junit.Assert.*;
 

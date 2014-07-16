@@ -1,6 +1,9 @@
 package com.olenick.avatar.pages;
 
+import org.jdom2.Element;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -8,7 +11,11 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.olenick.avatar.parsers.xml.XMLParser;
+
 public class PatientExperience {
+	
+	XMLParser xmlParser = new XMLParser();
 	
 	/*
 	 * TABS!
@@ -416,8 +423,8 @@ public class PatientExperience {
 
 	}
 	
-	public PatientExperience detectFilters() {
-		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(By.name("Panel_1_1")));
+	public PatientExperience detectFilters() throws InterruptedException {
+		accessPanelFrame();
 		system = driver.findElement(By.id("system"));
 		organization = driver.findElement(By.id("organization"));
 		department = driver.findElement(By.id("department"));
@@ -659,5 +666,125 @@ public class PatientExperience {
 		
 	}
 
+	public PatientExperience runSearch(Element patientDemographicElement) throws InterruptedException {
+		accessPanelFrame();
+		completeReportLevel(patientDemographicElement);
+		completeSurveySelection(patientDemographicElement);
+		//TODO: SUBMIT SEARCH
+		return this;
+	}
+
+	private void completeReportLevel(Element patientDemographicElement) throws NoSuchElementException, InterruptedException {
+		systemSelect.selectByValue(xmlParser.getSystem(patientDemographicElement));
+		setMultiselectListValue("organization", xmlParser.getOrganization(patientDemographicElement));	
+		setMultiselectListValue("department", xmlParser.getDepartment(patientDemographicElement));		
+		setMultiselectListValue("location",	xmlParser.getLocation(patientDemographicElement));
+	}
+	
+	private void completeSurveySelection(Element rootElement) throws NoSuchElementException, InterruptedException {
+		surveyTypeSelect.selectByValue(xmlParser.getSurveyType(rootElement));		
+		setMultiselectListValue("patienttype", xmlParser.getPatientType(rootElement));
+		setMultiselectListValue("factor", xmlParser.getFactorComposite(rootElement));	
+		setMultiselectListValue("item", xmlParser.getItemQuestion(rootElement));	
+
+		completeCalculationFilters(rootElement);
+		
+		fromMonthSelect.selectByValue(xmlParser.getFromMonth(rootElement));
+		fromYearSelect.selectByValue(xmlParser.getFromYear(rootElement));
+		toMonthSelect.selectByValue(xmlParser.getToMonth(rootElement));
+		toYearSelect.selectByValue(xmlParser.getToYear(rootElement));
+		
+		completeDemographicFilters(rootElement);	
+
+	}
+	
+	
+	private void completeDemographicFilters(Element rootElement) throws InterruptedException {
+		accessPanelFrame();
+		demographicLink.click();
+		Thread.sleep(2000);
+		
+		setMultiselectListValue("ptadmission", xmlParser.getPatientAdmission(rootElement));
+		setMultiselectListValue("ptage", xmlParser.getPatientAge(rootElement));		
+		setMultiselectListValue("ptdischarge", xmlParser.getPatientDischarge(rootElement));
+		setMultiselectListValue("ptgender",	xmlParser.getPatientGender(rootElement));	
+		setMultiselectListValue("ptlanguage", xmlParser.getPatientLanguage(rootElement));	
+		setMultiselectListValue("ptlength",	xmlParser.getPatientLength(rootElement));	
+		setMultiselectListValue("ptrace", xmlParser.getPatientRace(rootElement));		
+		setMultiselectListValue("ptservice", xmlParser.getPatientService(rootElement));
+		
+		//TODO: CLICK THE ADD BUTTON
+		
+	}
+
+	private void completeCalculationFilters(Element rootElement) {
+		if (xmlParser.getCalculation(rootElement).equalsIgnoreCase("1")) {
+			if (driver.findElement(By.id("top_box_0")).isDisplayed()) driver.findElement(By.id("top_box_0")).click();
+		} else {
+			if (driver.findElement(By.id("top_box_1")).isDisplayed()) driver.findElement(By.id("top_box_1")).click();
+		}
+		groupBySelect.selectByValue(xmlParser.getGroupBy(rootElement));
+	}
+	
+	private void setMultiselectListValue(String id, String[] values) throws NoSuchElementException, InterruptedException {
+		WebElement elem = driver.findElement(By.id(id));
+		elem.click();// Open dropdown list
+		
+		Select sel = new Select(elem);
+		Thread.sleep(750);
+
+		sel.deselectAll();
+
+		for (String value : values) {
+			String path = "option[@value=\"" + value + "\"]";
+			if (elem.findElement(By.xpath(path)) != null) {
+				expandCombo(id);
+				sel.selectByValue(value);
+				scrollUp(id);
+			}
+		}
+		WebElement elem2 = driver.findElement(By.id(id));
+		elem2.sendKeys(Keys.RETURN);		// Close dropdown list
+	}
+	
+	private void expandCombo(String id) {
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		js.executeScript("document.getElementById('" + id + "').setAttribute('size', '50')");
+	}	
+	
+	private void scrollUp(String id) {
+		if (!id.equalsIgnoreCase("rpt_type") || !id.equalsIgnoreCase("category")) 
+		((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView();",driver.findElement(By.id("texthead1")));
+	}
+
+	public PatientExperience accessAndValidateTab(String attributeFromXML) throws InterruptedException {
+		accessPanelFrame();
+		
+		switch (attributeFromXML){
+		case "overview":
+			accessOverviewTab().validateOverviewTabData();
+			break;
+		case "side by side":
+			accessSbsTab().validateSbsTabData();
+			break;
+		case "composite":
+			accessCompositeTab().validateCompositeTabData();
+			break;
+		case "demographics":
+			accessDemographicsTab().validateDemographicsTabData();
+			break;
+		}
+		
+		return this;
+	}
+
+	public PatientExperience exportToPDF() throws InterruptedException {
+		accessPanelFrame();
+		//TODO: Hacer click en el boton de exportar
+		//TODO: Cambiar al nuevo frame
+		//TODO: cerrar nuevo tab
+		
+		return this;
+	}
 
 }

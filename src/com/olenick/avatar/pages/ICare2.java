@@ -84,6 +84,7 @@ public class ICare2 {
 	}
 	
 	
+	/*
 	private void assurePDLoaded() throws InterruptedException {
 		int i = 0;
 	    while (driver.findElement(By.id("loadingiframe")).getAttribute("style").contains("block")){
@@ -92,4 +93,6 @@ public class ICare2 {
 			if (i >= 200) throw new java.util.NoSuchElementException("PATIENT DEMOGRAPHIC IS TAKING TOO LONG TO LOAD (200 seconds elapsed");
 		}
 	}
+	*/
+	
 }
