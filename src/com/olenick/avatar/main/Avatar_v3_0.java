@@ -20,6 +20,7 @@ import com.olenick.avatar.pages.Login;
 import com.olenick.avatar.pages.PatientExperience;
 import com.olenick.avatar.parsers.xml.*;
 import com.olenick.avatar.reports.ReportGenerator;
+import com.olenick.avatar.timer.Timer;
 
 public class Avatar_v3_0 {
 	
@@ -46,9 +47,10 @@ public class Avatar_v3_0 {
 		public static ICare2 iCare2Page;
 		public static PatientExperience patientExperiecePage;
 		public static ReportGenerator reportGenerator;
+		public static Timer timer;
 		
 		private static boolean firstRun;
-
+		public static long startTime, endTime;
 
 		
 	public static void main(String[] args) throws InterruptedException, ICare2PageNotDisplayed, HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, FileNotFoundException, UnsupportedEncodingException, UnknownHostException {
@@ -66,9 +68,8 @@ public class Avatar_v3_0 {
 		/*
 		 * Bloque de login
 		 */
-			loginPage = new Login(driver);
-			landingPage = loginPage.open(defineEnvironment(args)).login(root.getChildTextTrim("user"), root.getChildTextTrim("password"));
-			
+			timingLogin(args, root);
+			timingIc1(root);
 			
 		/*
 		 * Bloque de acciones en IC1
@@ -84,7 +85,9 @@ public class Avatar_v3_0 {
 					firstRunTrigger();
 					reportGenerator.addText(xmlParser.getScenario(patientDemographicElement)+";"); //Scenario Name
 					patientExperiecePage.runSearch(patientDemographicElement);
-					patientExperiecePage.accessAndValidateTab(xmlParser.getAttributeFromXML(patientDemographicElement, "tab")); //TODO: ITERADOR PARA VALIDAR MAS DE UN TAB
+					//TODO: ITERADOR PARA VALIDAR MAS DE UN TAB
+					//patientExperiecePage.accessAndValidateTab(xmlParser.getAttributeFromXML(patientDemographicElement, "tab"));
+					patientExperiecePage.accessAndValidateTab(xmlParser.getAttributeFromXML(patientDemographicElement, "tab"));
 					patientExperiecePage.exportToPDF(); //TODO: NOT IMPLEMENTED YET
 							
 							
@@ -171,6 +174,28 @@ public class Avatar_v3_0 {
 
 
 
+	private static void timingIc1(Element root) throws InterruptedException {
+		startTime = timer.setStartTime();
+		landingPage = loginPage.login(root.getChildTextTrim("user"), root.getChildTextTrim("password"));
+		endTime = timer.setEndTime();
+		timer.setIc1Time(endTime - startTime);
+	}
+
+
+
+
+
+	private static void timingLogin(String[] args, Element root)
+			throws InterruptedException {
+		startTime = timer.setStartTime();
+		loginPage = new Login(driver);
+		loginPage.open(defineEnvironment(args));
+		endTime = timer.setEndTime();
+		timer.setLoginTime(endTime - startTime);
+		
+	}
+
+
 	/*
 	 * Bloque de métodos
 	 */
@@ -198,12 +223,29 @@ public class Avatar_v3_0 {
 		private static void accessPatientExperience() 
 				throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 			landingPage = new Landing(driver, true);
-			iCare2Page = landingPage.drillDownAdvancedReports().accessEnhancedReports().switchToNewWindow().switchToMainIFrame().detectMenuBarItems();
+			iCare2Page = landingPage.drillDownAdvancedReports().accessEnhancedReports().switchToNewWindow();
+			
+			timingPatientExperience();
+			
+		}
+
+
+
+
+
+		private static void timingPatientExperience() throws HomeLinkInvalid,
+				PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid,
+				InterruptedException {
+			startTime = timer.setStartTime();
+			iCare2Page.switchToMainIFrame().detectMenuBarItems();
 			patientExperiecePage = iCare2Page.accessPatientExperienceTab()
 					.detectOverviewTab().detectCompositeTab().detectDemographicTab().detectSbsTab()
 					.detectFilters().convertFiltersToSelect();
 			patientExperiecePage = patientExperiecePage.accessOverviewTab();
 			patientExperiecePage.validateOverviewTabData();
+			endTime = timer.setEndTime();
+			
+			timer.setIc2Time(endTime - startTime);
 		}
 
 
