@@ -307,6 +307,9 @@ public class PatientExperience {
 
 	WebElement fromMonth, toMonth, fromYear, toYear, groupBy;
 	WebElement mean, topBox, demographicLink, applyButton;
+	WebElement admission, age, discharge, gender, language, length, race, serviceLine;
+
+	
 	/**
 	 * @return the applyButton
 	 */
@@ -352,7 +355,7 @@ public class PatientExperience {
 
 	Select surveyTypeSelect, patientTypeSelect, compositeSelect, itemSelect;
 	Select fromMonthSelect, toMonthSelect, fromYearSelect, toYearSelect, groupBySelect;
-	
+	Select admissionSelect, ageSelect, dischargeSelect, genderSelect, languageSelect, lengthSelect, raceSelect, serviceLineSelect;
 	
 	/**
 	 * @return the fromMonthSelect
@@ -494,7 +497,30 @@ public class PatientExperience {
 		case "groupBy":
 			groupBySelect = new Select(groupBy);
 			break;
-			
+		case "admission":
+			admissionSelect = new Select(admission);
+			break;
+		case "age":
+			ageSelect = new Select(age);
+			break;
+		case "discharge":
+			dischargeSelect = new Select(discharge);
+			break;
+		case "gender":
+			genderSelect = new Select(gender);
+			break;
+		case "language":
+			languageSelect = new Select(language);
+			break;
+		case "length":
+			lengthSelect = new Select(length);
+			break;
+		case "race":
+			raceSelect = new Select(race);
+			break;
+		case "serviceLine":
+			serviceLineSelect = new Select(serviceLine);
+			break;
 		}
 		return this;
 	}
@@ -670,14 +696,15 @@ public class PatientExperience {
 		accessPanelFrame();
 		completeReportLevel(patientDemographicElement);
 		completeSurveySelection(patientDemographicElement);
-		//TODO: SUBMIT SEARCH
+		driver.findElement(By.id("button2")).click();
 		return this;
 	}
 
 	private void completeReportLevel(Element patientDemographicElement) throws NoSuchElementException, InterruptedException {
+		
 		systemSelect.selectByValue(xmlParser.getSystem(patientDemographicElement));
-		setMultiselectListValue("organization", xmlParser.getOrganization(patientDemographicElement));	
-		setMultiselectListValue("department", xmlParser.getDepartment(patientDemographicElement));		
+		setMultiselectListValue("organization", xmlParser.getOrganization(patientDemographicElement));
+		setMultiselectListValue("department", xmlParser.getDepartment(patientDemographicElement));
 		setMultiselectListValue("location",	xmlParser.getLocation(patientDemographicElement));
 	}
 	
@@ -690,9 +717,13 @@ public class PatientExperience {
 		completeCalculationFilters(rootElement);
 		
 		fromMonthSelect.selectByValue(xmlParser.getFromMonth(rootElement));
+		scrollUp("system");
 		fromYearSelect.selectByValue(xmlParser.getFromYear(rootElement));
+		scrollUp("system");
 		toMonthSelect.selectByValue(xmlParser.getToMonth(rootElement));
+		scrollUp("system");
 		toYearSelect.selectByValue(xmlParser.getToYear(rootElement));
+		scrollUp("system");
 		
 		completeDemographicFilters(rootElement);	
 
@@ -704,6 +735,7 @@ public class PatientExperience {
 		demographicLink.click();
 		Thread.sleep(2000);
 		
+		
 		setMultiselectListValue("ptadmission", xmlParser.getPatientAdmission(rootElement));
 		setMultiselectListValue("ptage", xmlParser.getPatientAge(rootElement));		
 		setMultiselectListValue("ptdischarge", xmlParser.getPatientDischarge(rootElement));
@@ -713,7 +745,7 @@ public class PatientExperience {
 		setMultiselectListValue("ptrace", xmlParser.getPatientRace(rootElement));		
 		setMultiselectListValue("ptservice", xmlParser.getPatientService(rootElement));
 		
-		//TODO: CLICK THE ADD BUTTON
+		driver.findElement(By.id("buttonadd")).click();
 		
 	}
 
@@ -727,6 +759,8 @@ public class PatientExperience {
 	}
 	
 	private void setMultiselectListValue(String id, String[] values) throws NoSuchElementException, InterruptedException {
+		accessPanelFrame();
+		
 		WebElement elem = driver.findElement(By.id(id));
 		elem.click();// Open dropdown list
 		
@@ -786,5 +820,38 @@ public class PatientExperience {
 		
 		return this;
 	}
+
+	public PatientExperience convertFiltersToSelect() throws InterruptedException {
+		accessPanelFrame();
+		
+		convertToSelect("system");
+		convertToSelect("organization");
+		convertToSelect("department");
+		convertToSelect("location");
+		
+		convertToSelect("surveyType");
+		convertToSelect("patientType");
+		convertToSelect("composite");
+		convertToSelect("item");
+		
+		convertToSelect("fromMonth");
+		convertToSelect("fromYear");
+		convertToSelect("toMonth");
+		convertToSelect("toYear");
+		convertToSelect("groupBy");
+		
+		convertToSelect("groupBy");
+		convertToSelect("groupBy");
+		convertToSelect("groupBy");
+		convertToSelect("groupBy");
+		convertToSelect("groupBy");
+		convertToSelect("groupBy");
+		convertToSelect("groupBy");
+		convertToSelect("groupBy");
+		
+		
+		return this;
+	}
+
 
 }

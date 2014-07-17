@@ -1,17 +1,11 @@
 package com.olenick.avatar.main;
 
 import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -54,8 +48,7 @@ public class Avatar_v3_0 {
 		public static ReportGenerator reportGenerator;
 		
 		private static boolean firstRun;
-		
-		
+
 
 		
 	public static void main(String[] args) throws InterruptedException, ICare2PageNotDisplayed, HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, FileNotFoundException, UnsupportedEncodingException, UnknownHostException {
@@ -90,13 +83,9 @@ public class Avatar_v3_0 {
 				for (Element patientDemographicElement : root.getChildren("patient-demographic")) {
 					firstRunTrigger();
 					reportGenerator.addText(xmlParser.getScenario(patientDemographicElement)+";"); //Scenario Name
-							System.out.println("Antes de la busqueda");
 					patientExperiecePage.runSearch(patientDemographicElement);
-							System.out.println("Despues de la busqueda y antes de verificar el tab que sea");
-					patientExperiecePage.accessAndValidateTab(xmlParser.getAttributeFromXML(patientDemographicElement, "tab"));
-							System.out.println("Despues de verificar el tab que sea y antes de exportar a PDF");
+					patientExperiecePage.accessAndValidateTab(xmlParser.getAttributeFromXML(patientDemographicElement, "tab")); //TODO: ITERADOR PARA VALIDAR MAS DE UN TAB
 					patientExperiecePage.exportToPDF(); //TODO: NOT IMPLEMENTED YET
-							System.out.println("Despues de exportar a PDF");
 							
 							
 							
@@ -104,9 +93,11 @@ public class Avatar_v3_0 {
 							System.out.println("nodo.");
 					
 				}
-				
+			} catch (Exception e) {
+				e.printStackTrace();
+			/*
 			} catch (NoSuchElementException e){
-				/*System.out.println("CANNOT FIND ELEMENT: " + globalId);
+				System.out.println("CANNOT FIND ELEMENT: " + globalId);
 				takeScreenshot();
 	    		
 	    		if (errorLog == null){
@@ -208,8 +199,11 @@ public class Avatar_v3_0 {
 				throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 			landingPage = new Landing(driver, true);
 			iCare2Page = landingPage.drillDownAdvancedReports().accessEnhancedReports().switchToNewWindow().switchToMainIFrame().detectMenuBarItems();
-			patientExperiecePage = iCare2Page.accessPatientExperienceTab().detectOverviewTab().detectCompositeTab().detectDemographicTab().detectSbsTab().detectFilters();
-			patientExperiecePage.accessOverviewTab().validateOverviewTabData();
+			patientExperiecePage = iCare2Page.accessPatientExperienceTab()
+					.detectOverviewTab().detectCompositeTab().detectDemographicTab().detectSbsTab()
+					.detectFilters().convertFiltersToSelect();
+			patientExperiecePage = patientExperiecePage.accessOverviewTab();
+			patientExperiecePage.validateOverviewTabData();
 		}
 
 
