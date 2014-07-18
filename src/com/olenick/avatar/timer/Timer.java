@@ -4,8 +4,60 @@ import java.util.Date;
 
 public class Timer {
 
-	long loginTime, ic1Time, ic2Time, overviewTime, compositeTime, sideBySideTime, demographicsTime;
+	long 
+		loginTime, 
+		ic1Time, 
+		ic2Time, 
+		overviewTime, 
+		compositeTime, 
+		sideBySideTime, 
+		demographicsTime,
+		exportCompositeTime,
+		exportSideBySideTime,
+		exportDemographicsTime;
 	
+	/**
+	 * @return the exportCompositeTime
+	 */
+	public long getExportCompositeTime() {
+		return exportCompositeTime;
+	}
+
+	/**
+	 * @param exportCompositeTime the exportCompositeTime to set
+	 */
+	public void setExportCompositeTime(long exportCompositeTime) {
+		this.exportCompositeTime = exportCompositeTime;
+	}
+
+	/**
+	 * @return the exportSideBySideTime
+	 */
+	public long getExportSideBySideTime() {
+		return exportSideBySideTime;
+	}
+
+	/**
+	 * @param exportSideBySideTime the exportSideBySideTime to set
+	 */
+	public void setExportSideBySideTime(long exportSideBySideTime) {
+		this.exportSideBySideTime = exportSideBySideTime;
+	}
+
+	/**
+	 * @return the exportDemographicsTime
+	 */
+	public long getExportDemographicsTime() {
+		return exportDemographicsTime;
+	}
+
+	/**
+	 * @param exportDemographicsTime the exportDemographicsTime to set
+	 */
+	public void setExportDemographicsTime(long exportDemographicsTime) {
+		this.exportDemographicsTime = exportDemographicsTime;
+	}
+
 	/**
 	 * @return the loginTime
 	 */
@@ -112,6 +164,9 @@ public class Timer {
 		this.loginTime = 0;
 		this.overviewTime = 0;
 		this.sideBySideTime = 0;
+		this.exportCompositeTime = 0;
+		this.exportDemographicsTime = 0;
+		this.exportSideBySideTime = 0;
 	}
 	
 	public long setStartTime() {

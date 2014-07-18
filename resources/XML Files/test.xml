@@ -3,7 +3,7 @@
 	<password>!Avatar321</password>
 	<system>78</system>
 	<patient-demographic>
-		<tab>side by side</tab>
+		<tab>composite!side by side!demographics!overview</tab>
 		<scenario>1A</scenario>
 		<system>78</system>
 		<organization>546!541</organization>

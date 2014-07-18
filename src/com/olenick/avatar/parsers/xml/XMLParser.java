@@ -31,9 +31,7 @@ public class XMLParser {
 		return rootElement.getChildText(attribute);
 	}
 
-	public String getTab(Element rootElement) {
-		return getAttributeFromXML(rootElement, "tab");
-	}
+
 	
 	public String getScenario(Element rootElement) {
 		return getAttributeFromXML(rootElement, "scenario");
@@ -65,6 +63,16 @@ public class XMLParser {
 		return getAttributeFromXML(rootElement, "survey-type");
 	}
 
+	public String getTab(Element rootElement) {
+		return getAttributeFromXML(rootElement, "tab");
+	}
+	
+	public String[] getTabs(Element rootElement) {
+		String data =  getAttributeFromXML(rootElement, "tab");
+		String[] output = data.split("!");
+		return output;
+	}
+	
 	public String[] getPatientType(Element rootElement) {
 		String data =  getAttributeFromXML(rootElement, "patient-type");
 		String[] output = data.split("!");

@@ -15,6 +15,21 @@ import com.olenick.avatar.parsers.xml.XMLParser;
 
 public class PatientExperience {
 	
+	public boolean noDataAvailable;
+	/**
+	 * @return the noDataAvailable
+	 */
+	public boolean getNoDataAvailable() {
+		return noDataAvailable;
+	}
+
+	/**
+	 * @param noDataAvailable the noDataAvailable to set
+	 */
+	public void setNoDataAvailable(boolean noDataAvailable) {
+		this.noDataAvailable = noDataAvailable;
+	}
+
 	XMLParser xmlParser = new XMLParser();
 	
 	/*
@@ -554,21 +569,21 @@ public class PatientExperience {
 	}
 
 	public PatientExperience accessCompositeTab() throws InterruptedException {
-		assurePDLoaded();
+		//assurePDLoaded();
 		accessPanelFrame();
 		compositeTab.click();
 		return this;
 	}
 
 	public PatientExperience accessSbsTab() throws InterruptedException {
-		assurePDLoaded();
+		//assurePDLoaded();
 		accessPanelFrame();
 		sbsTab.click();
 		return this;
 	}
 
 	public PatientExperience accessDemographicsTab() throws InterruptedException {
-		assurePDLoaded();
+		//assurePDLoaded();
 		accessPanelFrame();
 		demographicTab.click();
 		return this;
@@ -583,9 +598,10 @@ public class PatientExperience {
 				if (i >= 200) throw new java.util.NoSuchElementException("PATIENT DEMOGRAPHIC IS TAKING TOO LONG TO LOAD (200 seconds elapsed");
 			}
 	    } catch (NoSuchElementException e){
+	    	System.out.println("NO LOADING FRAME");
 	    }
 	}
-	
+
 	public PatientExperience validateOverviewTabData() throws InterruptedException {
 		
 		accessPanelFrame();
@@ -618,14 +634,17 @@ public class PatientExperience {
 		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("rptfactor"));
 		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("reportCGbar"));
 		waitForGraphs();
+		
 		accessPanelFrame();
 		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("rptfactor"));
 		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("reportCGbar1"));
 		waitForGraphs();
+		
 		accessPanelFrame();
 		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("rptfactor"));
 		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("reportCGline"));
 		waitForGraphs();
+		
 		accessPanelFrame();
 		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("rptfactor"));
 		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("reportCGgrid"));
@@ -650,19 +669,22 @@ public class PatientExperience {
 	}
 
 	private void validateResultsOnScreen() {
+		setNoDataAvailable(false);
 		if ((isElementPresent("table") || isElementPresent("jschart_HOLD_0"))) { 
-			System.out.println("Page displayed");
+			//System.out.println("Page displayed");
 		} else if (isElementPresent("center")){
-			System.out.println("No data available");
+			setNoDataAvailable(true);
+			//System.out.println("No data available");
 		}
 	}
 
 	private void waitForGraphs() throws InterruptedException {
 		int i = 0;
-		while (!isElementPresent("center") && (!isElementPresent("table") || (!isElementPresent("jschart_HOLD_0"))) && i < 60){
+		while (!isElementPresent("center") && !(isElementPresent("table") || (isElementPresent("jschart_HOLD_0"))) && i < 60){
 			Thread.sleep(1000);
 			++i;
 		}
+		
 	}
 	
 	private void accessPanelFrame() throws InterruptedException {
@@ -677,10 +699,12 @@ public class PatientExperience {
 		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("report3"));
 		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("report1"));
 		waitForGraphs();
+		
 		accessPanelFrame();
 		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("report3"));
 		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("report2"));
 		waitForGraphs();
+		
 		accessPanelFrame();
 		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("report3"));
 		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("report33"));
@@ -812,13 +836,60 @@ public class PatientExperience {
 		return this;
 	}
 
-	public PatientExperience exportToPDF() throws InterruptedException {
+	public PatientExperience exportToPDF(String tab) throws InterruptedException {
 		accessPanelFrame();
-		//TODO: Hacer click en el boton de exportar
-		//TODO: Cambiar al nuevo frame
-		//TODO: cerrar nuevo tab
+		
+		switch (tab){
+		case "side by side":
+			accessSbsTab();
+			exportSBStoPDF();
+			break;
+		case "composite":
+			accessCompositeTab();
+			exportCompositeToPDF();
+			break;
+		case "demographics":
+			accessDemographicsTab();
+			exportDemographicsToPDF();
+			break;
+		}
 		
 		return this;
+	}
+
+	private void exportSBStoPDF() throws InterruptedException {
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("sdframe"));
+		driver.findElement(By.id("imgopt")).click();
+		driver.findElement(By.id("compdf")).click();
+		
+		handlePDFNewWindow();
+	    
+	}
+	
+	private void exportDemographicsToPDF() throws InterruptedException {
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("report3"));
+		driver.findElement(By.id("image45")).click();
+		
+		handlePDFNewWindow();
+	    
+	}
+
+	private void exportCompositeToPDF() throws InterruptedException {
+		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("rptfactor"));
+		driver.findElement(By.id("imageCGpdf")).click();
+		
+		handlePDFNewWindow();
+	    
+	}
+	
+	private void handlePDFNewWindow() throws InterruptedException {
+		while (driver.getWindowHandles().size()==2){
+	    	Thread.sleep(500);
+	    }
+	    driver.switchTo().window(driver.getWindowHandles().toArray()[2].toString());
+	    driver.close();
+	    //RETURN TO PATIENT DEMOGRAPHIC REPORT
+	    driver.switchTo().window(driver.getWindowHandles().toArray()[1].toString());
 	}
 
 	public PatientExperience convertFiltersToSelect() throws InterruptedException {

@@ -1,1 +1,0 @@
-Computer Name; Date and Time; Login Page; iCare1 Page; iCare2 Page; Scenario Name; Overview; Composite; Side By Side; Demographics; PDFGeneration;Computer Name; Date and Time; Login Page; iCare1 Page; iCare2 Page; Scenario Name; Overview; Composite; Side By Side; Demographics; PDFGeneration;

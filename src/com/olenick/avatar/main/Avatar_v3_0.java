@@ -47,10 +47,12 @@ public class Avatar_v3_0 {
 		public static ICare2 iCare2Page;
 		public static PatientExperience patientExperiecePage;
 		public static ReportGenerator reportGenerator;
-		public static Timer timer;
+		public static Timer timer = new Timer();
 		
 		private static boolean firstRun;
-		public static long startTime, endTime;
+		public static long startTime = 0, endTime = 0;
+		@SuppressWarnings("unused")
+		private static boolean keepOverview = false;
 
 		
 	public static void main(String[] args) throws InterruptedException, ICare2PageNotDisplayed, HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, FileNotFoundException, UnsupportedEncodingException, UnknownHostException {
@@ -85,13 +87,8 @@ public class Avatar_v3_0 {
 					firstRunTrigger();
 					reportGenerator.addText(xmlParser.getScenario(patientDemographicElement)+";"); //Scenario Name
 					patientExperiecePage.runSearch(patientDemographicElement);
-					//TODO: ITERADOR PARA VALIDAR MAS DE UN TAB
-					//patientExperiecePage.accessAndValidateTab(xmlParser.getAttributeFromXML(patientDemographicElement, "tab"));
-					patientExperiecePage.accessAndValidateTab(xmlParser.getAttributeFromXML(patientDemographicElement, "tab"));
-					patientExperiecePage.exportToPDF(); //TODO: NOT IMPLEMENTED YET
-							
-							
-							
+					timingOverview();
+					accessAndValidatePatientExperienceTabs(patientDemographicElement);
 							
 							System.out.println("nodo.");
 					
@@ -157,7 +154,18 @@ public class Avatar_v3_0 {
 			*/
 				
 			System.out.println("Pase");
-		
+			System.out.println("Login: " + timer.getLoginTime());
+			System.out.println("Icare1: " + timer.getIc1Time());
+			System.out.println("Icare2: " + timer.getIc2Time());
+			System.out.println("Overview: " + timer.getOverviewTime());
+			System.out.println("Composite: " + timer.getCompositeTime());
+			System.out.println("Export Composite: " + timer.getExportCompositeTime());
+			System.out.println("Side By Side: " + timer.getSideBySideTime());
+			System.out.println("Export Side By Side: " + timer.getExportSideBySideTime());
+			System.out.println("Demographics: " + timer.getDemographicsTime());
+			System.out.println("Export Demographics: " + timer.getExportDemographicsTime());
+			
+			
 			
 			
 		/*
@@ -168,6 +176,80 @@ public class Avatar_v3_0 {
 			driver.quit();
 			
 			
+	}
+
+
+
+
+
+	private static void accessAndValidatePatientExperienceTabs(
+			Element patientDemographicElement) throws InterruptedException {
+
+		for (String tab : xmlParser.getTabs(patientDemographicElement)){
+			if (tab.equalsIgnoreCase("overview")) keepOverview  = true;
+			accessAndValidateTab(patientDemographicElement, tab);
+			timingPdfExport(tab);
+		}
+		
+		if (keepOverview = false) timer.setOverviewTime(0);
+	}
+
+
+
+
+
+	private static void timingPdfExport(String tab) throws InterruptedException {
+		startTime = timer.setStartTime();
+		patientExperiecePage.exportToPDF(tab);
+		endTime = timer.setEndTime();
+		
+		switch (tab){
+		case "composite":
+			timer.setExportCompositeTime(endTime - startTime);
+			break;
+		case "side by side":
+			timer.setExportSideBySideTime(endTime - startTime);
+			break;
+		case "demographics":
+			timer.setExportDemographicsTime(endTime - startTime);
+			break;
+		}
+	}
+
+
+
+
+
+	private static void timingOverview() throws InterruptedException {
+		timer.setStartTime();
+		patientExperiecePage.accessOverviewTab().validateOverviewTabData();
+		timer.setEndTime();
+		timer.setOverviewTime(endTime - startTime);
+	}
+
+
+
+
+
+	private static void accessAndValidateTab(Element patientDemographicElement, String tab)
+			throws InterruptedException {
+		
+		startTime = timer.setStartTime();
+		patientExperiecePage.accessAndValidateTab(tab);
+		endTime = timer.setEndTime();
+		
+		switch (tab){
+		case "composite":
+			timer.setCompositeTime(endTime - startTime);
+			break;
+		case "side by side":
+			timer.setSideBySideTime(endTime - startTime);
+			break;
+		case "demographics":
+			timer.setDemographicsTime(endTime - startTime);
+			break;
+		}
+		
 	}
 
 
@@ -312,6 +394,7 @@ public class Avatar_v3_0 {
 		private static void firstRunTrigger() {
 			if (!firstRun) {
 				reportGenerator.addText(";;;;;");
+				keepOverview = false;
 			}
 		}
 		
