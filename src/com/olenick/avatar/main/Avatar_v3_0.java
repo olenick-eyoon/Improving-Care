@@ -1,11 +1,14 @@
 package com.olenick.avatar.main;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -19,6 +22,7 @@ import com.olenick.avatar.pages.Landing;
 import com.olenick.avatar.pages.Login;
 import com.olenick.avatar.pages.PatientExperience;
 import com.olenick.avatar.parsers.xml.*;
+import com.olenick.avatar.reports.ErrorHandler;
 import com.olenick.avatar.reports.ReportGenerator;
 import com.olenick.avatar.timer.Timer;
 
@@ -34,7 +38,6 @@ public class Avatar_v3_0 {
 		public static String baseUrl = "";
 		
 		
-		
 		//XML Declarations
 		public static String xmlFilePath = "./resources/XML Files/";
 		public static Document xmlFile;
@@ -48,14 +51,15 @@ public class Avatar_v3_0 {
 		public static PatientExperience patientExperiecePage;
 		public static ReportGenerator reportGenerator;
 		public static Timer timer = new Timer();
+		public static ErrorHandler errorHandler= new ErrorHandler();
 		
-		private static boolean firstRun;
+		private static boolean firstRun = true;
 		public static long startTime = 0, endTime = 0;
 		@SuppressWarnings("unused")
 		private static boolean keepOverview = false;
 
 		
-	public static void main(String[] args) throws InterruptedException, ICare2PageNotDisplayed, HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, FileNotFoundException, UnsupportedEncodingException, UnknownHostException {
+	public static void main(String[] args) throws InterruptedException, ICare2PageNotDisplayed, HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, IOException {
 		
 		/*
 		 * Bloque de ejecución
@@ -65,7 +69,9 @@ public class Avatar_v3_0 {
 			Element root = xmlFile.getRootElement(); //Generates the root element we will use during execution
 			
 			reportGenerator = new ReportGenerator();
-			reportGenerator.createWriter("./resources/testFile.txt");
+			reportGenerator.createWriter("./resources/testFile.csv");
+			
+			errorHandler.initializePaths().setComputerName(reportGenerator.getComputerName());
 			
 		/*
 		 * Bloque de login
@@ -85,74 +91,28 @@ public class Avatar_v3_0 {
 				accessPatientExperience();
 				for (Element patientDemographicElement : root.getChildren("patient-demographic")) {
 					firstRunTrigger();
-					reportGenerator.addText(xmlParser.getScenario(patientDemographicElement)+";"); //Scenario Name
 					patientExperiecePage.runSearch(patientDemographicElement);
 					timingOverview();
 					accessAndValidatePatientExperienceTabs(patientDemographicElement);
-							
-							System.out.println("nodo.");
+					reportGenerator.printLineToFile(buildReportLine(xmlParser.getScenario(patientDemographicElement)));
 					
+					System.out.println("nodo.");
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			/*
-			} catch (NoSuchElementException e){
-				System.out.println("CANNOT FIND ELEMENT: " + globalId);
-				takeScreenshot();
-	    		
-	    		if (errorLog == null){
-	    			errorLog = createErrorLog(args);
-	    		}
-	    		
-	    		errorLog.println(getTimeStamp() + " CANNOT FIND ELEMENT: " + globalId);
-	    		errorLog.println("Screenshot: " + screenshotName);
-				errorLog.println("-----STACK TRACE------");
-				e.printStackTrace(errorLog);
-				errorLog.println("\n");
-	    		
-	    	} catch (StaleElementReferenceException e3) {
-	    		System.out.println("ELEMENT NO LONGER ATTACHED TO THE DOM: " + globalId);
-	    		takeScreenshot();
-	    		
-	    		if (errorLog == null){
-	    			errorLog = createErrorLog(args);
-	    		}
-	    		
-				errorLog.println(getTimeStamp() + " ELEMENT NO LONGER ATTACHED TO THE DOM: " + globalId);
-				errorLog.println("-----STACK TRACE------");
-				e3.printStackTrace(errorLog);
-				errorLog.println("\n");
-	    		
-			} catch (Exception e2){
-				System.out.println("OTHER EXCEPTION");
-				takeScreenshot();
-				
-				if (errorLog == null){
-	    			errorLog = createErrorLog(args);
-	    		}
-				
-				errorLog.println(getTimeStamp() + " OTHER EXCEPTION: " + globalId);
-	    		errorLog.println("Screenshot: " + screenshotName);
-				errorLog.println("-----STACK TRACE------");
-				e2.printStackTrace(errorLog);
-				errorLog.println("\n");
-	    		*/
+			} catch (NoSuchElementException e) {
+				checkLog(args);
+				errorHandler.takeScreenshot(driver);
+				errorHandler.addEventToLog(true, false, false, e);
+			} catch (StaleElementReferenceException e2) {
+				checkLog(args);
+				errorHandler.takeScreenshot(driver);
+				errorHandler.addEventToLog(false, true, false, e2);
+			} catch (Exception e3) {
+				checkLog(args);
+				errorHandler.takeScreenshot(driver);
+				errorHandler.addEventToLog(false, false, true, e3);
 			}
 			
-			
 			/*
-			patientExperiecePage = iCare2Page.accessPatientExperienceTab().detectOverviewTab().detectCompositeTab().detectDemographicTab().detectSbsTab();
-
-			patientExperiecePage.accessOverviewTab();
-			patientExperiecePage.validateOverviewTabData();
-			patientExperiecePage.accessCompositeTab();
-			patientExperiecePage.validateCompositeTabData();
-			patientExperiecePage.accessSbsTab();
-			patientExperiecePage.validateSbsTabData();
-			patientExperiecePage.accessDemographicsTab();
-			patientExperiecePage.validateDemographicsTabData();			
-			*/
-				
 			System.out.println("Pase");
 			System.out.println("Login: " + timer.getLoginTime());
 			System.out.println("Icare1: " + timer.getIc1Time());
@@ -164,124 +124,157 @@ public class Avatar_v3_0 {
 			System.out.println("Export Side By Side: " + timer.getExportSideBySideTime());
 			System.out.println("Demographics: " + timer.getDemographicsTime());
 			System.out.println("Export Demographics: " + timer.getExportDemographicsTime());
-			
-			
-			
+			*/
 			
 		/*
 		 * Bloque de cierre
 		 */
-			//TODO: Clean up mess
-			reportGenerator.wrapUpFile();
-			driver.quit();
-			
-			
-	}
-
-
-
-
-
-	private static void accessAndValidatePatientExperienceTabs(
-			Element patientDemographicElement) throws InterruptedException {
-
-		for (String tab : xmlParser.getTabs(patientDemographicElement)){
-			if (tab.equalsIgnoreCase("overview")) keepOverview  = true;
-			accessAndValidateTab(patientDemographicElement, tab);
-			timingPdfExport(tab);
-		}
-		
-		if (keepOverview = false) timer.setOverviewTime(0);
-	}
-
-
-
-
-
-	private static void timingPdfExport(String tab) throws InterruptedException {
-		startTime = timer.setStartTime();
-		patientExperiecePage.exportToPDF(tab);
-		endTime = timer.setEndTime();
-		
-		switch (tab){
-		case "composite":
-			timer.setExportCompositeTime(endTime - startTime);
-			break;
-		case "side by side":
-			timer.setExportSideBySideTime(endTime - startTime);
-			break;
-		case "demographics":
-			timer.setExportDemographicsTime(endTime - startTime);
-			break;
-		}
-	}
-
-
-
-
-
-	private static void timingOverview() throws InterruptedException {
-		timer.setStartTime();
-		patientExperiecePage.accessOverviewTab().validateOverviewTabData();
-		timer.setEndTime();
-		timer.setOverviewTime(endTime - startTime);
-	}
-
-
-
-
-
-	private static void accessAndValidateTab(Element patientDemographicElement, String tab)
-			throws InterruptedException {
-		
-		startTime = timer.setStartTime();
-		patientExperiecePage.accessAndValidateTab(tab);
-		endTime = timer.setEndTime();
-		
-		switch (tab){
-		case "composite":
-			timer.setCompositeTime(endTime - startTime);
-			break;
-		case "side by side":
-			timer.setSideBySideTime(endTime - startTime);
-			break;
-		case "demographics":
-			timer.setDemographicsTime(endTime - startTime);
-			break;
-		}
-		
-	}
-
-
-
-
-
-	private static void timingIc1(Element root) throws InterruptedException {
-		startTime = timer.setStartTime();
-		landingPage = loginPage.login(root.getChildTextTrim("user"), root.getChildTextTrim("password"));
-		endTime = timer.setEndTime();
-		timer.setIc1Time(endTime - startTime);
-	}
-
-
-
-
-
-	private static void timingLogin(String[] args, Element root)
-			throws InterruptedException {
-		startTime = timer.setStartTime();
-		loginPage = new Login(driver);
-		loginPage.open(defineEnvironment(args));
-		endTime = timer.setEndTime();
-		timer.setLoginTime(endTime - startTime);
-		
+		cleanUpMess();
 	}
 
 
 	/*
-	 * Bloque de métodos
+	 * METHODS
 	 */
+	
+		private static String buildReportLine(String scenario) throws UnknownHostException {
+			String output = "";
+			
+			output = scenario + ";";
+			
+			if (timer.getOverviewTime() == 0){
+				output += ";";
+			} else {
+				output += timer.getOverviewTime() + ";";
+			}
+			
+			if (timer.getCompositeTime() == 0){
+				output += ";";
+			} else {
+				output += timer.getCompositeTime() + ";";
+			}
+			
+			if (timer.getSideBySideTime() == 0){
+				output += ";";
+			} else {
+				output += timer.getSideBySideTime() + ";";
+			}
+			
+			if (timer.getDemographicsTime() == 0){
+				output += ";";
+			} else {
+				output += timer.getDemographicsTime() + ";";
+			}
+			
+			if (timer.getExportCompositeTime() == 0){
+				output += ";";
+			} else {
+				output += timer.getExportCompositeTime() + ";";
+			}
+			
+			if (timer.getExportDemographicsTime() == 0){
+				output += ";";
+			} else {
+				output += timer.getExportDemographicsTime() + ";";
+			}
+			
+			if (timer.getExportSideBySideTime() == 0){
+				output += ";";
+			} else {
+				output += timer.getExportSideBySideTime() + ";";
+			}
+			
+			return output;
+		}
+	
+		private static void cleanUpMess() {
+			reportGenerator.wrapUpFile();
+			errorHandler.wrapUpFile();
+			if (driver != null) driver.quit();
+		}
 
+		private static void checkLog(String[] args) throws FileNotFoundException,
+				UnsupportedEncodingException {
+			if (errorHandler.getErrorLog() == null) { 
+				errorHandler.setErrorTimeStamp(reportGenerator.getDate());
+				errorHandler.initializeLog(args);
+			}
+		}
+	
+		private static void accessAndValidatePatientExperienceTabs(
+				Element patientDemographicElement) throws InterruptedException {
+	
+			for (String tab : xmlParser.getTabs(patientDemographicElement)){
+				if (tab.equalsIgnoreCase("overview")) keepOverview  = true;
+				accessAndValidateTab(patientDemographicElement, tab);
+				timingPdfExport(tab);
+			}
+			
+			if (keepOverview = false) timer.setOverviewTime(0);
+		}
+	
+		private static void timingPdfExport(String tab) throws InterruptedException {
+			startTime = timer.setStartTime();
+			patientExperiecePage.exportToPDF(tab);
+			endTime = timer.setEndTime();
+			
+			switch (tab){
+			case "composite":
+				timer.setExportCompositeTime(endTime - startTime);
+				break;
+			case "side by side":
+				timer.setExportSideBySideTime(endTime - startTime);
+				break;
+			case "demographics":
+				timer.setExportDemographicsTime(endTime - startTime);
+				break;
+			}
+		}
+	
+		private static void timingOverview() throws InterruptedException {
+			timer.setStartTime();
+			patientExperiecePage.accessOverviewTab().validateOverviewTabData();
+			timer.setEndTime();
+			timer.setOverviewTime(endTime - startTime);
+		}
+	
+		private static void accessAndValidateTab(Element patientDemographicElement, String tab)
+				throws InterruptedException {
+			
+			startTime = timer.setStartTime();
+			patientExperiecePage.accessAndValidateTab(tab);
+			endTime = timer.setEndTime();
+			
+			switch (tab){
+			case "composite":
+				timer.setCompositeTime(endTime - startTime);
+				break;
+			case "side by side":
+				timer.setSideBySideTime(endTime - startTime);
+				break;
+			case "demographics":
+				timer.setDemographicsTime(endTime - startTime);
+				break;
+			}
+		}
+	
+		private static void timingIc1(Element root) throws InterruptedException {
+			startTime = timer.setStartTime();
+			landingPage = loginPage.login(root.getChildTextTrim("user"), root.getChildTextTrim("password"));
+			endTime = timer.setEndTime();
+			timer.setIc1Time(endTime - startTime);
+		}
+	
+		private static void timingLogin(String[] args, Element root)
+				throws InterruptedException {
+			startTime = timer.setStartTime();
+			loginPage = new Login(driver);
+			loginPage.open(defineEnvironment(args));
+			endTime = timer.setEndTime();
+			timer.setLoginTime(endTime - startTime);
+			
+		}
+	
 		private static boolean defineEnvironment(String[] args) {
 			if (args[1].equalsIgnoreCase("qa")){ 
 	    		return true;
@@ -311,10 +304,6 @@ public class Avatar_v3_0 {
 			
 		}
 
-
-
-
-
 		private static void timingPatientExperience() throws HomeLinkInvalid,
 				PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid,
 				InterruptedException {
@@ -330,73 +319,23 @@ public class Avatar_v3_0 {
 			timer.setIc2Time(endTime - startTime);
 		}
 
-
 		private static void updateSystemAndOrganization(Element root)
 				throws InterruptedException {
 			landingPage.drillDownHome().openOrgOrSystemSelection();
 			selectSystemAndOrganization(root);
 		}
 		
-		/*
-		private static boolean isElementPresent (String elementId) {
-			try {
-				if (!elementId.equalsIgnoreCase("center") && !elementId.equalsIgnoreCase("table")){
-					driver.findElement(By.id(elementId));
-					} else {
-						driver.findElement(By.tagName(elementId));
-					}
-				return true;
-			} catch (NoSuchElementException e) {
-				return false;
-			}
-		}
-		
-		
-		private static void accessPanelFrame() throws InterruptedException {
-			driver.switchTo().defaultContent();
-			driver.switchTo().frame(0);
-			wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("Panel_1_1"));
-		}
-		
-		
-		private static void assurePDLoaded() throws InterruptedException {
-			int i = 0;
-		    while (driver.findElement(By.id("loadingiframe")).getAttribute("style").contains("block")){
-				Thread.sleep(1000);
-				++i;
-				if (i >= 200) throw new java.util.NoSuchElementException("PATIENT DEMOGRAPHIC IS TAKING TOO LONG TO LOAD (200 seconds elapsed");
-			}
-		}
-		
-		private static void runSearch(Element rootElement) throws NoSuchElementException, InterruptedException {
-			
-			//noDataAvailable = false;
-			
-			//setGlobalTab(rootElement); 
-			//selectTab(tab);
+		private static void firstRunTrigger() throws UnknownHostException {
+			reportGenerator.addText(reportGenerator.generateTerminalData() + ";");
 
-			accessPanelFrame();
-			completeReportLevel(rootElement);
-			completeSurveySelection(rootElement);
-			
-			submitForm();
-			Thread.sleep(5000);
-		    //assurePDLoaded();
-			//Thread.sleep(5000);
-
-		}
-
-*/
-		
-		/*
-		 * LOCAL METHODS
-		 */
-		private static void firstRunTrigger() {
-			if (!firstRun) {
-				reportGenerator.addText(";;;;;");
+			if (firstRun) {
+				reportGenerator.addText(  timer.getLoginTime() + ";"
+						+ timer.getIc1Time() + ";"
+						+ timer.getIc2Time() + ";");
+				firstRun = false;
+			} else {
+				reportGenerator.addText(";;;");
 				keepOverview = false;
 			}
 		}
-		
-		
 }

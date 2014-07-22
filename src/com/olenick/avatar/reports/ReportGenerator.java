@@ -27,15 +27,15 @@ public class ReportGenerator {
 	}
 
 	public String generateTerminalData() throws UnknownHostException {
-		DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-	    Date date = new Date();
-	    InetAddress.getLocalHost().getHostName();
-		return InetAddress.getLocalHost().getHostName() + ";" + dateFormat.format(date) + ";";
+		return getComputerName() + ";" + getDate() + ";";
+	}
+
+	public String getComputerName() throws UnknownHostException {
+		return InetAddress.getLocalHost().getHostName();
 	}
 
 	public void addHeader() {
-		addText(""
-				+ "Computer Name; "
+		addText("Computer Name; "
 				+ "Date and Time; "
 				+ "Login Page; "
 				+ "iCare1 Page; "
@@ -45,7 +45,9 @@ public class ReportGenerator {
 				+ "Composite; "
 				+ "Side By Side; "
 				+ "Demographics; "
-				+ "PDFGeneration;");
+				+ "Export Composite Tab; "
+				+ "Export Side By Side; "
+				+ "Export Composite Tab");
 		
 	}
 
@@ -61,6 +63,13 @@ public class ReportGenerator {
 	public void printLineToFile(String lineToPrint) {
 		addText(lineToPrint);
 		writer.println(getContent());
-		builder.replace(0, builder.length()-1, "");
+		builder.setLength(0);
+		//builder.replace(0, builder.length(), "");
+	}
+	
+	public String getDate() {
+		DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+	    Date date = new Date();
+	    return dateFormat.format(date);
 	}
 }
