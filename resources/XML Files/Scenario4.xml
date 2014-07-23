@@ -1,0 +1,139 @@
+<avatar-icare>
+	<user>performance.test4@avatar-intl.com</user>
+	<password>!Avatar321</password>
+	<system>78</system>
+	<patient-demographic>
+		<tab>demographics</tab>
+		<scenario>4A</scenario>
+		<system>78</system>
+		<organization>582!547!541</organization>
+		<department>_FOC_NULL</department>
+		<location>_FOC_NULL</location>
+		
+		<survey-type>CG-CAHPS</survey-type>
+		<patient-type>_FOC_NULL</patient-type>
+		<factor-composite>_FOC_NULL</factor-composite>
+		<item-question>_FOC_NULL</item-question>
+		
+		<calculation></calculation>
+		
+		<from-month>01</from-month>
+		<from-year>2013</from-year>
+		<to-month>07</to-month>
+		<to-year>2013</to-year>
+		<group-by>1</group-by>
+		
+		<patient-admission>_FOC_NULL</patient-admission>
+		<patient-age>_FOC_NULL</patient-age>
+		<patient-discharge>_FOC_NULL</patient-discharge>
+		<patient-gender>_FOC_NULL</patient-gender>
+		<patient-language>_FOC_NULL</patient-language>
+		<patient-length>_FOC_NULL</patient-length>
+		<patient-race>_FOC_NULL</patient-race>
+		<patient-service>_FOC_NULL</patient-service>
+
+		<filter>Gender</filter>
+
+	</patient-demographic>
+
+	<patient-demographic>
+		<tab>side by side</tab>
+		<scenario>4B</scenario>
+		<system>78</system>
+		<organization>_FOC_NULL</organization>
+		<department>_FOC_NULL</department>
+		<location>_FOC_NULL</location>
+		
+		<survey-type>CG-CAHPS</survey-type>
+		<patient-type>Visit Adult</patient-type>
+		<factor-composite>Access to Care</factor-composite>
+		<item-question>_FOC_NULL</item-question>
+		
+		<calculation>2</calculation>
+		
+		<from-month>02</from-month>
+		<from-year>2013</from-year>
+		<to-month>08</to-month>
+		<to-year>2013</to-year>
+		<group-by>1</group-by>
+		
+		<patient-admission>_FOC_NULL</patient-admission>
+		<patient-age>_FOC_NULL</patient-age>
+		<patient-discharge>_FOC_NULL</patient-discharge>
+		<patient-gender>_FOC_NULL</patient-gender>
+		<patient-language>_FOC_NULL</patient-language>
+		<patient-length>_FOC_NULL</patient-length>
+		<patient-race>_FOC_NULL</patient-race>
+		<patient-service>_FOC_NULL</patient-service>
+
+		<filter>Language</filter>
+
+	</patient-demographic>
+	<patient-demographic>
+		<tab>composite</tab>
+		<scenario>4C</scenario>
+		<system>78</system>
+		<organization>546</organization>
+		<department>_FOC_NULL</department>
+		<location>_FOC_NULL</location>
+		
+		<survey-type>Pediatric HCAHPS</survey-type>
+		<patient-type>Pediatric HCAHPS</patient-type>
+		<factor-composite>Child's Care</factor-composite>
+		<item-question>_FOC_NULL</item-question>
+		
+		<calculation>2</calculation>
+		
+		<from-month>01</from-month>
+		<from-year>2013</from-year>
+		<to-month>08</to-month>
+		<to-year>2013</to-year>
+		<group-by>2</group-by>
+		
+		<patient-admission>_FOC_NULL</patient-admission>
+		<patient-age>_FOC_NULL</patient-age>
+		<patient-discharge>_FOC_NULL</patient-discharge>
+		<patient-gender>_FOC_NULL</patient-gender>
+		<patient-language>_FOC_NULL</patient-language>
+		<patient-length>_FOC_NULL</patient-length>
+		<patient-race>_FOC_NULL</patient-race>
+		<patient-service>_FOC_NULL</patient-service>
+
+		<filter>Age</filter>
+
+	</patient-demographic>
+
+	<patient-demographic>
+		<tab>demographics</tab>
+		<scenario>4D</scenario>
+		<system>78</system>
+		<organization>_FOC_NULL</organization>
+		<department>_FOC_NULL</department>
+		<location>_FOC_NULL</location>
+		
+		<survey-type>HCAHPS</survey-type>
+		<patient-type>HCAHPS</patient-type>
+		<factor-composite>Communication with Doctors</factor-composite>
+		<item-question>_FOC_NULL</item-question>
+		
+		<calculation>2</calculation>
+		
+		<from-month>01</from-month>
+		<from-year>2009</from-year>
+		<to-month>08</to-month>
+		<to-year>2013</to-year>
+		<group-by>1</group-by>
+		
+		<patient-admission>_FOC_NULL</patient-admission>
+		<patient-age>_FOC_NULL</patient-age>
+		<patient-discharge>_FOC_NULL</patient-discharge>
+		<patient-gender>_FOC_NULL</patient-gender>
+		<patient-language>_FOC_NULL</patient-language>
+		<patient-length>_FOC_NULL</patient-length>
+		<patient-race>_FOC_NULL</patient-race>
+		<patient-service>_FOC_NULL</patient-service>
+
+		<filter>Length</filter>
+
+	</patient-demographic>
+</avatar-icare>
