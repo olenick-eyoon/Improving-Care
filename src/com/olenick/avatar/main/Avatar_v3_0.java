@@ -82,8 +82,6 @@ public class Avatar_v3_0 {
 					timingOverview();
 					accessAndValidatePatientExperienceTabs(patientDemographicElement);
 					reportGenerator.printLineToFile(buildReportLine(xmlParser.getScenario(patientDemographicElement)));
-					
-					//System.out.println("nodo.");
 				}
 			} catch (NoSuchElementException e) {
 				handleExceptions(args, true, false, false, e);
@@ -93,97 +91,67 @@ public class Avatar_v3_0 {
 				handleExceptions(args, false, false, true, e3);
 			}
 			
-			/*
-			System.out.println("Pase");
-			System.out.println("Login: " + timer.getLoginTime());
-			System.out.println("Icare1: " + timer.getIc1Time());
-			System.out.println("Icare2: " + timer.getIc2Time());
-			System.out.println("Overview: " + timer.getOverviewTime());
-			System.out.println("Composite: " + timer.getCompositeTime());
-			System.out.println("Export Composite: " + timer.getExportCompositeTime());
-			System.out.println("Side By Side: " + timer.getSideBySideTime());
-			System.out.println("Export Side By Side: " + timer.getExportSideBySideTime());
-			System.out.println("Demographics: " + timer.getDemographicsTime());
-			System.out.println("Export Demographics: " + timer.getExportDemographicsTime());
-			*/
-			
-		/*
-		 * Bloque de cierre
-		 */
+		//Bloque de cierre
 		cleanUpMess();
 	}
 
+	//METHODS
 
-	private static void handleExceptions(String[] args, boolean NSEEx, boolean SEEx, boolean OEx, Exception e)
-			throws FileNotFoundException, UnsupportedEncodingException,
-			IOException {
-		checkLog(args);
-		errorHandler.takeScreenshot(driver);
-		errorHandler.addEventToLog(NSEEx, SEEx, OEx, e);
-	}
-
-
-	private static void initializeReportGeneratorObject(String[] args)
-			throws FileNotFoundException, UnsupportedEncodingException,
-			UnknownHostException {
-		reportGenerator = new ReportGenerator();
-		reportGenerator.createWriter("./resources/" + reportGenerator.getComputerName() + "_" + args[0].replace(".xml", "")  + "_" + reportGenerator.getDate() + ".csv");
-		reportGenerator.addHeader();
-		//reportGenerator.printLineToFile(reportGenerator.getContent());
-	}
-
-
-	/*
-	 * METHODS
-	 */
+		private static void handleExceptions(String[] args, boolean NSEEx, boolean SEEx, boolean OEx, Exception e)
+				throws FileNotFoundException, UnsupportedEncodingException,
+				IOException {
+			checkLog(args);
+			errorHandler.takeScreenshot(driver);
+			errorHandler.addEventToLog(NSEEx, SEEx, OEx, e);
+		}
 	
+	
+		private static void initializeReportGeneratorObject(String[] args)
+				throws FileNotFoundException, UnsupportedEncodingException,
+				UnknownHostException {
+			reportGenerator = new ReportGenerator();
+			reportGenerator.createWriter("./resources/" + reportGenerator.getComputerName() + "_" + args[0].replace(".xml", "")  + "_" + reportGenerator.getDate() + ".csv");
+			reportGenerator.addHeader();
+		}
+		
 		private static String buildReportLine(String scenario) throws UnknownHostException {
 			String output = "";
-			
 			output = scenario + ";";
-			
 			if (timer.getOverviewTime() == 0){
 				output += ";";
 			} else {
 				output += timer.getOverviewTime() + ";";
 			}
-			
 			if (timer.getCompositeTime() == 0){
 				output += ";";
 			} else {
 				output += timer.getCompositeTime() + ";";
 			}
-			
 			if (timer.getSideBySideTime() == 0){
 				output += ";";
 			} else {
 				output += timer.getSideBySideTime() + ";";
 			}
-			
 			if (timer.getDemographicsTime() == 0){
 				output += ";";
 			} else {
 				output += timer.getDemographicsTime() + ";";
 			}
-			
 			if (timer.getExportCompositeTime() == 0){
 				output += ";";
 			} else {
 				output += timer.getExportCompositeTime() + ";";
 			}
-			
 			if (timer.getExportDemographicsTime() == 0){
 				output += ";";
 			} else {
 				output += timer.getExportDemographicsTime() + ";";
 			}
-			
 			if (timer.getExportSideBySideTime() == 0){
 				output += ";";
 			} else {
 				output += timer.getExportSideBySideTime() + ";";
 			}
-			
 			return output;
 		}
 	
@@ -203,13 +171,11 @@ public class Avatar_v3_0 {
 	
 		private static void accessAndValidatePatientExperienceTabs(
 				Element patientDemographicElement) throws InterruptedException {
-	
 			for (String tab : xmlParser.getTabs(patientDemographicElement)){
 				if (tab.equalsIgnoreCase("overview")) keepOverview  = true;
 				accessAndValidateTab(patientDemographicElement, tab);
 				timingPdfExport(tab);
 			}
-			
 			if (keepOverview = false) timer.setOverviewTime(0);
 		}
 	
@@ -217,7 +183,6 @@ public class Avatar_v3_0 {
 			startTime = timer.setStartTime();
 			patientExperiecePage.exportToPDF(tab);
 			endTime = timer.setEndTime();
-			
 			switch (tab){
 			case "composite":
 				timer.setExportCompositeTime(endTime - startTime);
