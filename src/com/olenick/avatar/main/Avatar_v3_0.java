@@ -61,29 +61,18 @@ public class Avatar_v3_0 {
 		
 	public static void main(String[] args) throws InterruptedException, ICare2PageNotDisplayed, HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, IOException {
 		
-		/*
-		 * Bloque de ejecución
-		 */
-		
+		//Bloque de ejecución
 	    	xmlFile = xmlParser.loadFile(xmlFilePath + args[0]); //Loads xml file from the command line arguments
 			Element root = xmlFile.getRootElement(); //Generates the root element we will use during execution
-			
-			reportGenerator = new ReportGenerator();
-			reportGenerator.createWriter("./resources/" + reportGenerator.getComputerName() + "_" + args[0].replace(".xml", "")  + "_" + reportGenerator.getDate() + ".csv");
-			reportGenerator.addHeader();
-			//reportGenerator.printLineToFile(reportGenerator.getContent());
-			
+			initializeReportGeneratorObject(args);
 			errorHandler.initializePaths().setComputerName(reportGenerator.getComputerName());
 			
-		/*
-		 * Bloque de login
-		 */
+
+		//Bloque de login
 			timingLogin(args, root);
 			timingIc1(root);
 			
-		/*
-		 * Bloque de acciones en IC1
-		 */
+		//Bloque de acciones en IC1
 			try{
 				updateSystemAndOrganization(root);
 				accessPatientExperience();
@@ -94,20 +83,14 @@ public class Avatar_v3_0 {
 					accessAndValidatePatientExperienceTabs(patientDemographicElement);
 					reportGenerator.printLineToFile(buildReportLine(xmlParser.getScenario(patientDemographicElement)));
 					
-					System.out.println("nodo.");
+					//System.out.println("nodo.");
 				}
 			} catch (NoSuchElementException e) {
-				checkLog(args);
-				errorHandler.takeScreenshot(driver);
-				errorHandler.addEventToLog(true, false, false, e);
+				handleExceptions(args, true, false, false, e);
 			} catch (StaleElementReferenceException e2) {
-				checkLog(args);
-				errorHandler.takeScreenshot(driver);
-				errorHandler.addEventToLog(false, true, false, e2);
+				handleExceptions(args, false, true, false, e2);
 			} catch (Exception e3) {
-				checkLog(args);
-				errorHandler.takeScreenshot(driver);
-				errorHandler.addEventToLog(false, false, true, e3);
+				handleExceptions(args, false, false, true, e3);
 			}
 			
 			/*
@@ -128,6 +111,25 @@ public class Avatar_v3_0 {
 		 * Bloque de cierre
 		 */
 		cleanUpMess();
+	}
+
+
+	private static void handleExceptions(String[] args, boolean NSEEx, boolean SEEx, boolean OEx, Exception e)
+			throws FileNotFoundException, UnsupportedEncodingException,
+			IOException {
+		checkLog(args);
+		errorHandler.takeScreenshot(driver);
+		errorHandler.addEventToLog(NSEEx, SEEx, OEx, e);
+	}
+
+
+	private static void initializeReportGeneratorObject(String[] args)
+			throws FileNotFoundException, UnsupportedEncodingException,
+			UnknownHostException {
+		reportGenerator = new ReportGenerator();
+		reportGenerator.createWriter("./resources/" + reportGenerator.getComputerName() + "_" + args[0].replace(".xml", "")  + "_" + reportGenerator.getDate() + ".csv");
+		reportGenerator.addHeader();
+		//reportGenerator.printLineToFile(reportGenerator.getContent());
 	}
 
 

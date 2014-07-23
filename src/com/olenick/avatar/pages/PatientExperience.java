@@ -684,7 +684,6 @@ public class PatientExperience {
 			Thread.sleep(1000);
 			++i;
 		}
-		
 	}
 	
 	private void accessPanelFrame() throws InterruptedException {
@@ -758,7 +757,6 @@ public class PatientExperience {
 		accessPanelFrame();
 		demographicLink.click();
 		Thread.sleep(2000);
-		
 		
 		setMultiselectListValue("ptadmission", xmlParser.getPatientAdmission(rootElement));
 		setMultiselectListValue("ptage", xmlParser.getPatientAge(rootElement));		
@@ -853,7 +851,6 @@ public class PatientExperience {
 			exportDemographicsToPDF();
 			break;
 		}
-		
 		return this;
 	}
 
@@ -861,25 +858,19 @@ public class PatientExperience {
 		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("sdframe"));
 		driver.findElement(By.id("imgopt")).click();
 		driver.findElement(By.id("compdf")).click();
-		
 		handlePDFNewWindow();
-	    
 	}
 	
 	private void exportDemographicsToPDF() throws InterruptedException {
 		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("report3"));
 		driver.findElement(By.id("image45")).click();
-		
 		handlePDFNewWindow();
-	    
 	}
 
 	private void exportCompositeToPDF() throws InterruptedException {
 		wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("rptfactor"));
 		driver.findElement(By.id("imageCGpdf")).click();
-		
 		handlePDFNewWindow();
-	    
 	}
 	
 	private void handlePDFNewWindow() throws InterruptedException {
@@ -888,39 +879,24 @@ public class PatientExperience {
 	    }
 	    driver.switchTo().window(driver.getWindowHandles().toArray()[2].toString());
 	    driver.close();
-	    //RETURN TO PATIENT DEMOGRAPHIC REPORT
 	    driver.switchTo().window(driver.getWindowHandles().toArray()[1].toString());
 	}
 
 	public PatientExperience convertFiltersToSelect() throws InterruptedException {
 		accessPanelFrame();
-		
 		convertToSelect("system");
 		convertToSelect("organization");
 		convertToSelect("department");
 		convertToSelect("location");
-		
 		convertToSelect("surveyType");
 		convertToSelect("patientType");
 		convertToSelect("composite");
 		convertToSelect("item");
-		
 		convertToSelect("fromMonth");
 		convertToSelect("fromYear");
 		convertToSelect("toMonth");
 		convertToSelect("toYear");
 		convertToSelect("groupBy");
-		
-		convertToSelect("groupBy");
-		convertToSelect("groupBy");
-		convertToSelect("groupBy");
-		convertToSelect("groupBy");
-		convertToSelect("groupBy");
-		convertToSelect("groupBy");
-		convertToSelect("groupBy");
-		convertToSelect("groupBy");
-		
-		
 		return this;
 	}
 
