@@ -237,7 +237,6 @@ public class Avatar_v3_0 {
 			loginPage.open(defineEnvironment(args));
 			endTime = timer.setEndTime();
 			timer.setLoginTime(endTime - startTime);
-			
 		}
 	
 		private static boolean defineEnvironment(String[] args) {
@@ -255,7 +254,6 @@ public class Avatar_v3_0 {
 			} else {
 				landingPage.setSystem(xmlParser.getSystem(root));
 			}
-			
 			landingPage.submitOrgOrSystem();
 			Thread.sleep(1500);
 		}
@@ -264,9 +262,7 @@ public class Avatar_v3_0 {
 				throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 			landingPage = new Landing(driver, true);
 			iCare2Page = landingPage.drillDownAdvancedReports().accessEnhancedReports().switchToNewWindow();
-			
 			timingPatientExperience();
-			
 		}
 
 		private static void timingPatientExperience() throws HomeLinkInvalid,
@@ -280,7 +276,6 @@ public class Avatar_v3_0 {
 			patientExperiecePage = patientExperiecePage.accessOverviewTab();
 			patientExperiecePage.validateOverviewTabData();
 			endTime = timer.setEndTime();
-			
 			timer.setIc2Time(endTime - startTime);
 		}
 
@@ -292,7 +287,6 @@ public class Avatar_v3_0 {
 		
 		private static void firstRunTrigger() throws UnknownHostException {
 			reportGenerator.addText(reportGenerator.generateTerminalData());
-
 			if (firstRun) {
 				reportGenerator.addText(  timer.getLoginTime() + ";"
 						+ timer.getIc1Time() + ";"
