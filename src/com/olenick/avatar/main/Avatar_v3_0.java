@@ -69,7 +69,9 @@ public class Avatar_v3_0 {
 			Element root = xmlFile.getRootElement(); //Generates the root element we will use during execution
 			
 			reportGenerator = new ReportGenerator();
-			reportGenerator.createWriter("./resources/testFile.csv");
+			reportGenerator.createWriter("./resources/" + reportGenerator.getComputerName() + "_" + args[0].replace(".xml", "")  + "_" + reportGenerator.getDate() + ".csv");
+			reportGenerator.addHeader();
+			//reportGenerator.printLineToFile(reportGenerator.getContent());
 			
 			errorHandler.initializePaths().setComputerName(reportGenerator.getComputerName());
 			
@@ -82,10 +84,6 @@ public class Avatar_v3_0 {
 		/*
 		 * Bloque de acciones en IC1
 		 */
-			
-			reportGenerator.addHeader();
-			reportGenerator.printLineToFile(reportGenerator.getContent());
-			
 			try{
 				updateSystemAndOrganization(root);
 				accessPatientExperience();
@@ -326,7 +324,7 @@ public class Avatar_v3_0 {
 		}
 		
 		private static void firstRunTrigger() throws UnknownHostException {
-			reportGenerator.addText(reportGenerator.generateTerminalData() + ";");
+			reportGenerator.addText(reportGenerator.generateTerminalData());
 
 			if (firstRun) {
 				reportGenerator.addText(  timer.getLoginTime() + ";"

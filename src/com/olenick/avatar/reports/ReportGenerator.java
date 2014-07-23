@@ -35,19 +35,22 @@ public class ReportGenerator {
 	}
 
 	public void addHeader() {
-		addText("Computer Name; "
-				+ "Date and Time; "
-				+ "Login Page; "
-				+ "iCare1 Page; "
-				+ "iCare2 Page; "
-				+ "Scenario Name; "
-				+ "Overview; "
-				+ "Composite; "
-				+ "Side By Side; "
-				+ "Demographics; "
-				+ "Export Composite Tab; "
-				+ "Export Side By Side; "
-				+ "Export Composite Tab");
+		addText("_Computer Name; "
+				+ "_Date and Time; "
+				+ "_Login Page; "
+				+ "_iCare1 Page; "
+				+ "_iCare2 Page; "
+				+ "_Scenario Name; "
+				+ "_Overview; "
+				+ "_Composite; "
+				+ "_Side By Side; "
+				+ "_Demographics; "
+				+ "_Export Composite Tab; "
+				+ "_Export Side By Side; "
+				+ "_Export Composite Tab");
+		
+		writer.println(getContent());
+		builder.setLength(0);
 		
 	}
 
