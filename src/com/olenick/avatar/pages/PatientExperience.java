@@ -874,12 +874,17 @@ public class PatientExperience {
 	}
 	
 	private void handlePDFNewWindow() throws InterruptedException {
-		while (driver.getWindowHandles().size()==2){
+		//while (driver.getWindowHandles().size()==2){
+		while (driver.getWindowHandles().size()==1){
 	    	Thread.sleep(500);
 	    }
-	    driver.switchTo().window(driver.getWindowHandles().toArray()[2].toString());
-	    driver.close();
+	    //driver.switchTo().window(driver.getWindowHandles().toArray()[2].toString());
+	    //driver.close();
+	    //driver.switchTo().window(driver.getWindowHandles().toArray()[1].toString());
+	    //NEW VESION
 	    driver.switchTo().window(driver.getWindowHandles().toArray()[1].toString());
+	    driver.close();
+	    driver.switchTo().window(driver.getWindowHandles().toArray()[0].toString());
 	}
 
 	public PatientExperience convertFiltersToSelect() throws InterruptedException {

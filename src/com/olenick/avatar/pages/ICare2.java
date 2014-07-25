@@ -43,7 +43,7 @@ public class ICare2 {
 	}
 
 	public ICare2 detectMenuBarItems() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException {
-		Thread.sleep(10000);
+		Thread.sleep(60000);
 		//assurePDLoaded();
 		home = driver.findElement(By.xpath(menuBarXpath+"/div[1]"));
 		patientExperience = driver.findElement(By.xpath(menuBarXpath+"/div[2]"));

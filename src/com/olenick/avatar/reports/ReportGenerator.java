@@ -38,7 +38,7 @@ public class ReportGenerator {
 		addText("_Computer Name; "
 				+ "_Date and Time; "
 				+ "_Login Page; "
-				+ "_iCare1 Page; "
+				//+ "_iCare1 Page; "
 				+ "_iCare2 Page; "
 				+ "_Scenario Name; "
 				+ "_Overview; "

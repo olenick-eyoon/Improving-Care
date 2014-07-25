@@ -21,6 +21,7 @@ import com.olenick.avatar.pages.ICare2;
 import com.olenick.avatar.pages.Landing;
 import com.olenick.avatar.pages.Login;
 import com.olenick.avatar.pages.PatientExperience;
+import com.olenick.avatar.pages.PatientExperienceLogin;
 import com.olenick.avatar.parsers.xml.*;
 import com.olenick.avatar.reports.ErrorHandler;
 import com.olenick.avatar.reports.ReportGenerator;
@@ -28,36 +29,29 @@ import com.olenick.avatar.timer.Timer;
 
 public class Avatar_v3_0 {
 	
-	/*
-	 * Bloque de variables
-	 */
-	
+	//Bloque de variables
 		//Webdriver Declarations
-		public static WebDriver driver = new FirefoxDriver();
-		public static WebDriverWait wait = new WebDriverWait(driver, 240);
-		public static String baseUrl = "";
-		
-		
+			public static WebDriver driver = new FirefoxDriver();
+			public static WebDriverWait wait = new WebDriverWait(driver, 240);
+			public static String baseUrl = "";
 		//XML Declarations
-		public static String xmlFilePath = "./resources/XML Files/";
-		public static Document xmlFile;
-		public static XMLParser xmlParser = new XMLParser();
-		
-		
+			public static String xmlFilePath = "./resources/XML Files/";
+			public static Document xmlFile;
+			public static XMLParser xmlParser = new XMLParser();
 		//Model objects
-		public static Login loginPage;
-		public static Landing landingPage;
-		public static ICare2 iCare2Page;
-		public static PatientExperience patientExperiecePage;
-		public static ReportGenerator reportGenerator;
-		public static Timer timer = new Timer();
-		public static ErrorHandler errorHandler= new ErrorHandler();
-		
-		private static boolean firstRun = true;
-		public static long startTime = 0, endTime = 0;
-		@SuppressWarnings("unused")
-		private static boolean keepOverview = false;
-
+			public static Login loginPage;
+			public static PatientExperienceLogin peLogin;
+			public static Landing landingPage;
+			public static ICare2 iCare2Page;
+			public static PatientExperience patientExperiecePage;
+			public static ReportGenerator reportGenerator;
+			public static Timer timer = new Timer();
+			public static ErrorHandler errorHandler= new ErrorHandler();
+	
+			private static boolean firstRun = true;
+			public static long startTime = 0, endTime = 0;
+			@SuppressWarnings("unused")
+			private static boolean keepOverview = false;
 		
 	public static void main(String[] args) throws InterruptedException, ICare2PageNotDisplayed, HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, IOException {
 		
@@ -67,15 +61,13 @@ public class Avatar_v3_0 {
 			initializeReportGeneratorObject(args);
 			errorHandler.initializePaths().setComputerName(reportGenerator.getComputerName());
 			
-
-		//Bloque de login
-			timingLogin(args, root);
-			timingIc1(root);
+		//Bloque de login - Note: To login through old site, use timingLogin(args, root) and timingIc1(root)
+			newTimingLogin(args, root);
+			iCare2Page = peLogin.login(root.getChildText("user"), root.getChildText("password"));
 			
-		//Bloque de acciones en IC1
+		//Bloque de acciones en IC1 - Note: To access through old site, use updateSystemAndOrganization(root), accessPatientExperience().
 			try{
-				updateSystemAndOrganization(root);
-				accessPatientExperience();
+				timingPatientExperience();
 				for (Element patientDemographicElement : root.getChildren("patient-demographic")) {
 					firstRunTrigger();
 					patientExperiecePage.runSearch(patientDemographicElement);
@@ -95,8 +87,8 @@ public class Avatar_v3_0 {
 		cleanUpMess();
 	}
 
-	//METHODS
 
+		//METHODS
 		private static void handleExceptions(String[] args, boolean NSEEx, boolean SEEx, boolean OEx, Exception e)
 				throws FileNotFoundException, UnsupportedEncodingException,
 				IOException {
@@ -104,7 +96,6 @@ public class Avatar_v3_0 {
 			errorHandler.takeScreenshot(driver);
 			errorHandler.addEventToLog(NSEEx, SEEx, OEx, e);
 		}
-	
 	
 		private static void initializeReportGeneratorObject(String[] args)
 				throws FileNotFoundException, UnsupportedEncodingException,
@@ -223,13 +214,17 @@ public class Avatar_v3_0 {
 			}
 		}
 	
+		/* DEPRECATED
 		private static void timingIc1(Element root) throws InterruptedException {
 			startTime = timer.setStartTime();
 			landingPage = loginPage.login(root.getChildTextTrim("user"), root.getChildTextTrim("password"));
 			endTime = timer.setEndTime();
 			timer.setIc1Time(endTime - startTime);
 		}
-	
+		*/
+
+		
+		/* DEPRECATED
 		private static void timingLogin(String[] args, Element root)
 				throws InterruptedException {
 			startTime = timer.setStartTime();
@@ -238,7 +233,18 @@ public class Avatar_v3_0 {
 			endTime = timer.setEndTime();
 			timer.setLoginTime(endTime - startTime);
 		}
+		*/
+		
+		private static void newTimingLogin(String[] args, Element root){
+			startTime = timer.setStartTime();
+			peLogin = new PatientExperienceLogin(driver);
+			peLogin.open(true).detectElements();
+			endTime = timer.setEndTime();
+			timer.setLoginTime(endTime - startTime);
+		}
 	
+		//TODO: Verificar el metodo
+		/* DEPRECATED
 		private static boolean defineEnvironment(String[] args) {
 			if (args[1].equalsIgnoreCase("qa")){ 
 	    		return true;
@@ -246,7 +252,9 @@ public class Avatar_v3_0 {
 	    		return false;
 	    	}
 		}
-	
+		 */
+		
+		/* DEPRECATED
 		private static void selectSystemAndOrganization(Element root) throws InterruptedException {
 			if (xmlParser.getSystem(root).equalsIgnoreCase("-68") || xmlParser.getSystem(root).equalsIgnoreCase("-426") || xmlParser.getSystem(root).equalsIgnoreCase("-56") || xmlParser.getSystem(root).equalsIgnoreCase("731")) {
 				landingPage.setSystem("0");
@@ -258,13 +266,15 @@ public class Avatar_v3_0 {
 			Thread.sleep(1500);
 		}
 
+		DEPRECATED
 		private static void accessPatientExperience() 
 				throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
 			landingPage = new Landing(driver, true);
 			iCare2Page = landingPage.drillDownAdvancedReports().accessEnhancedReports().switchToNewWindow();
 			timingPatientExperience();
 		}
-
+		 */
+		
 		private static void timingPatientExperience() throws HomeLinkInvalid,
 				PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid,
 				InterruptedException {
@@ -279,17 +289,19 @@ public class Avatar_v3_0 {
 			timer.setIc2Time(endTime - startTime);
 		}
 
+		/* DEPRECATED
 		private static void updateSystemAndOrganization(Element root)
 				throws InterruptedException {
 			landingPage.drillDownHome().openOrgOrSystemSelection();
 			selectSystemAndOrganization(root);
 		}
+		*/
 		
 		private static void firstRunTrigger() throws UnknownHostException {
 			reportGenerator.addText(reportGenerator.generateTerminalData());
 			if (firstRun) {
 				reportGenerator.addText(  timer.getLoginTime() + ";"
-						+ timer.getIc1Time() + ";"
+						//+ timer.getIc1Time() + ";"
 						+ timer.getIc2Time() + ";");
 				firstRun = false;
 			} else {

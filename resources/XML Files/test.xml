@@ -1,12 +1,12 @@
 <avatar-icare>
-	<user>performance.test4@avatar-intl.com</user>
-	<password>!Avatar321</password>
+	<user>dpiriz@olenick.com</user>
+	<password>password</password>
 	<system>78</system>
 	<patient-demographic>
 		<tab>composite!overview</tab>
 		<scenario>1A</scenario>
 		<system>78</system>
-		<organization>546!541</organization>
+		<organization>_FOC_NULL</organization>
 		<department>_FOC_NULL</department>
 		<location>_FOC_NULL</location>
 		
