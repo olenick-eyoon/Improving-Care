@@ -1,12 +1,8 @@
 package com.olenick.avatar.pages;
 
-import org.jdom2.Element;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-
-import com.olenick.avatar.tests.ICare2Page;
-import com.olenick.avatar.tests.PatientExperiencePage;
 
 public class PatientExperienceLogin {
 
@@ -90,7 +86,7 @@ public class PatientExperienceLogin {
 	}
 
 	public PatientExperienceLogin open(boolean dev) {
-		if (dev) { driver.get(devBaseUrl ); } else { driver.get("");}; //TODO: Agregar la url de produccion.
+		if (dev) { driver.get(devBaseUrl ); } else { driver.get("http://www.google.com");}; //TODO: Agregar la url de produccion.
 		return this;
 	}
 

@@ -1,10 +1,8 @@
 package com.olenick.avatar.main;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
-
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.openqa.selenium.NoSuchElementException;
@@ -12,7 +10,6 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
 import com.olenick.avatar.exceptions.HomeLinkInvalid;
 import com.olenick.avatar.exceptions.ICare2PageNotDisplayed;
 import com.olenick.avatar.exceptions.PatientExperienceLinkInvalid;
@@ -26,9 +23,7 @@ import com.olenick.avatar.parsers.xml.*;
 import com.olenick.avatar.reports.ErrorHandler;
 import com.olenick.avatar.reports.ReportGenerator;
 import com.olenick.avatar.timer.Timer;
-
 public class Avatar_v3_0 {
-	
 	//Bloque de variables
 		//Webdriver Declarations
 			public static WebDriver driver = new FirefoxDriver();
@@ -54,17 +49,14 @@ public class Avatar_v3_0 {
 			private static boolean keepOverview = false;
 		
 	public static void main(String[] args) throws InterruptedException, ICare2PageNotDisplayed, HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, IOException {
-		
 		//Bloque de ejecución
 	    	xmlFile = xmlParser.loadFile(xmlFilePath + args[0]); //Loads xml file from the command line arguments
 			Element root = xmlFile.getRootElement(); //Generates the root element we will use during execution
 			initializeReportGeneratorObject(args);
 			errorHandler.initializePaths().setComputerName(reportGenerator.getComputerName());
-			
 		//Bloque de login - Note: To login through old site, use timingLogin(args, root) and timingIc1(root)
 			newTimingLogin(args, root);
 			iCare2Page = peLogin.login(root.getChildText("user"), root.getChildText("password"));
-			
 		//Bloque de acciones en IC1 - Note: To access through old site, use updateSystemAndOrganization(root), accessPatientExperience().
 			try{
 				timingPatientExperience();
@@ -82,24 +74,18 @@ public class Avatar_v3_0 {
 			} catch (Exception e3) {
 				handleExceptions(args, false, false, true, e3);
 			}
-			
 		//Bloque de cierre
 		cleanUpMess();
 	}
 
-
-		//METHODS
-		private static void handleExceptions(String[] args, boolean NSEEx, boolean SEEx, boolean OEx, Exception e)
-				throws FileNotFoundException, UnsupportedEncodingException,
-				IOException {
+	//METHODS
+		private static void handleExceptions(String[] args, boolean NSEEx, boolean SEEx, boolean OEx, Exception e) throws FileNotFoundException, UnsupportedEncodingException, IOException {
 			checkLog(args);
 			errorHandler.takeScreenshot(driver);
 			errorHandler.addEventToLog(NSEEx, SEEx, OEx, e);
 		}
 	
-		private static void initializeReportGeneratorObject(String[] args)
-				throws FileNotFoundException, UnsupportedEncodingException,
-				UnknownHostException {
+		private static void initializeReportGeneratorObject(String[] args) throws FileNotFoundException, UnsupportedEncodingException, UnknownHostException {
 			reportGenerator = new ReportGenerator();
 			reportGenerator.createWriter("./resources/" + reportGenerator.getComputerName() + "_" + args[0].replace(".xml", "")  + "_" + reportGenerator.getDate() + ".csv");
 			reportGenerator.addHeader();
@@ -108,41 +94,13 @@ public class Avatar_v3_0 {
 		private static String buildReportLine(String scenario) throws UnknownHostException {
 			String output = "";
 			output = scenario + ";";
-			if (timer.getOverviewTime() == 0){
-				output += ";";
-			} else {
-				output += timer.getOverviewTime() + ";";
-			}
-			if (timer.getCompositeTime() == 0){
-				output += ";";
-			} else {
-				output += timer.getCompositeTime() + ";";
-			}
-			if (timer.getSideBySideTime() == 0){
-				output += ";";
-			} else {
-				output += timer.getSideBySideTime() + ";";
-			}
-			if (timer.getDemographicsTime() == 0){
-				output += ";";
-			} else {
-				output += timer.getDemographicsTime() + ";";
-			}
-			if (timer.getExportCompositeTime() == 0){
-				output += ";";
-			} else {
-				output += timer.getExportCompositeTime() + ";";
-			}
-			if (timer.getExportDemographicsTime() == 0){
-				output += ";";
-			} else {
-				output += timer.getExportDemographicsTime() + ";";
-			}
-			if (timer.getExportSideBySideTime() == 0){
-				output += ";";
-			} else {
-				output += timer.getExportSideBySideTime() + ";";
-			}
+			output += (timer.getOverviewTime() == 0) ? ";" : timer.getOverviewTime() + ";";
+			output += (timer.getCompositeTime() == 0) ? ";" : timer.getCompositeTime() + ";"; 
+			output += (timer.getSideBySideTime() == 0) ? ";" : timer.getSideBySideTime() + ";"; 
+			output += (timer.getDemographicsTime() == 0) ? ";" : timer.getDemographicsTime() + ";"; 
+			output += (timer.getExportCompositeTime() == 0) ? ";" : timer.getExportCompositeTime() + ";"; 
+			output += (timer.getExportDemographicsTime() == 0) ? ";" : timer.getExportDemographicsTime() + ";"; 
+			output += (timer.getExportSideBySideTime() == 0) ? ";" : timer.getExportSideBySideTime() + ";"; 
 			return output;
 		}
 	
@@ -152,16 +110,14 @@ public class Avatar_v3_0 {
 			if (driver != null) driver.quit();
 		}
 
-		private static void checkLog(String[] args) throws FileNotFoundException,
-				UnsupportedEncodingException {
+		private static void checkLog(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
 			if (errorHandler.getErrorLog() == null) { 
 				errorHandler.setErrorTimeStamp(reportGenerator.getDate());
 				errorHandler.initializeLog(args);
 			}
 		}
 	
-		private static void accessAndValidatePatientExperienceTabs(
-				Element patientDemographicElement) throws InterruptedException {
+		private static void accessAndValidatePatientExperienceTabs(Element patientDemographicElement) throws InterruptedException {
 			for (String tab : xmlParser.getTabs(patientDemographicElement)){
 				if (tab.equalsIgnoreCase("overview")) keepOverview  = true;
 				accessAndValidateTab(patientDemographicElement, tab);
@@ -194,9 +150,7 @@ public class Avatar_v3_0 {
 			timer.setOverviewTime(endTime - startTime);
 		}
 	
-		private static void accessAndValidateTab(Element patientDemographicElement, String tab)
-				throws InterruptedException {
-			
+		private static void accessAndValidateTab(Element patientDemographicElement, String tab) throws InterruptedException {
 			startTime = timer.setStartTime();
 			patientExperiecePage.accessAndValidateTab(tab);
 			endTime = timer.setEndTime();
@@ -213,38 +167,15 @@ public class Avatar_v3_0 {
 				break;
 			}
 		}
-	
-		/* DEPRECATED
-		private static void timingIc1(Element root) throws InterruptedException {
-			startTime = timer.setStartTime();
-			landingPage = loginPage.login(root.getChildTextTrim("user"), root.getChildTextTrim("password"));
-			endTime = timer.setEndTime();
-			timer.setIc1Time(endTime - startTime);
-		}
-		*/
 
-		
-		/* DEPRECATED
-		private static void timingLogin(String[] args, Element root)
-				throws InterruptedException {
-			startTime = timer.setStartTime();
-			loginPage = new Login(driver);
-			loginPage.open(defineEnvironment(args));
-			endTime = timer.setEndTime();
-			timer.setLoginTime(endTime - startTime);
-		}
-		*/
-		
 		private static void newTimingLogin(String[] args, Element root){
 			startTime = timer.setStartTime();
 			peLogin = new PatientExperienceLogin(driver);
-			peLogin.open(true).detectElements();
+			peLogin.open(defineEnvironment(args)).detectElements();
 			endTime = timer.setEndTime();
 			timer.setLoginTime(endTime - startTime);
 		}
-	
-		//TODO: Verificar el metodo
-		/* DEPRECATED
+
 		private static boolean defineEnvironment(String[] args) {
 			if (args[1].equalsIgnoreCase("qa")){ 
 	    		return true;
@@ -252,57 +183,21 @@ public class Avatar_v3_0 {
 	    		return false;
 	    	}
 		}
-		 */
-		
-		/* DEPRECATED
-		private static void selectSystemAndOrganization(Element root) throws InterruptedException {
-			if (xmlParser.getSystem(root).equalsIgnoreCase("-68") || xmlParser.getSystem(root).equalsIgnoreCase("-426") || xmlParser.getSystem(root).equalsIgnoreCase("-56") || xmlParser.getSystem(root).equalsIgnoreCase("731")) {
-				landingPage.setSystem("0");
-				landingPage.setOrganization(xmlParser.getSystem(root).replace("-", ""));
-			} else {
-				landingPage.setSystem(xmlParser.getSystem(root));
-			}
-			landingPage.submitOrgOrSystem();
-			Thread.sleep(1500);
-		}
 
-		DEPRECATED
-		private static void accessPatientExperience() 
-				throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException, ICare2PageNotDisplayed {
-			landingPage = new Landing(driver, true);
-			iCare2Page = landingPage.drillDownAdvancedReports().accessEnhancedReports().switchToNewWindow();
-			timingPatientExperience();
-		}
-		 */
-		
-		private static void timingPatientExperience() throws HomeLinkInvalid,
-				PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid,
-				InterruptedException {
+		private static void timingPatientExperience() throws HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, InterruptedException {
 			startTime = timer.setStartTime();
 			iCare2Page.switchToMainIFrame().detectMenuBarItems();
-			patientExperiecePage = iCare2Page.accessPatientExperienceTab()
-					.detectOverviewTab().detectCompositeTab().detectDemographicTab().detectSbsTab()
-					.detectFilters().convertFiltersToSelect();
+			patientExperiecePage = iCare2Page.accessPatientExperienceTab().detectOverviewTab().detectCompositeTab().detectDemographicTab().detectSbsTab().detectFilters().convertFiltersToSelect();
 			patientExperiecePage = patientExperiecePage.accessOverviewTab();
 			patientExperiecePage.validateOverviewTabData();
 			endTime = timer.setEndTime();
 			timer.setIc2Time(endTime - startTime);
 		}
-
-		/* DEPRECATED
-		private static void updateSystemAndOrganization(Element root)
-				throws InterruptedException {
-			landingPage.drillDownHome().openOrgOrSystemSelection();
-			selectSystemAndOrganization(root);
-		}
-		*/
 		
 		private static void firstRunTrigger() throws UnknownHostException {
 			reportGenerator.addText(reportGenerator.generateTerminalData());
 			if (firstRun) {
-				reportGenerator.addText(  timer.getLoginTime() + ";"
-						//+ timer.getIc1Time() + ";"
-						+ timer.getIc2Time() + ";");
+				reportGenerator.addText(  timer.getLoginTime() + ";" + timer.getIc2Time() + ";");
 				firstRun = false;
 			} else {
 				reportGenerator.addText(";;;");
