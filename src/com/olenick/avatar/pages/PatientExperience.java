@@ -724,7 +724,7 @@ public class PatientExperience {
 	}
 
 	private void completeReportLevel(Element patientDemographicElement) throws NoSuchElementException, InterruptedException {
-		
+		scrollUp("system");
 		systemSelect.selectByValue(xmlParser.getSystem(patientDemographicElement));
 		setMultiselectListValue("organization", xmlParser.getOrganization(patientDemographicElement));
 		setMultiselectListValue("department", xmlParser.getDepartment(patientDemographicElement));
@@ -732,24 +732,73 @@ public class PatientExperience {
 	}
 	
 	private void completeSurveySelection(Element rootElement) throws NoSuchElementException, InterruptedException {
-		surveyTypeSelect.selectByValue(xmlParser.getSurveyType(rootElement));		
+		scrollUp("surveytype");
+		//surveyTypeSelect.selectByValue(xmlParser.getSurveyType(rootElement));
+		surveyType.sendKeys(xmlParser.getSurveyType(rootElement));
 		setMultiselectListValue("patienttype", xmlParser.getPatientType(rootElement));
 		setMultiselectListValue("factor", xmlParser.getFactorComposite(rootElement));	
 		setMultiselectListValue("item", xmlParser.getItemQuestion(rootElement));	
 
 		completeCalculationFilters(rootElement);
-		
-		fromMonthSelect.selectByValue(xmlParser.getFromMonth(rootElement));
-		scrollUp("system");
-		fromYearSelect.selectByValue(xmlParser.getFromYear(rootElement));
-		scrollUp("system");
-		toMonthSelect.selectByValue(xmlParser.getToMonth(rootElement));
-		scrollUp("system");
-		toYearSelect.selectByValue(xmlParser.getToYear(rootElement));
-		scrollUp("system");
-		
-		completeDemographicFilters(rootElement);	
 
+		scrollUp("system");
+
+		fromMonth.sendKeys(resolveMonth(xmlParser.getFromMonth(rootElement)));
+		scrollUp("system");
+		fromYear.sendKeys(xmlParser.getFromYear(rootElement));
+		scrollUp("system");
+		toMonth.sendKeys(resolveMonth(xmlParser.getToMonth(rootElement)));
+		scrollUp("system");
+		toYear.sendKeys(xmlParser.getToYear(rootElement));
+		scrollUp("system");
+		
+		//completeDemographicFilters(rootElement);	
+
+	}
+	
+	
+	private static String resolveMonth(String fromMonth) {
+
+		String output = "";
+		switch (fromMonth){
+			case "01":
+				output = "jan";
+				break;
+			case "02":
+				output = "feb";
+				break;
+			case "03":
+				output = "mar";
+				break;
+			case "04":
+				output = "apr";
+				break;
+			case "05":
+				output = "may";
+				break;
+			case "06":
+				output = "jun";
+				break;
+			case "07":
+				output = "jul";
+				break;
+			case "08":
+				output = "aug";
+				break;
+			case "09":
+				output = "sep";
+				break;
+			case "10":
+				output = "oct";
+				break;
+			case "11":
+				output = "nov";
+				break;
+			case "12":
+				output = "dec";
+				break;
+		}
+		return output;
 	}
 	
 	
@@ -787,7 +836,7 @@ public class PatientExperience {
 		elem.click();// Open dropdown list
 		
 		Select sel = new Select(elem);
-		Thread.sleep(750);
+		Thread.sleep(1250);
 
 		sel.deselectAll();
 
@@ -801,6 +850,8 @@ public class PatientExperience {
 		}
 		WebElement elem2 = driver.findElement(By.id(id));
 		elem2.sendKeys(Keys.RETURN);		// Close dropdown list
+		
+		scrollUp("system");
 	}
 	
 	private void expandCombo(String id) {
@@ -810,7 +861,7 @@ public class PatientExperience {
 	
 	private void scrollUp(String id) {
 		if (!id.equalsIgnoreCase("rpt_type") || !id.equalsIgnoreCase("category")) 
-		((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView();",driver.findElement(By.id("texthead1")));
+		((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView();",driver.findElement(By.id("text1")));
 	}
 
 	public PatientExperience accessAndValidateTab(String attributeFromXML) throws InterruptedException {

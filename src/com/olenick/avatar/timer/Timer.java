@@ -179,4 +179,19 @@ public class Timer {
 		return endDate2.getTime();
 	}
 
+	public void getTimeLog(){
+		System.out.println("Login Time: " + this.loginTime);
+		System.out.println("IC1 Time: " + this.ic1Time);
+		System.out.println("IC2 Time: " + this.ic2Time);
+		System.out.println("Patient Experience Time: " + this.demographicsTime);
+		System.out.println("Overview Time: " + this.overviewTime);
+		System.out.println("Side By side: " + this.sideBySideTime);
+		System.out.println("Side By side Export: " + this.exportSideBySideTime);
+		System.out.println("Composite: " + this.compositeTime);
+		System.out.println("Composite: " + this.exportCompositeTime);
+		System.out.println("Demographics: " + this.demographicsTime);
+		System.out.println("Demographics: " + this.exportDemographicsTime);
+		
+	}
+	
 }
