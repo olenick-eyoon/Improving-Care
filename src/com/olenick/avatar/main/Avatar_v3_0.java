@@ -42,12 +42,11 @@ public class Avatar_v3_0 {
 			public static ReportGenerator reportGenerator;
 			public static Timer timer = new Timer();
 			public static ErrorHandler errorHandler= new ErrorHandler();
-	
+		//Internal Variables
 			private static boolean firstRun = true;
 			public static long startTime = 0, endTime = 0;
-			@SuppressWarnings("unused")
 			private static boolean keepOverview = false;
-		
+	
 	public static void main(String[] args) throws InterruptedException, ICare2PageNotDisplayed, HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, IOException {
 		//Bloque de ejecución
 	    	xmlFile = xmlParser.loadFile(xmlFilePath + args[0]); //Loads xml file from the command line arguments
@@ -66,10 +65,8 @@ public class Avatar_v3_0 {
 					timingOverview();
 					accessAndValidatePatientExperienceTabs(patientDemographicElement);
 					reportGenerator.printLineToFile(buildReportLine(xmlParser.getScenario(patientDemographicElement)));
-					timer.getTimeLog();
 					System.out.println("Scenario " + xmlParser.getScenario(patientDemographicElement) + " completed...");
 					timer.resetTimer();
-					timer.getTimeLog();
 				}
 			} catch (NoSuchElementException e) {
 				handleExceptions(args, true, false, false, e);
@@ -81,7 +78,7 @@ public class Avatar_v3_0 {
 		//Bloque de cierre
 		cleanUpMess();
 	}
-
+	
 	//METHODS
 		private static void handleExceptions(String[] args, boolean NSEEx, boolean SEEx, boolean OEx, Exception e) throws FileNotFoundException, UnsupportedEncodingException, IOException {
 			checkLog(args);
@@ -204,7 +201,7 @@ public class Avatar_v3_0 {
 				reportGenerator.addText(  timer.getLoginTime() + "," + timer.getIc2Time() + ",");
 				firstRun = false;
 			} else {
-				reportGenerator.addText(";;");
+				reportGenerator.addText(",,");
 				keepOverview = false;
 			}
 		}
