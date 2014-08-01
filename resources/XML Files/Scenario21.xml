@@ -1,6 +1,6 @@
 <avatar-icare>
-	<user>performance.test6@avatar-intl.com</user>
-	<password>!Avatar321</password>
+	<user>performance.test6@avatarsolutions.com</user>
+	<password>password</password>
 	<system>131</system>
 	<patient-demographic>
 		<tab>demographics</tab>
@@ -105,7 +105,7 @@
 	</patient-demographic>
 
 	<patient-demographic>
-		<tab>demographics</tab>
+		<tab>overview!demographics</tab>
 		<scenario>21D</scenario>
 		<system>131</system>
 		<organization>658</organization>

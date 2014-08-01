@@ -27,7 +27,12 @@ public class ReportGenerator {
 	}
 
 	public String generateTerminalData() throws UnknownHostException {
-		return getComputerName() + ";" + getDate() + ";";
+		return getComputerName() + "," + getFormattedDate() + ",";
+	}
+	
+	public String getFormattedDate() {
+		return getDate().substring(4, 6) + "-" + getDate().substring(6, 8) + "-" + getDate().substring(0, 4) + "  " 
+				+ getDate().substring(9, 11) + ":" + getDate().substring(11,13) + ":" + getDate().substring(13,15);
 	}
 
 	public String getComputerName() throws UnknownHostException {
@@ -35,34 +40,34 @@ public class ReportGenerator {
 	}
 
 	public void addHeader() {
-		addText("_Computer Name; "
-				+ "_Date and Time; "
-				+ "_Login Page; "
+		addText("_Computer Name, "
+				+ "_Date and Time, "
+				+ "_Login Page, "
 				//+ "_iCare1 Page; "
-				+ "_iCare2 Page; "
-				+ "_Scenario Name; "
-				+ "_Overview; "
-				+ "_Composite; "
-				+ "_Side By Side; "
-				+ "_Demographics; "
-				+ "_Export Composite Tab; "
-				+ "_Export Side By Side; "
-				+ "_Export Composite Tab");
+				+ "_iCare2 Page, "
+				+ "_Scenario Name, "
+				+ "_Overview, "
+				+ "_Composite, "
+				+ "_Side By Side, "
+				+ "_Demographics, "
+				+ "_Export Composite Tab, "
+				+ "_Export Side By Side, "
+				+ "_Export Demographics Tab");
 		
 		writer.println(getContent());
 		builder.setLength(0);
 		
 	}
-
+	
 	public PrintWriter createWriter(String filename) throws FileNotFoundException, UnsupportedEncodingException {
 		writer = new PrintWriter(filename, "UTF-8");
 		return writer;
 	}
-
+	
 	public void wrapUpFile() {
 		if (writer != null) writer.close();
 	}
-
+	
 	public void printLineToFile(String lineToPrint) {
 		addText(lineToPrint);
 		writer.println(getContent());
@@ -75,4 +80,5 @@ public class ReportGenerator {
 	    Date date = new Date();
 	    return dateFormat.format(date);
 	}
+	
 }

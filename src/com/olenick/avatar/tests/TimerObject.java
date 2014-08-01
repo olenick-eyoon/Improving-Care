@@ -2,6 +2,10 @@ package com.olenick.avatar.tests;
 
 import static org.junit.Assert.*;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -81,6 +85,19 @@ public class TimerObject {
 		timer.setSideBySideTime(1000);
 		timer.resetTimer();
 		assertEquals(timer.getCompositeTime()+timer.getDemographicsTime()+timer.getIc1Time()+timer.getIc2Time()+timer.getLoginTime()+timer.getOverviewTime()+timer.getSideBySideTime() , 0);
+	}
+	
+	@Test
+	public void formattingDate() {
+		String input = "20140731_105047";
+		System.out.println(getDate().substring(4, 6) + "-" + getDate().substring(6, 8) + "-" + getDate().substring(0, 4) + "  " 
+				+ getDate().substring(9, 11) + ":" + getDate().substring(11,13) + ":" + getDate().substring(13,15)); 
+	}
+	
+	public String getDate() {
+		DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+	    Date date = new Date();
+	    return dateFormat.format(date);
 	}
 	
 	

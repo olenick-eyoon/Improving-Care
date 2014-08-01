@@ -42,12 +42,11 @@ public class Avatar_v3_0 {
 			public static ReportGenerator reportGenerator;
 			public static Timer timer = new Timer();
 			public static ErrorHandler errorHandler= new ErrorHandler();
-	
+		//Internal Variables
 			private static boolean firstRun = true;
 			public static long startTime = 0, endTime = 0;
-			@SuppressWarnings("unused")
 			private static boolean keepOverview = false;
-		
+	
 	public static void main(String[] args) throws InterruptedException, ICare2PageNotDisplayed, HomeLinkInvalid, PatientExperienceLinkInvalid, SurveyControlCenterLinkInvalid, IOException {
 		//Bloque de ejecución
 	    	xmlFile = xmlParser.loadFile(xmlFilePath + args[0]); //Loads xml file from the command line arguments
@@ -66,6 +65,8 @@ public class Avatar_v3_0 {
 					timingOverview();
 					accessAndValidatePatientExperienceTabs(patientDemographicElement);
 					reportGenerator.printLineToFile(buildReportLine(xmlParser.getScenario(patientDemographicElement)));
+					System.out.println("Scenario " + xmlParser.getScenario(patientDemographicElement) + " completed...");
+					timer.resetTimer();
 				}
 			} catch (NoSuchElementException e) {
 				handleExceptions(args, true, false, false, e);
@@ -77,7 +78,7 @@ public class Avatar_v3_0 {
 		//Bloque de cierre
 		cleanUpMess();
 	}
-
+	
 	//METHODS
 		private static void handleExceptions(String[] args, boolean NSEEx, boolean SEEx, boolean OEx, Exception e) throws FileNotFoundException, UnsupportedEncodingException, IOException {
 			checkLog(args);
@@ -93,14 +94,14 @@ public class Avatar_v3_0 {
 		
 		private static String buildReportLine(String scenario) throws UnknownHostException {
 			String output = "";
-			output = scenario + ";";
-			output += (timer.getOverviewTime() == 0) ? ";" : timer.getOverviewTime() + ";";
-			output += (timer.getCompositeTime() == 0) ? ";" : timer.getCompositeTime() + ";"; 
-			output += (timer.getSideBySideTime() == 0) ? ";" : timer.getSideBySideTime() + ";"; 
-			output += (timer.getDemographicsTime() == 0) ? ";" : timer.getDemographicsTime() + ";"; 
-			output += (timer.getExportCompositeTime() == 0) ? ";" : timer.getExportCompositeTime() + ";"; 
-			output += (timer.getExportDemographicsTime() == 0) ? ";" : timer.getExportDemographicsTime() + ";"; 
-			output += (timer.getExportSideBySideTime() == 0) ? ";" : timer.getExportSideBySideTime() + ";"; 
+			output = scenario + ",";
+			output += (timer.getOverviewTime() == 0) ? "," : timer.getOverviewTime() + ",";
+			output += (timer.getCompositeTime() == 0) ? "," : timer.getCompositeTime() + ","; 
+			output += (timer.getSideBySideTime() == 0) ? "," : timer.getSideBySideTime() + ","; 
+			output += (timer.getDemographicsTime() == 0) ? "," : timer.getDemographicsTime() + ","; 
+			output += (timer.getExportCompositeTime() == 0) ? "," : timer.getExportCompositeTime() + ","; 
+			output += (timer.getExportSideBySideTime() == 0) ? "," : timer.getExportSideBySideTime() + ","; 
+			output += (timer.getExportDemographicsTime() == 0) ? "," : timer.getExportDemographicsTime() + ","; 
 			return output;
 		}
 	
@@ -123,7 +124,7 @@ public class Avatar_v3_0 {
 				accessAndValidateTab(patientDemographicElement, tab);
 				timingPdfExport(tab);
 			}
-			if (keepOverview = false) timer.setOverviewTime(0);
+			if (keepOverview == false) timer.setOverviewTime(0);
 		}
 	
 		private static void timingPdfExport(String tab) throws InterruptedException {
@@ -197,10 +198,10 @@ public class Avatar_v3_0 {
 		private static void firstRunTrigger() throws UnknownHostException {
 			reportGenerator.addText(reportGenerator.generateTerminalData());
 			if (firstRun) {
-				reportGenerator.addText(  timer.getLoginTime() + ";" + timer.getIc2Time() + ";");
+				reportGenerator.addText(  timer.getLoginTime() + "," + timer.getIc2Time() + ",");
 				firstRun = false;
 			} else {
-				reportGenerator.addText(";;;");
+				reportGenerator.addText(",,");
 				keepOverview = false;
 			}
 		}
