@@ -80,8 +80,8 @@
 		
 		<survey-type>Avatar</survey-type>
 		<patient-type>Inpatient!Emergency</patient-type>
-		<factor-composite></factor-composite>
-		<item-question></item-question>
+		<factor-composite>_FOC_NULL</factor-composite>
+		<item-question>_FOC_NULL</item-question>
 		
 		<calculation></calculation>
 		

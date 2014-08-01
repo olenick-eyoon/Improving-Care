@@ -1,5 +1,5 @@
 <avatar-icare>
-	<user>performance.test3@avatarsolutions.com</user>
+	<user>performance.test6@avatarsolutions.com</user>
 	<password>password</password>
 	<system>131</system>
 	<patient-demographic>
@@ -81,7 +81,7 @@
 
 		<survey-type>Avatar</survey-type>
 		<patient-type>OP Behavioral Health!Physician Office</patient-type>
-		<factor-composite>General Reputation!KeyResults</factor-composite>
+		<factor-composite>General Reputation!Key Results</factor-composite>
 		<item-question>_FOC_NULL</item-question>
 		
 		<calculation>2</calculation>
@@ -110,7 +110,7 @@
 		<scenario>23D</scenario>
 		<system>131</system>
 		<organization>657</organization>
-		<department>IP - General Medical!IP - Obstetrics!IP - Transitional Care Unit</department>
+		<department>_FOC_NULL</department>
 		<location>_FOC_NULL</location>
 		
 		<survey-type>HCAHPS</survey-type>

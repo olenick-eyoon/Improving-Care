@@ -1,5 +1,5 @@
 <avatar-icare>
-	<user>performance.test3@avatarsolutions.com</user>
+	<user>performance.test5@avatarsolutions.com</user>
 	<password>password</password>
 	<system>-56</system>
 	<patient-demographic>
@@ -7,7 +7,7 @@
 		<scenario>20A</scenario>
 		<system>-56</system>
 		<organization>_FOC_NULL</organization>
-		<department>Birthing Center</department>
+		<department>364</department>
 		<location>_FOC_NULL</location>
 
 		<survey-type>Avatar</survey-type>
@@ -41,7 +41,7 @@
 		<scenario>20B</scenario>
 		<system>-56</system>
 		<organization>_FOC_NULL</organization>
-		<department>Ambulatory Surgery!Emergency Department!Inpatient Locations</department>
+		<department>362!361!359</department>
 		<location>_FOC_NULL</location>
 
 		<survey-type>HCAHPS</survey-type>
@@ -76,7 +76,7 @@
 		<scenario>20C</scenario>
 		<system>-56</system>
 		<organization>_FOC_NULL</organization>
-		<department>Heart Clinics Northwest!Inpatient Locations!Outpatient Locations</department>
+		<department>6680!359!582</department>
 		<location>_FOC_NULL</location>
 
 		<survey-type>Avatar</survey-type>
@@ -110,7 +110,7 @@
 		<scenario>20D</scenario>
 		<system>-56</system>
 		<organization>56</organization>
-		<department>Inpatient Locations</department>
+		<department>359</department>
 		<location>_FOC_NULL</location>
 
 		<survey-type>Pediatric HCAHPS</survey-type>

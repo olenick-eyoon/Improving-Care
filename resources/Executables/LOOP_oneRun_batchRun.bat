@@ -1,0 +1,30 @@
+:loop
+java -jar "Avatar 3.0.jar" Scenario1.xml
+java -jar "Avatar 3.0.jar" Scenario2.xml
+java -jar "Avatar 3.0.jar" Scenario3.xml
+java -jar "Avatar 3.0.jar" Scenario4.xml
+java -jar "Avatar 3.0.jar" Scenario5.xml
+java -jar "Avatar 3.0.jar" Scenario6.xml
+java -jar "Avatar 3.0.jar" Scenario7.xml
+java -jar "Avatar 3.0.jar" Scenario8.xml
+java -jar "Avatar 3.0.jar" Scenario9.xml
+java -jar "Avatar 3.0.jar" Scenario10.xml
+java -jar "Avatar 3.0.jar" Scenario11.xml
+java -jar "Avatar 3.0.jar" Scenario12.xml
+java -jar "Avatar 3.0.jar" Scenario13.xml
+java -jar "Avatar 3.0.jar" Scenario14.xml
+java -jar "Avatar 3.0.jar" Scenario15.xml
+java -jar "Avatar 3.0.jar" Scenario16.xml
+java -jar "Avatar 3.0.jar" Scenario17.xml
+java -jar "Avatar 3.0.jar" Scenario18.xml
+java -jar "Avatar 3.0.jar" Scenario19.xml
+java -jar "Avatar 3.0.jar" Scenario20.xml
+java -jar "Avatar 3.0.jar" Scenario21.xml
+java -jar "Avatar 3.0.jar" Scenario22.xml
+java -jar "Avatar 3.0.jar" Scenario23.xml
+java -jar "Avatar 3.0.jar" Scenario24.xml
+java -jar "Avatar 3.0.jar" Scenario25.xml
+java -jar "Avatar 3.0.jar" Scenario26.xml
+java -jar "Avatar 3.0.jar" Scenario27.xml
+java -jar "Avatar 3.0.jar" Scenario28.xml
+goto :loop
