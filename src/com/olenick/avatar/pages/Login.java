@@ -28,8 +28,6 @@ public class Login {
 		return this;
 	}
 	
-
-	//TODO: return MainPage object
 	public Landing login(String user, String pass) throws InterruptedException {
 		setUser(user);
 		setPassword(pass);
