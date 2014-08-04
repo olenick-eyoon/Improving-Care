@@ -37,7 +37,7 @@
 	</patient-demographic>
 
 	<patient-demographic>
-		<tab>side-by-side</tab>
+		<tab>side by side</tab>
 		<scenario>23B</scenario>
 		<system>131</system>
 		<organization>661</organization>

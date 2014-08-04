@@ -36,7 +36,7 @@
 	</patient-demographic>
 
 	<patient-demographic>
-		<tab>side-by-side</tab>
+		<tab>side by side</tab>
 		<scenario>12B</scenario>
 		<system>26</system>
 		<organization>254!255</organization>

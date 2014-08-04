@@ -37,7 +37,7 @@
 	</patient-demographic>
 
 	<patient-demographic>
-		<tab>side-by-side</tab>
+		<tab>side by side</tab>
 		<scenario>15B</scenario>
 		<system>-426</system>
 		<organization>_FOC_NULL</organization>

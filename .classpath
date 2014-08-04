@@ -2,8 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/Users/Dario Piriz/dp_References/JAR/jdom-2.0.5.jar" sourcepath="C:/Users/Dario Piriz/dp_References/JAR/jdom-2.0.5-sources.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Dario Piriz/dp_References/JAR/selenium-2.42.2/selenium-java-2.42.2.jar" sourcepath="C:/Users/Dario Piriz/dp_References/JAR/selenium-2.42.2/selenium-java-2.42.2-srcs.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Dario Piriz/dp_References/JAR/selenium-2.42.2/selenium-server-standalone-2.42.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/dpiriz/JARS/jDom-2.0.5/jdom-2.0.5.jar" sourcepath="C:/Users/dpiriz/JARS/jDom-2.0.5/jdom-2.0.5-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/dpiriz/JARS/selenium-2.42.1/selenium-java-2.42.1.jar" sourcepath="C:/Users/dpiriz/JARS/selenium-2.42.1/selenium-java-2.42.1-srcs.jar"/>
+	<classpathentry kind="lib" path="C:/Users/dpiriz/JARS/selenium-server-standalone-2.42.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
