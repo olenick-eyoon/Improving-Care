@@ -1,5 +1,4 @@
 .idea/
-resources/errors/
 target/
 .classpath
 *.iml
