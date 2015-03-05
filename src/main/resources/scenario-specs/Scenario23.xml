@@ -1,0 +1,144 @@
+<avatar-icare>
+    <user>performance.test6@avatarsolutions.com</user>
+    <password>password</password>
+    <system>131</system>
+    <patient-demographic>
+        <tab>demographics</tab>
+        <scenario>23A</scenario>
+        <system>131</system>
+        <organization>644!646</organization>
+        <department>_FOC_NULL</department>
+        <location>_FOC_NULL</location>
+
+        <survey-type>Avatar</survey-type>
+        <patient-type>Inpatient!IP Behavioral Health</patient-type>
+        <factor-composite>Meals!Nursing Care</factor-composite>
+        <item-question>5623!14!2828!6372</item-question>
+
+        <calculation>1</calculation>
+
+        <from-month>05</from-month>
+        <from-year>2014</from-year>
+        <to-month>05</to-month>
+        <to-year>2014</to-year>
+
+        <group-by>1</group-by>
+
+        <patient-admission>_FOC_NULL</patient-admission>
+        <patient-age>_FOC_NULL</patient-age>
+        <patient-discharge>_FOC_NULL</patient-discharge>
+        <patient-gender>_FOC_NULL</patient-gender>
+        <patient-language>_FOC_NULL</patient-language>
+        <patient-length>_FOC_NULL</patient-length>
+        <patient-race>_FOC_NULL</patient-race>
+        <patient-service>_FOC_NULL</patient-service>
+
+        <filter></filter>
+    </patient-demographic>
+
+    <patient-demographic>
+        <tab>side by side</tab>
+        <scenario>23B</scenario>
+        <system>131</system>
+        <organization>661</organization>
+        <department>_FOC_NULL</department>
+        <location>_FOC_NULL</location>
+
+        <survey-type>HCAHPS</survey-type>
+        <patient-type>_FOC_NULL</patient-type>
+        <factor-composite>Pain Management!Responsiveness of Hospital Staff
+        </factor-composite>
+        <item-question>_FOC_NULL</item-question>
+
+        <calculation>2</calculation>
+
+
+        <from-month>01</from-month>
+        <from-year>2014</from-year>
+        <to-month>05</to-month>
+        <to-year>2014</to-year>
+
+        <group-by>2</group-by>
+
+        <patient-admission>_FOC_NULL</patient-admission>
+        <patient-age>_FOC_NULL</patient-age>
+        <patient-discharge>_FOC_NULL</patient-discharge>
+        <patient-gender>_FOC_NULL</patient-gender>
+        <patient-language>_FOC_NULL</patient-language>
+        <patient-length>_FOC_NULL</patient-length>
+        <patient-race>_FOC_NULL</patient-race>
+        <patient-service>_FOC_NULL</patient-service>
+
+        <filter></filter>
+    </patient-demographic>
+
+    <patient-demographic>
+        <tab>composite</tab>
+        <scenario>23C</scenario>
+        <system>131</system>
+        <organization>643</organization>
+        <department>_FOC_NULL</department>
+        <location>_FOC_NULL</location>
+
+        <survey-type>Avatar</survey-type>
+        <patient-type>OP Behavioral Health!Physician Office</patient-type>
+        <factor-composite>General Reputation!Key Results</factor-composite>
+        <item-question>_FOC_NULL</item-question>
+
+        <calculation>2</calculation>
+
+        <from-month>01</from-month>
+        <from-year>2012</from-year>
+        <to-month>07</to-month>
+        <to-year>2014</to-year>
+
+        <group-by>3</group-by>
+
+        <patient-admission>_FOC_NULL</patient-admission>
+        <patient-age>_FOC_NULL</patient-age>
+        <patient-discharge>_FOC_NULL</patient-discharge>
+        <patient-gender>_FOC_NULL</patient-gender>
+        <patient-language>_FOC_NULL</patient-language>
+        <patient-length>_FOC_NULL</patient-length>
+        <patient-race>_FOC_NULL</patient-race>
+        <patient-service>_FOC_NULL</patient-service>
+
+        <filter></filter>
+    </patient-demographic>
+
+    <patient-demographic>
+        <tab>overview!demographics</tab>
+        <scenario>23D</scenario>
+        <system>131</system>
+        <organization>657</organization>
+        <department>_FOC_NULL</department>
+        <location>_FOC_NULL</location>
+
+        <survey-type>HCAHPS</survey-type>
+        <patient-type>HCAHPS</patient-type>
+        <factor-composite>Care Transition Measure!Willingness to Recommend
+        </factor-composite>
+        <item-question>24!22</item-question>
+
+        <calculation>2</calculation>
+
+        <from-month>01</from-month>
+        <from-year>2010</from-year>
+        <to-month>12</to-month>
+        <to-year>2013</to-year>
+
+        <group-by>4</group-by>
+
+        <patient-admission>_FOC_NULL</patient-admission>
+        <patient-age>_FOC_NULL</patient-age>
+        <patient-discharge>_FOC_NULL</patient-discharge>
+        <patient-gender>_FOC_NULL</patient-gender>
+        <patient-language>_FOC_NULL</patient-language>
+        <patient-length>_FOC_NULL</patient-length>
+        <patient-race>_FOC_NULL</patient-race>
+        <patient-service>_FOC_NULL</patient-service>
+
+        <filter></filter>
+    </patient-demographic>
+
+</avatar-icare>

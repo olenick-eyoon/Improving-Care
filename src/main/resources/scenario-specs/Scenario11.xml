@@ -1,0 +1,141 @@
+<avatar-icare>
+
+    <user>performance.test3@avatarsolutions.com</user>
+    <password>password</password>
+    <system>26</system>
+    <patient-demographic>
+        <tab>demographics</tab>
+        <scenario>11A</scenario>
+        <system>26</system>
+        <organization>251</organization>
+        <department>1618</department>
+        <location>83634</location>
+
+        <survey-type>Avatar</survey-type>
+        <patient-type>_FOC_NULL</patient-type>
+        <factor-composite>Nuclear Medicine</factor-composite>
+        <item-question>508!510</item-question>
+
+        <calculation>1</calculation>
+
+        <from-month>01</from-month>
+        <from-year>2011</from-year>
+        <to-month>04</to-month>
+        <to-year>2014</to-year>
+        <group-by>1</group-by>
+
+        <patient-admission>_FOC_NULL</patient-admission>
+        <patient-age>_FOC_NULL</patient-age>
+        <patient-discharge>_FOC_NULL</patient-discharge>
+        <patient-gender>_FOC_NULL</patient-gender>
+        <patient-language>_FOC_NULL</patient-language>
+        <patient-length>_FOC_NULL</patient-length>
+        <patient-race>_FOC_NULL</patient-race>
+        <patient-service>_FOC_NULL</patient-service>
+
+        <filter></filter>
+    </patient-demographic>
+
+    <patient-demographic>
+        <tab>side by side</tab>
+        <scenario>11B</scenario>
+        <system>26</system>
+        <organization>634!253</organization>
+        <department>4200</department>
+        <location>45951</location>
+
+        <survey-type>HCAHPS</survey-type>
+        <patient-type>_FOC_NULL</patient-type>
+        <factor-composite>Communication About Medications</factor-composite>
+        <item-question>17</item-question>
+
+        <calculation>2</calculation>
+
+        <from-month>03</from-month>
+        <from-year>2012</from-year>
+        <to-month>07</to-month>
+        <to-year>2014</to-year>
+
+        <group-by>2</group-by>
+
+        <patient-admission>_FOC_NULL</patient-admission>
+        <patient-age>_FOC_NULL</patient-age>
+        <patient-discharge>_FOC_NULL</patient-discharge>
+        <patient-gender>_FOC_NULL</patient-gender>
+        <patient-language>_FOC_NULL</patient-language>
+        <patient-length>_FOC_NULL</patient-length>
+        <patient-race>_FOC_NULL</patient-race>
+        <patient-service>_FOC_NULL</patient-service>
+
+        <filter></filter>
+    </patient-demographic>
+
+    <patient-demographic>
+        <tab>composite</tab>
+        <scenario>11C</scenario>
+        <system>26</system>
+        <organization>251</organization>
+        <department>1305!1619</department>
+        <location>_FOC_NULL</location>
+
+        <survey-type>Avatar</survey-type>
+        <patient-type>Ambulatory Surgery</patient-type>
+        <factor-composite>Admissions/Registration</factor-composite>
+        <item-question>_FOC_NULL</item-question>
+
+        <calculation>2</calculation>
+
+        <from-month>01</from-month>
+        <from-year>2009</from-year>
+        <to-month>12</to-month>
+        <to-year>2012</to-year>
+
+        <group-by>3</group-by>
+
+        <patient-admission>_FOC_NULL</patient-admission>
+        <patient-age>_FOC_NULL</patient-age>
+        <patient-discharge>_FOC_NULL</patient-discharge>
+        <patient-gender>_FOC_NULL</patient-gender>
+        <patient-language>_FOC_NULL</patient-language>
+        <patient-length>_FOC_NULL</patient-length>
+        <patient-race>_FOC_NULL</patient-race>
+        <patient-service>_FOC_NULL</patient-service>
+
+        <filter></filter>
+    </patient-demographic>
+
+    <patient-demographic>
+        <tab>overview!demographics</tab>
+        <scenario>11D</scenario>
+        <system>26</system>
+        <organization>251!252!253</organization>
+        <department>1305!1307!1309</department>
+        <location>8759</location>
+
+        <survey-type>HCAHPS</survey-type>
+        <patient-type>_FOC_NULL</patient-type>
+        <factor-composite>Responsiveness of Hospital Staff</factor-composite>
+        <item-question>_FOC_NULL</item-question>
+
+        <calculation>2</calculation>
+
+        <from-month>01</from-month>
+        <from-year>2013</from-year>
+        <to-month>12</to-month>
+        <to-year>2014</to-year>
+
+        <group-by>4</group-by>
+
+        <patient-admission>_FOC_NULL</patient-admission>
+        <patient-age>_FOC_NULL</patient-age>
+        <patient-discharge>_FOC_NULL</patient-discharge>
+        <patient-gender>_FOC_NULL</patient-gender>
+        <patient-language>_FOC_NULL</patient-language>
+        <patient-length>_FOC_NULL</patient-length>
+        <patient-race>_FOC_NULL</patient-race>
+        <patient-service>_FOC_NULL</patient-service>
+
+        <filter></filter>
+
+    </patient-demographic>
+</avatar-icare>

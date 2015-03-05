@@ -1,0 +1,141 @@
+<avatar-icare>
+    <user>performance.test5@avatarsolutions.com</user>
+    <password>password</password>
+    <system>-56</system>
+    <patient-demographic>
+        <tab>demographics</tab>
+        <scenario>19A</scenario>
+        <system>-56</system>
+        <organization>56</organization>
+        <department>582</department>
+        <location>4319</location>
+
+        <survey-type>Avatar</survey-type>
+        <patient-type>Outpatient</patient-type>
+        <factor-composite>Key Results</factor-composite>
+        <item-question>188</item-question>
+
+        <calculation>1</calculation>
+
+        <from-month>01</from-month>
+        <from-year>2013</from-year>
+        <to-month>07</to-month>
+        <to-year>2013</to-year>
+        <group-by>1</group-by>
+
+        <patient-admission>_FOC_NULL</patient-admission>
+        <patient-age>_FOC_NULL</patient-age>
+        <patient-discharge>_FOC_NULL</patient-discharge>
+        <patient-gender>_FOC_NULL</patient-gender>
+        <patient-language>_FOC_NULL</patient-language>
+        <patient-length>_FOC_NULL</patient-length>
+        <patient-race>_FOC_NULL</patient-race>
+        <patient-service>_FOC_NULL</patient-service>
+
+        <filter>Gender</filter>
+
+    </patient-demographic>
+
+    <patient-demographic>
+        <tab>side by side</tab>
+        <scenario>19B</scenario>
+        <system>-56</system>
+        <organization>_FOC_NULL</organization>
+        <department>_FOC_NULL</department>
+        <location>_FOC_NULL</location>
+
+        <survey-type>Pediatric HCAHPS</survey-type>
+        <patient-type>Pediatric HCAHPS</patient-type>
+        <factor-composite>Child's Care</factor-composite>
+        <item-question>32</item-question>
+
+        <calculation>2</calculation>
+
+        <from-month>02</from-month>
+        <from-year>2013</from-year>
+        <to-month>08</to-month>
+        <to-year>2013</to-year>
+        <group-by>1</group-by>
+
+        <patient-admission>_FOC_NULL</patient-admission>
+        <patient-age>_FOC_NULL</patient-age>
+        <patient-discharge>_FOC_NULL</patient-discharge>
+        <patient-gender>_FOC_NULL</patient-gender>
+        <patient-language>_FOC_NULL</patient-language>
+        <patient-length>_FOC_NULL</patient-length>
+        <patient-race>_FOC_NULL</patient-race>
+        <patient-service>_FOC_NULL</patient-service>
+
+        <filter>Discharge</filter>
+
+    </patient-demographic>
+
+    <patient-demographic>
+        <tab>composite</tab>
+        <scenario>19C</scenario>
+        <system>-56</system>
+        <organization>_FOC_NULL</organization>
+        <department>_FOC_NULL</department>
+        <location>_FOC_NULL</location>
+
+        <survey-type>HCAHPS</survey-type>
+        <patient-type>HCAHPS</patient-type>
+        <factor-composite>Willingness to Recommend</factor-composite>
+        <item-question>_FOC_NULL</item-question>
+
+        <calculation>2</calculation>
+
+        <from-month>01</from-month>
+        <from-year>2011</from-year>
+        <to-month>08</to-month>
+        <to-year>2011</to-year>
+        <group-by>1</group-by>
+
+        <patient-admission>_FOC_NULL</patient-admission>
+        <patient-age>_FOC_NULL</patient-age>
+        <patient-discharge>_FOC_NULL</patient-discharge>
+        <patient-gender>_FOC_NULL</patient-gender>
+        <patient-language>_FOC_NULL</patient-language>
+        <patient-length>_FOC_NULL</patient-length>
+        <patient-race>_FOC_NULL</patient-race>
+        <patient-service>_FOC_NULL</patient-service>
+
+        <filter>Age</filter>
+
+    </patient-demographic>
+
+    <patient-demographic>
+        <tab>overview!demographics</tab>
+        <scenario>19D</scenario>
+        <system>-56</system>
+        <organization>_FOC_NULL</organization>
+        <department>_FOC_NULL</department>
+        <location>_FOC_NULL</location>
+
+        <survey-type>CG-CAHPS</survey-type>
+        <patient-type>_FOC_NULL</patient-type>
+        <factor-composite>Overall Provider Rating</factor-composite>
+        <item-question>_FOC_NULL</item-question>
+
+        <calculation>2</calculation>
+
+        <from-month>01</from-month>
+        <from-year>2009</from-year>
+        <to-month>08</to-month>
+        <to-year>2013</to-year>
+        <group-by>1</group-by>
+
+        <patient-admission>_FOC_NULL</patient-admission>
+        <patient-age>_FOC_NULL</patient-age>
+        <patient-discharge>_FOC_NULL</patient-discharge>
+        <patient-gender>_FOC_NULL</patient-gender>
+        <patient-language>_FOC_NULL</patient-language>
+        <patient-length>_FOC_NULL</patient-length>
+        <patient-race>_FOC_NULL</patient-race>
+        <patient-service>_FOC_NULL</patient-service>
+
+        <filter>Length</filter>
+
+    </patient-demographic>
+
+</avatar-icare>

@@ -1,0 +1,19 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <!-- In progress... -->
+
+    <xsd:attribute name="name" type="xsd:string"/>
+    <xsd:attribute name="user" type="xsd:string"/>
+    <xsd:attribute name="password" type="xsd:string"/>
+    <xsd:complexType name="scenario">
+        <xsd:attribute name="name" ref="name" use="required"/>
+        <xsd:attribute name="user" ref="user" use="required"/>
+        <xsd:attribute name="password" ref="password" use="required"/>
+    </xsd:complexType>
+    <xsd:element name="feature">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="scenario" type="scenario"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>

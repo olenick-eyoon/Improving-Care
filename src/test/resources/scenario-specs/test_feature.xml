@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature>
+    <scenario name="1A" user="performance.test4@avatarsolutions.com"
+              password="pass">
+        <report-filter>
+            <system>78</system>
+            <organizations>
+                <organization>541</organization>
+                <organization>546</organization>
+            </organizations>
+            <departments>
+                <department>_FOC_NULL</department>
+            </departments>
+            <locations>
+                <location>_FOC_NULL</location>
+            </locations>
+
+            <survey-type>HCAHPS</survey-type>
+            <patient-types>
+                <patient-type>HCAHPS</patient-type>
+            </patient-types>
+            <factor-composites>
+                <factor-composite>_FOC_NULL</factor-composite>
+            </factor-composites>
+            <item-questions>
+                <item-question>_FOC_NULL</item-question>
+            </item-questions>
+
+            <from month="01" year="2012"/>
+            <to month="08" year="2013"/>
+            <group-by>MONTHLY</group-by>
+
+            <calculation>TOP_BOX</calculation>
+
+            <demographics>
+                <admission-sources>
+                    <admission-source>_FOC_NULL</admission-source>
+                </admission-sources>
+                <ages>
+                    <age>_FOC_NULL</age>
+                </ages>
+                <discharge-statuses>
+                    <discharge-status>_FOC_NULL</discharge-status>
+                </discharge-statuses>
+                <genders>
+                    <gender>_FOC_NULL</gender>
+                </genders>
+                <languages>
+                    <language>_FOC_NULL</language>
+                </languages>
+                <lengths-of-stay>
+                    <length-of-stay>_FOC_NULL</length-of-stay>
+                </lengths-of-stay>
+                <races>
+                    <race>_FOC_NULL</race>
+                </races>
+                <service-lines>
+                    <service-line>_FOC_NULL</service-line>
+                </service-lines>
+            </demographics>
+
+            <tab-specs>
+                <tab-spec tab="DEMOGRAPHICS" filter="Gender"/>
+                <tab-spec tab="OVERVIEW"/>
+            </tab-specs>
+        </report-filter>
+    </scenario>
+    <scenario name="my scenario" user="a user" password="some password">
+    </scenario>
+</feature>
