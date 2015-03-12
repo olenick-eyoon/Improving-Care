@@ -1,5 +1,7 @@
 package com.olenick.avatar.main;
 
+import java.net.URL;
+
 import org.junit.Test;
 
 import com.olenick.avatar.SeleniumTest;
@@ -21,6 +23,11 @@ public class FeatureExecutorIntegrationTest extends SeleniumTest {
         FeatureTimer featureTimer = new FeatureTimer(REPORT_FILENAME, HOSTNAME);
         FeatureExecutor featureExecutor = new FeatureExecutor(this.driver);
         featureExecutor.addListeners(featureTimer);
-        featureExecutor.execute(URL_ROOT_DEV, SCENARIO_SPECS_XML_FILENAME);
+        URL xmlFileURL = this.getClass().getClassLoader()
+                .getResource(SCENARIO_SPECS_XML_FILENAME);
+        if (xmlFileURL == null) {
+            throw new IllegalArgumentException("XML file could not be opened");
+        }
+        featureExecutor.execute(URL_ROOT_DEV, xmlFileURL);
     }
 }

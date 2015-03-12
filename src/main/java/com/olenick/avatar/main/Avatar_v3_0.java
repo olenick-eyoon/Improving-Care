@@ -1,6 +1,78 @@
 package com.olenick.avatar.main;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import org.openqa.selenium.firefox.FirefoxDriver;
+
+import com.olenick.avatar.exceptions.FeatureExecutionException;
+import com.olenick.avatar.exceptions.FeatureExecutorListenerException;
+import com.olenick.avatar.reports.FeatureTimer;
+import com.olenick.avatar.web.ExtendedRemoteWebDriver;
+
 public class Avatar_v3_0 {
+    private static final String HOSTNAME = "my-hostname";
+    private static final String URL_ROOT_DEV = "http://172.16.20.210:8080/ibi_apps";
+    private static final String XML_FILE_PATH = "scenario-specs/";
+    private static int RV_NO_XML_FILENAME = -1;
+
+    public static void main(String[] args) throws FeatureExecutionException,
+            FeatureExecutorListenerException, MalformedURLException {
+        if (args.length < 1 || args[0] == null) {
+            printUsage(RV_NO_XML_FILENAME);
+        }
+
+        String xmlFilename = args[0];
+        URL xmlFileURL = getXMLFileURL(xmlFilename);
+
+        boolean finishedWithException = false;
+        ExtendedRemoteWebDriver driver = new ExtendedRemoteWebDriver(
+                new FirefoxDriver());
+        try {
+            FeatureTimer featureTimer = new FeatureTimer(xmlFilename + ".csv",
+                    HOSTNAME);
+            FeatureExecutor featureExecutor = new FeatureExecutor(driver);
+            featureExecutor.addListeners(featureTimer);
+            featureExecutor.execute(URL_ROOT_DEV, xmlFileURL);
+        } catch (FeatureExecutionException | FeatureExecutorListenerException
+                | RuntimeException exception) {
+            finishedWithException = true;
+            throw exception;
+        } finally {
+            try {
+                driver.quit();
+            } catch (RuntimeException exception) {
+                if (!finishedWithException) {
+                    throw exception;
+                }
+            }
+        }
+    }
+
+    private static void printUsage(int returnValue) {
+        System.err
+                .println("Usage: java -jar {THIS_JAR_NAME.jar} {FEATURE_XML_FILENAME}");
+        System.exit(returnValue);
+    }
+
+    private static URL getXMLFileURL(final String xmlFilename)
+            throws MalformedURLException {
+        URL xmlFileURL;
+        File xmlFile = new File(xmlFilename);
+        if (xmlFile.exists()) {
+            xmlFileURL = xmlFile.toURI().toURL();
+        } else {
+            xmlFileURL = Avatar_v3_0.class.getClassLoader().getResource(
+                    XML_FILE_PATH + xmlFilename);
+            if (xmlFileURL == null) {
+                throw new IllegalArgumentException(
+                        "XML file could not be opened");
+            }
+        }
+        return xmlFileURL;
+    }
+
     /*
      * // XML Declarations private static final String xmlFilePath =
      * "scenario-specs/"; // Webdriver Declarations public static WebDriver

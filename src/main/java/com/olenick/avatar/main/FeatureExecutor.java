@@ -47,11 +47,11 @@ public class FeatureExecutor {
         this.listeners.addAll(Arrays.asList(listeners));
     }
 
-    public void execute(final String urlRoot, final String xmlFilename)
+    public void execute(final String urlRoot, final URL xmlFileURL)
             throws FeatureExecutionException {
         PatientExperienceFeature feature;
         try {
-            feature = this.getFeature(xmlFilename);
+            feature = this.getFeature(xmlFileURL);
         } catch (IllegalArgumentException | ParseException exception) {
             throw new FeatureExecutionException("Error while parsing XML file",
                     exception);
@@ -124,13 +124,8 @@ public class FeatureExecutor {
         this.notifyListenersOrFailScenario(FeatureExecutorEvent.SCENARIO_ENDED);
     }
 
-    protected PatientExperienceFeature getFeature(final String xmlFilename)
+    protected PatientExperienceFeature getFeature(final URL xmlFileURL)
             throws ParseException {
-        URL xmlFileURL = this.getClass().getClassLoader()
-                .getResource(xmlFilename);
-        if (xmlFileURL == null) {
-            throw new IllegalArgumentException("XML file could not be opened");
-        }
         log.debug("Feature XML file: {}", xmlFileURL);
         return new XMLPatientExperienceFeatureParser().parse(xmlFileURL);
     }

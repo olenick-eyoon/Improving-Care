@@ -411,7 +411,8 @@ public class AvatarMultiselectWebElement extends ExtendedSelectWebElement {
     @Override
     protected Select safeGetSelect() {
         if (this.select == null) {
-            this.select = new AvatarSelect(this.safeGetUnderlyingWebElement());
+            this.select = new AvatarSelect(this.safeGetUnderlyingWebElement(),
+                    this);
         }
         return this.select;
     }
@@ -435,10 +436,28 @@ public class AvatarMultiselectWebElement extends ExtendedSelectWebElement {
 
     protected static class AvatarSelect extends Select {
         private boolean multiple = false;
+        private AvatarMultiselectWebElement superElement;
 
-        public AvatarSelect(final WebElement element) {
+        public AvatarSelect(final WebElement element,
+                final AvatarMultiselectWebElement superElement) {
             super(element);
             this.multiple = element.getAttribute(ATTRIBUTE_NAME_MULTI_SELECT) != null;
+            this.superElement = superElement;
+        }
+
+        public void deselectAll() {
+            if (!isMultiple()) {
+                throw new UnsupportedOperationException(
+                        "You may only deselect all options of a multi-select");
+            }
+
+            for (WebElement option : getOptions()) {
+                if (option.isSelected()) {
+                    this.superElement.scrollUp();
+                    this.superElement.expandSelect();
+                    option.click();
+                }
+            }
         }
 
         public boolean isMultiple() {

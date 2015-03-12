@@ -1,0 +1,236 @@
+<?xml version="1.0" ?>
+<feature>
+    <scenario name="21A" password="password" user="performance.test6@avatarsolutions.com">
+        <report-filter>
+            <system>131</system>
+            <organizations>
+                <organization>_FOC_NULL</organization>
+            </organizations>
+            <departments>
+                <department>_FOC_NULL</department>
+            </departments>
+            <locations>
+                <location>_FOC_NULL</location>
+            </locations>
+            <survey-type>HCAHPS</survey-type>
+            <patient-types>
+                <patient-type>HCAHPS</patient-type>
+            </patient-types>
+            <factor-composites>
+                <factor-composite>_FOC_NULL</factor-composite>
+            </factor-composites>
+            <item-questions>
+                <item-question>_FOC_NULL</item-question>
+            </item-questions>
+            <from month="02" year="2013"/>
+            <to month="08" year="2013"/>
+            <group-by>MONTHLY</group-by>
+            <calculation>TOP_BOX</calculation>
+            <demographics>
+                <admission-sources>
+                    <admission-sources>_FOC_NULL</admission-sources>
+                </admission-sources>
+                <ages>
+                    <ages>_FOC_NULL</ages>
+                </ages>
+                <discharge-statuses>
+                    <discharge-statuses>_FOC_NULL</discharge-statuses>
+                </discharge-statuses>
+                <genders>
+                    <genders>_FOC_NULL</genders>
+                </genders>
+                <languages>
+                    <languages>_FOC_NULL</languages>
+                </languages>
+                <lengths-of-stay>
+                    <lengths-of-stay>_FOC_NULL</lengths-of-stay>
+                </lengths-of-stay>
+                <races>
+                    <races>_FOC_NULL</races>
+                </races>
+                <service-lines>
+                    <service-lines>_FOC_NULL</service-lines>
+                </service-lines>
+            </demographics>
+            <tab-specs>
+                <tab-spec filter="Gender" tab="DEMOGRAPHICS"/>
+            </tab-specs>
+        </report-filter>
+    </scenario>
+    <scenario name="21B" password="password" user="performance.test6@avatarsolutions.com">
+        <report-filter>
+            <system>131</system>
+            <organizations>
+                <organization>643</organization>
+            </organizations>
+            <departments>
+                <department>_FOC_NULL</department>
+            </departments>
+            <locations>
+                <location>_FOC_NULL</location>
+            </locations>
+            <survey-type>Avatar</survey-type>
+            <patient-types>
+                <patient-type>Physician Office</patient-type>
+            </patient-types>
+            <factor-composites>
+                <factor-composite>_FOC_NULL</factor-composite>
+            </factor-composites>
+            <item-questions>
+                <item-question>_FOC_NULL</item-question>
+            </item-questions>
+            <from month="01" year="2009"/>
+            <to month="02" year="2013"/>
+            <group-by>MONTHLY</group-by>
+            <calculation>MEAN</calculation>
+            <demographics>
+                <admission-sources>
+                    <admission-sources>_FOC_NULL</admission-sources>
+                </admission-sources>
+                <ages>
+                    <ages>_FOC_NULL</ages>
+                </ages>
+                <discharge-statuses>
+                    <discharge-statuses>_FOC_NULL</discharge-statuses>
+                </discharge-statuses>
+                <genders>
+                    <genders>_FOC_NULL</genders>
+                </genders>
+                <languages>
+                    <languages>_FOC_NULL</languages>
+                </languages>
+                <lengths-of-stay>
+                    <lengths-of-stay>_FOC_NULL</lengths-of-stay>
+                </lengths-of-stay>
+                <races>
+                    <races>_FOC_NULL</races>
+                </races>
+                <service-lines>
+                    <service-lines>_FOC_NULL</service-lines>
+                </service-lines>
+            </demographics>
+            <tab-specs>
+                <tab-spec filter="Language" tab="SIDE_BY_SIDE"/>
+            </tab-specs>
+        </report-filter>
+    </scenario>
+    <scenario name="21C" password="password" user="performance.test6@avatarsolutions.com">
+        <report-filter>
+            <system>131</system>
+            <organizations>
+                <organization>_FOC_NULL</organization>
+            </organizations>
+            <departments>
+                <department>_FOC_NULL</department>
+            </departments>
+            <locations>
+                <location>_FOC_NULL</location>
+            </locations>
+            <survey-type>Avatar</survey-type>
+            <patient-types>
+                <patient-type>Inpatient</patient-type>
+                <patient-type>Emergency</patient-type>
+            </patient-types>
+            <factor-composites>
+                <factor-composite>Expectations</factor-composite>
+            </factor-composites>
+            <item-questions>
+                <item-question>_FOC_NULL</item-question>
+            </item-questions>
+            <from month="01" year="2011"/>
+            <to month="08" year="2013"/>
+            <group-by>MONTHLY</group-by>
+            <calculation>MEAN</calculation>
+            <demographics>
+                <admission-sources>
+                    <admission-sources>_FOC_NULL</admission-sources>
+                </admission-sources>
+                <ages>
+                    <ages>_FOC_NULL</ages>
+                </ages>
+                <discharge-statuses>
+                    <discharge-statuses>_FOC_NULL</discharge-statuses>
+                </discharge-statuses>
+                <genders>
+                    <genders>_FOC_NULL</genders>
+                </genders>
+                <languages>
+                    <languages>_FOC_NULL</languages>
+                </languages>
+                <lengths-of-stay>
+                    <lengths-of-stay>_FOC_NULL</lengths-of-stay>
+                </lengths-of-stay>
+                <races>
+                    <races>_FOC_NULL</races>
+                </races>
+                <service-lines>
+                    <service-lines>_FOC_NULL</service-lines>
+                </service-lines>
+            </demographics>
+            <tab-specs>
+                <tab-spec filter="Admission" tab="COMPOSITE"/>
+            </tab-specs>
+        </report-filter>
+    </scenario>
+    <scenario name="21D" password="password" user="performance.test6@avatarsolutions.com">
+        <report-filter>
+            <system>131</system>
+            <organizations>
+                <organization>658</organization>
+            </organizations>
+            <departments>
+                <department>_FOC_NULL</department>
+            </departments>
+            <locations>
+                <location>_FOC_NULL</location>
+            </locations>
+            <survey-type>HCAHPS</survey-type>
+            <patient-types>
+                <patient-type>_FOC_NULL</patient-type>
+            </patient-types>
+            <factor-composites>
+                <factor-composite>Communication About Medications</factor-composite>
+                <factor-composite>Willingness to
+            Recommend
+        </factor-composite>
+            </factor-composites>
+            <item-questions>
+                <item-question>22</item-question>
+            </item-questions>
+            <from month="03" year="2013"/>
+            <to month="07" year="2013"/>
+            <group-by>MONTHLY</group-by>
+            <calculation>TOP_BOX</calculation>
+            <demographics>
+                <admission-sources>
+                    <admission-sources>_FOC_NULL</admission-sources>
+                </admission-sources>
+                <ages>
+                    <ages>_FOC_NULL</ages>
+                </ages>
+                <discharge-statuses>
+                    <discharge-statuses>_FOC_NULL</discharge-statuses>
+                </discharge-statuses>
+                <genders>
+                    <genders>_FOC_NULL</genders>
+                </genders>
+                <languages>
+                    <languages>_FOC_NULL</languages>
+                </languages>
+                <lengths-of-stay>
+                    <lengths-of-stay>_FOC_NULL</lengths-of-stay>
+                </lengths-of-stay>
+                <races>
+                    <races>_FOC_NULL</races>
+                </races>
+                <service-lines>
+                    <service-lines>_FOC_NULL</service-lines>
+                </service-lines>
+            </demographics>
+            <tab-specs>
+                <tab-spec filter="Age" tab="OVERVIEW"/>
+                <tab-spec filter="Age" tab="DEMOGRAPHICS"/>
+            </tab-specs>
+        </report-filter>
+    </scenario>
+</feature>
