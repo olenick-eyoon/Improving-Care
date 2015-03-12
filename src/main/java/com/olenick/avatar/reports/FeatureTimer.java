@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.EnumMap;
 
+import com.olenick.avatar.uses.PatientExperienceFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,14 +56,28 @@ public class FeatureTimer extends FeatureExecutorListener {
 
     @Override
     public void featureStarted() throws FeatureExecutorListenerException {
+        log.debug("Feature started");
         this.initializeWriter();
         this.writeHeader();
     }
 
     @Override
     public void featureEnded() throws FeatureExecutorListenerException {
+        log.debug("Feature ended");
         this.writer.flush();
+        this.clearScenario();
         this.writer.close();
+        this.writer = null;
+    }
+
+    @Override
+    public void featureFailed(PatientExperienceFeature feature, String message,
+                              Throwable cause) throws FeatureExecutorListenerException {
+        log.debug("Feature failed");
+        this.writer.flush();
+        this.clearScenario();
+        this.writer.close();
+        this.writer = null;
     }
 
     @Override
@@ -259,5 +274,14 @@ public class FeatureTimer extends FeatureExecutorListener {
         }
         this.writer.println();
         this.writer.flush();
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        if (this.writer != null) {
+            this.writer.flush();
+            this.writer.close();
+        }
+        super.finalize();
     }
 }

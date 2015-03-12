@@ -8,6 +8,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 
 import com.olenick.avatar.exceptions.FeatureExecutionException;
 import com.olenick.avatar.exceptions.FeatureExecutorListenerException;
+import com.olenick.avatar.reports.ErrorHandler;
 import com.olenick.avatar.reports.FeatureTimer;
 import com.olenick.avatar.web.ExtendedRemoteWebDriver;
 
@@ -15,6 +16,8 @@ public class Avatar_v3_0 {
     private static final String HOSTNAME = "my-hostname";
     private static final String URL_ROOT_DEV = "http://172.16.20.210:8080/ibi_apps";
     private static final String XML_FILE_PATH = "scenario-specs/";
+    private static final String DIR_ERROR_LOGS = "";
+    private static final String DIR_SCREENSHOTS = "";
     private static int RV_NO_XML_FILENAME = -1;
 
     public static void main(String[] args) throws FeatureExecutionException,
@@ -32,8 +35,10 @@ public class Avatar_v3_0 {
         try {
             FeatureTimer featureTimer = new FeatureTimer(xmlFilename + ".csv",
                     HOSTNAME);
+            ErrorHandler errorHandler = new ErrorHandler(driver,
+                    DIR_ERROR_LOGS, DIR_SCREENSHOTS, xmlFilename);
             FeatureExecutor featureExecutor = new FeatureExecutor(driver);
-            featureExecutor.addListeners(featureTimer);
+            featureExecutor.addListeners(featureTimer, errorHandler);
             featureExecutor.execute(URL_ROOT_DEV, xmlFileURL);
         } catch (FeatureExecutionException | FeatureExecutorListenerException
                 | RuntimeException exception) {

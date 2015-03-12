@@ -2,177 +2,154 @@ package com.olenick.avatar.reports;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.olenick.avatar.exceptions.FeatureExecutorListenerException;
+import com.olenick.avatar.uses.PatientExperienceFeature;
+import com.olenick.avatar.uses.PatientExperienceScenario;
+import com.olenick.avatar.web.ExtendedRemoteWebDriver;
 
 /**
- * TODO: Port functionality.
+ * Error Handler listener of FeatureExecutor.
  */
-public class ErrorHandler {
+public class ErrorHandler extends FeatureExecutorListener {
+    private static final Logger log = LoggerFactory
+            .getLogger(ErrorHandler.class);
 
-    File outputScreenshot;
+    private SimpleDateFormat filenameDateFormat = new SimpleDateFormat(
+            "YYYYDDMM-hhmmss-S");
+    private SimpleDateFormat logDateFormat = new SimpleDateFormat(
+            "YYYY-DD-MM hh:mm:ss.S");
 
-    String parentFolder = "", screenshotsFolder = "", logsFolder = "";
-    String computerName, scenario, errorTimeStamp;
-    PrintWriter errorLog;
+    private String errorLogsDir, errorLogFilename, screenshotsDir;
+    private String scenarioName;
+    private ExtendedRemoteWebDriver driver;
+    private PrintWriter writer;
 
-    /**
-     * @return the computerName
-     */
-    public String getComputerName() {
-        return computerName;
+    public ErrorHandler(ExtendedRemoteWebDriver driver, String errorLogsDir,
+            String screenshotsDir, String featureFilename) {
+        this.driver = driver;
+        this.errorLogsDir = errorLogsDir;
+        this.screenshotsDir = screenshotsDir;
+        this.initErrorLogFilename(featureFilename);
     }
 
-    /**
-     * @param computerName the computerName to set
-     */
-    public ErrorHandler setComputerName(String computerName) {
-        this.computerName = computerName;
-        return this;
+    @Override
+    public void scenarioStarted(String scenarioName)
+            throws FeatureExecutorListenerException {
+        this.scenarioName = scenarioName;
     }
 
-    /**
-     * @return the scenario
-     */
-    public String getScenario() {
-        return scenario;
+    @Override
+    public void scenarioFailed(PatientExperienceScenario scenario,
+            String message, Throwable cause)
+            throws FeatureExecutorListenerException {
+        this.logEvent("SCENARIO FAILED", cause);
     }
 
-    /**
-     * @param scenario the scenario to set
-     */
-    public ErrorHandler setScenario(String scenario) {
-        this.scenario = scenario;
-        return this;
+    @Override
+    public void featureEnded() throws FeatureExecutorListenerException {
+        this.closeWriter();
     }
 
-    /**
-     * @return the errorTimeStamp
-     */
-    public String getErrorTimeStamp() {
-        return errorTimeStamp;
+    @Override
+    public void featureFailed(PatientExperienceFeature feature, String message,
+            Throwable cause) throws FeatureExecutorListenerException {
+        this.logEvent("WARNING", cause);
+        this.closeWriter();
     }
 
-    /**
-     * @param errorTimeStamp the errorTimeStamp to set
-     */
-    public ErrorHandler setErrorTimeStamp(String errorTimeStamp) {
-        this.errorTimeStamp = errorTimeStamp;
-        return this;
+    @Override
+    public void warning(PatientExperienceScenario scenario, String message,
+            Throwable cause) throws FeatureExecutorListenerException {
+        this.logEvent("WARNING", cause);
     }
 
-    /**
-     * @return the errorLog
-     */
-    public PrintWriter getErrorLog() {
-        return errorLog;
-    }
-
-    /**
-     * @return the screenshotsFolder
-     */
-    public String getScreenshotsFolder() {
-        return screenshotsFolder;
-    }
-
-    /**
-     * @param screenshotsFolder the screenshotsFolder to set
-     */
-    public ErrorHandler setScreenshotsFolder(String screenshotsFolder) {
-        this.screenshotsFolder = screenshotsFolder;
-        return this;
-    }
-
-    /**
-     * @return the logsFolder
-     */
-    public String getLogsFolder() {
-        return logsFolder;
-    }
-
-    /**
-     * @param logsFolder the logsFolder to set
-     */
-    public ErrorHandler setLogsFolder(String logsFolder) {
-        this.logsFolder = logsFolder;
-        return this;
-    }
-
-    /**
-     * @return the parentFolder
-     */
-    public String getParentFolder() {
-        return parentFolder;
-    }
-
-    /**
-     * @param parentFolder the parentFolder to set
-     */
-    public ErrorHandler setParentFolder(String parentFolder) {
-        this.parentFolder = parentFolder;
-        return this;
-    }
-
-    public ErrorHandler initializeLog(String[] args)
-            throws FileNotFoundException, UnsupportedEncodingException {
-        errorLog = new PrintWriter("./resources/errors/logs/ERROR_"
-                + computerName + "_" + args[0].replace(".xml", "") + "_"
-                + errorTimeStamp + ".log", "UTF-8");
-        return this;
-    }
-
-    public ErrorHandler addEventToLog(boolean noSuchElement,
-            boolean elementNotAttached, boolean otherException, Exception e) {
-
-        if (noSuchElement) {
-            errorLog.println(errorTimeStamp + " CANNOT FIND ELEMENT.");
+    private void closeWriter() {
+        if (this.writer != null) {
+            this.writer.flush();
+            this.writer.close();
+            this.writer = null;
         }
+    }
 
-        if (elementNotAttached) {
-            errorLog.println(errorTimeStamp
-                    + " ELEMENT NO LONGER ATTACHED TO THE DOM.");
+    private void initErrorLogFilename(String featureFilename) {
+        File featureFile = new File(featureFilename);
+        this.errorLogFilename = this.errorLogsDir + "error_"
+                + featureFile.getName() + "_"
+                + filenameDateFormat.format(new Date()) + ".log";
+    }
+
+    private void initializeWriter() throws FeatureExecutorListenerException {
+        if (this.writer == null) {
+            log.debug("Initializing CSV file writer");
+            try {
+                this.writer = new PrintWriter(new File(this.errorLogFilename));
+            } catch (FileNotFoundException exception) {
+                throw new FeatureExecutorListenerException(
+                        "Could not open file " + this.errorLogFilename,
+                        exception);
+            }
         }
+    }
 
-        if (otherException) {
-            errorLog.println(errorTimeStamp + " OTHER EXCEPTION.");
+    private void logEvent(String logPrefix, Throwable cause)
+            throws FeatureExecutorListenerException {
+        this.initializeWriter();
+        this.writer.print(this.logDateFormat.format(new Date()));
+        this.writer.write(" - ");
+        this.writer.write(logPrefix);
+        this.writer.write(": ");
+        if (cause != null) {
+            this.writer.write(cause.getMessage());
+            this.writer.println();
+            cause.printStackTrace(this.writer);
         }
-
-        errorLog.println("Screenshot: " + outputScreenshot.getPath());
-        errorLog.println("-----STACK TRACE------");
-        e.printStackTrace(errorLog);
-        errorLog.println("\n");
-
-        return this;
+        this.writer.println();
+        this.writer.println("Screenshot: "
+                + this.takeScreenshot().getAbsolutePath());
+        this.writer.flush();
     }
 
-    public void closeLog() {
-        errorLog.close();
+    private String sanitizeForFilename(String string) {
+        return string.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
     }
 
-    public void takeScreenshot(WebDriver driver) throws IOException {
-        outputScreenshot = new File(screenshotsFolder + "screenshot_"
-                + errorTimeStamp + ".png");
-        FileUtils.copyFile(
-                ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE),
-                outputScreenshot);
+    private File takeScreenshot() throws FeatureExecutorListenerException {
+        File outputScreenshot = new File(this.screenshotsDir + "screenshot_"
+                + this.sanitizeForFilename(this.scenarioName) + "_"
+                + this.filenameDateFormat.format(new Date()) + ".png");
+        OutputStream stream = null;
+        try {
+            stream = new FileOutputStream(outputScreenshot);
+            stream.write(this.driver.getScreenshotAs(OutputType.BYTES));
+        } catch (IOException exception) {
+            throw new FeatureExecutorListenerException(
+                    "Exception while taking screenshot", exception);
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException exception) {
+                    // Nothing sane to do
+                }
+            }
+        }
+        return outputScreenshot;
     }
 
-    public ErrorHandler initializePaths() {
-        setParentFolder("./resources//errors//");
-        setLogsFolder(getParentFolder() + "logs//");
-        setScreenshotsFolder(getParentFolder() + "screenshots//");
-        return this;
+    @Override
+    protected void finalize() throws Throwable {
+        this.closeWriter();
+        super.finalize();
     }
-
-    public void wrapUpFile() {
-        if (errorLog != null)
-            closeLog();
-    }
-
 }

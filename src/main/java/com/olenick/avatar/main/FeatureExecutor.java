@@ -60,7 +60,7 @@ public class FeatureExecutor {
         for (PatientExperienceScenario scenario : feature.getScenarios()) {
             try {
                 this.runScenario(urlRoot, scenario);
-            } catch (FeatureExecutorListenerException exception) {
+            } catch (FeatureExecutorListenerException | RuntimeException exception) {
                 this.notifyListenersOrFailFeature(
                         FeatureExecutorEvent.SCENARIO_FAILED, scenario, "",
                         exception);
@@ -76,67 +76,89 @@ public class FeatureExecutor {
     private void runScenario(final String urlRoot,
             final PatientExperienceScenario scenario)
             throws FeatureExecutorListenerException {
-        String scenarioName = scenario.getName();
-
         this.notifyListenersOrFailScenario(
-                FeatureExecutorEvent.SCENARIO_STARTED, scenarioName);
+                FeatureExecutorEvent.SCENARIO_STARTED, scenario.getName());
 
-        this.notifyListenersOrFailScenario(FeatureExecutorEvent.LOGIN_PAGE_STARTED);
-        LoginPage loginPage = new LoginPage(this.driver, urlRoot).open()
-                .waitForElementsToLoad();
-        this.notifyListenersOrFailScenario(FeatureExecutorEvent.LOGIN_PAGE_ENDED);
-
-        LoggedInWelcomePage welcomePage = loginPage.login(scenario.getUser(),
-                scenario.getPassword()).waitForElementsToLoad();
-
-        this.notifyListenersOrFailScenario(FeatureExecutorEvent.PATIENT_EXPERIENCE_STARTED);
-        PatientExperienceIFrame patientExperienceIFrame = welcomePage
-                .navigateToPatientExperienceTab().waitForElementsToLoad();
-        patientExperienceIFrame.openOverviewTab().waitForElementsToLoad();
-        this.notifyListenersOrFailScenario(FeatureExecutorEvent.PATIENT_EXPERIENCE_ENDED);
-
-        ReportFilter reportFilter = scenario.getReportFilter();
-        patientExperienceIFrame.configureReportLevelFilter(reportFilter)
-                .configureSurveySelectionFilter(reportFilter)
-                .applyConfiguredFilters();
-
-        for (ReportTabSpec tabSpec : reportFilter.getTabSpecs()) {
-            ReportTab tab = tabSpec.getTab();
-            this.notifyListenersOrFailScenario(
-                    FeatureExecutorEvent.REPORT_TAB_STARTED, tab);
-            ReportGraphsTabIFrame<?> iFrame = (ReportGraphsTabIFrame<?>) patientExperienceIFrame
-                    .openReportTab(tab).waitForElementsToLoad();
-            this.notifyListenersOrFailScenario(
-                    FeatureExecutorEvent.REPORT_TAB_ENDED, tab);
-            if (tab.isCapableOfExportingToPDF()) {
-
-                this.notifyListenersOrFailScenario(
-                        FeatureExecutorEvent.REPORT_TAB_EXPORT_TO_PDF_STARTED,
-                        tab);
-                iFrame.exportToPDF();
-                this.notifyListenersOrFailScenario(
-                        FeatureExecutorEvent.REPORT_TAB_EXPORT_TO_PDF_ENDED,
-                        tab);
-
-            }
-        }
+        LoggedInWelcomePage welcomePage = this.login(urlRoot, scenario);
+        PatientExperienceIFrame patientExperienceIFrame = this
+                .loadPatientExperience(welcomePage);
+        ReportFilter reportFilter = this.configureReportFilter(scenario,
+                patientExperienceIFrame);
+        this.loadReports(patientExperienceIFrame, reportFilter);
 
         this.notifyListenersOrFailScenario(FeatureExecutorEvent.SCENARIO_ENDED);
     }
 
-    protected PatientExperienceFeature getFeature(final URL xmlFileURL)
+    private ReportFilter configureReportFilter(
+            PatientExperienceScenario scenario,
+            PatientExperienceIFrame patientExperienceIFrame) {
+        ReportFilter reportFilter = scenario.getReportFilter();
+        patientExperienceIFrame.configureReportLevelFilter(reportFilter)
+                .configureSurveySelectionFilter(reportFilter)
+                .applyConfiguredFilters();
+        return reportFilter;
+    }
+
+    private void exportToPDF(ReportTab tab, ReportGraphsTabIFrame<?> iFrame)
+            throws FeatureExecutorListenerException {
+        this.notifyListenersOrFailScenario(
+                FeatureExecutorEvent.REPORT_TAB_EXPORT_TO_PDF_STARTED, tab);
+        iFrame.exportToPDF();
+        this.notifyListenersOrFailScenario(
+                FeatureExecutorEvent.REPORT_TAB_EXPORT_TO_PDF_ENDED, tab);
+    }
+
+    private PatientExperienceFeature getFeature(final URL xmlFileURL)
             throws ParseException {
         log.debug("Feature XML file: {}", xmlFileURL);
         return new XMLPatientExperienceFeatureParser().parse(xmlFileURL);
     }
 
-    private void notifyListenersOrFailScenario(
-            final FeatureExecutorEvent event, final Object... args)
+    private PatientExperienceIFrame loadPatientExperience(
+            LoggedInWelcomePage welcomePage)
             throws FeatureExecutorListenerException {
-        for (FeatureExecutorListener listener : this.listeners) {
-            log.trace("Notifying {} of {}", listener, event);
-            listener.listen(event, args);
+        this.notifyListenersOrFailScenario(FeatureExecutorEvent.PATIENT_EXPERIENCE_STARTED);
+        PatientExperienceIFrame patientExperienceIFrame = welcomePage
+                .navigateToPatientExperienceTab().waitForElementsToLoad();
+        patientExperienceIFrame.openOverviewTab().waitForElementsToLoad();
+        this.notifyListenersOrFailScenario(FeatureExecutorEvent.PATIENT_EXPERIENCE_ENDED);
+        return patientExperienceIFrame;
+    }
+
+    private void loadReports(PatientExperienceIFrame patientExperienceIFrame,
+            ReportFilter reportFilter) throws FeatureExecutorListenerException {
+        for (ReportTabSpec tabSpec : reportFilter.getTabSpecs()) {
+            ReportTab tab = tabSpec.getTab();
+            ReportGraphsTabIFrame<?> iFrame = this.loadReportTab(
+                    patientExperienceIFrame, tab);
+            if (tab.isCapableOfExportingToPDF()) {
+                this.exportToPDF(tab, iFrame);
+            }
         }
+    }
+
+    private ReportGraphsTabIFrame<?> loadReportTab(
+            PatientExperienceIFrame patientExperienceIFrame, ReportTab tab)
+            throws FeatureExecutorListenerException {
+        this.notifyListenersOrFailScenario(
+                FeatureExecutorEvent.REPORT_TAB_STARTED, tab);
+        ReportGraphsTabIFrame<?> iFrame = (ReportGraphsTabIFrame<?>) patientExperienceIFrame
+                .openReportTab(tab).waitForElementsToLoad();
+        this.notifyListenersOrFailScenario(
+                FeatureExecutorEvent.REPORT_TAB_ENDED, tab);
+        return iFrame;
+    }
+
+    private LoggedInWelcomePage login(String urlRoot,
+            PatientExperienceScenario scenario)
+            throws FeatureExecutorListenerException {
+        this.notifyListenersOrFailScenario(FeatureExecutorEvent.LOGIN_PAGE_STARTED);
+        LoginPage loginPage = new LoginPage(this.driver, urlRoot).open()
+                .waitForElementsToLoad();
+        this.notifyListenersOrFailScenario(FeatureExecutorEvent.LOGIN_PAGE_ENDED);
+
+        return loginPage.login(scenario.getUser(), scenario.getPassword())
+                .waitForElementsToLoad();
     }
 
     private void notifyListenersOrFailFeature(final FeatureExecutorEvent event,
@@ -150,6 +172,15 @@ public class FeatureExecutor {
             }
             throw new FeatureExecutionException("Event: " + event
                     + argsSB.toString(), exception);
+        }
+    }
+
+    private void notifyListenersOrFailScenario(
+            final FeatureExecutorEvent event, final Object... args)
+            throws FeatureExecutorListenerException {
+        for (FeatureExecutorListener listener : this.listeners) {
+            log.trace("Notifying {} of {}", listener, event);
+            listener.listen(event, args);
         }
     }
 }

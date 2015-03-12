@@ -2,54 +2,83 @@ package com.olenick.avatar.reports;
 
 import com.olenick.avatar.exceptions.FeatureExecutorListenerException;
 import com.olenick.avatar.model.ReportTab;
+import com.olenick.avatar.uses.PatientExperienceFeature;
 import com.olenick.avatar.uses.PatientExperienceScenario;
 
 /**
  * FeatureExecutor listener.
  */
 public abstract class FeatureExecutorListener {
-    public abstract void featureEnded() throws FeatureExecutorListenerException;
+    public void featureEnded() throws FeatureExecutorListenerException {
+        // DO NOTHING
+    }
 
-    public abstract void featureStarted()
-            throws FeatureExecutorListenerException;
+    public void featureFailed(PatientExperienceFeature feature, String message,
+            Throwable cause) throws FeatureExecutorListenerException {
+        // DO NOTHING
+    }
 
-    public abstract void loginPageEnded()
-            throws FeatureExecutorListenerException;
+    public void featureStarted() throws FeatureExecutorListenerException {
+        // DO NOTHING
+    }
 
-    public abstract void loginPageStarted()
-            throws FeatureExecutorListenerException;
+    public void loginPageEnded() throws FeatureExecutorListenerException {
+        // DO NOTHING
+    }
 
-    public abstract void patientExperienceEnded()
-            throws FeatureExecutorListenerException;
+    public void loginPageStarted() throws FeatureExecutorListenerException {
+        // DO NOTHING
+    }
 
-    public abstract void patientExperienceStarted()
-            throws FeatureExecutorListenerException;
+    public void patientExperienceEnded()
+            throws FeatureExecutorListenerException {
+        // DO NOTHING
+    }
 
-    public abstract void reportTabEnded(ReportTab tab)
-            throws FeatureExecutorListenerException;
+    public void patientExperienceStarted()
+            throws FeatureExecutorListenerException {
+        // DO NOTHING
+    }
 
-    public abstract void reportTabStarted(ReportTab tab)
-            throws FeatureExecutorListenerException;
+    public void reportTabEnded(ReportTab tab)
+            throws FeatureExecutorListenerException {
+        // DO NOTHING
+    }
 
-    public abstract void reportTabExportedToPDFEnded(ReportTab tab)
-            throws FeatureExecutorListenerException;
+    public void reportTabStarted(ReportTab tab)
+            throws FeatureExecutorListenerException {
+        // DO NOTHING
+    }
 
-    public abstract void reportTabExportedToPDFStarted(ReportTab tab)
-            throws FeatureExecutorListenerException;
+    public void reportTabExportedToPDFEnded(ReportTab tab)
+            throws FeatureExecutorListenerException {
+        // DO NOTHING
+    }
 
-    public abstract void scenarioEnded()
-            throws FeatureExecutorListenerException;
+    public void reportTabExportedToPDFStarted(ReportTab tab)
+            throws FeatureExecutorListenerException {
+        // DO NOTHING
+    }
 
-    public abstract void scenarioFailed(PatientExperienceScenario scenario,
+    public void scenarioEnded() throws FeatureExecutorListenerException {
+        // DO NOTHING
+    }
+
+    public void scenarioFailed(PatientExperienceScenario scenario,
             String message, Throwable cause)
-            throws FeatureExecutorListenerException;
+            throws FeatureExecutorListenerException {
+        // DO NOTHING
+    }
 
-    public abstract void scenarioStarted(String scenarioName)
-            throws FeatureExecutorListenerException;
+    public void scenarioStarted(String scenarioName)
+            throws FeatureExecutorListenerException {
+        // DO NOTHING
+    }
 
-    public abstract void warning(PatientExperienceScenario scenario,
-            String message, Throwable cause)
-            throws FeatureExecutorListenerException;
+    public void warning(PatientExperienceScenario scenario, String message,
+            Throwable cause) throws FeatureExecutorListenerException {
+        // DO NOTHING
+    }
 
     public final void listen(FeatureExecutorEvent event, Object... args)
             throws FeatureExecutorListenerException {
@@ -60,6 +89,10 @@ public abstract class FeatureExecutorListener {
                 break;
             case FEATURE_ENDED:
                 this.featureEnded();
+                break;
+            case FEATURE_FAILED:
+                this.featureFailed((PatientExperienceFeature) args[0],
+                        (String) args[1], (Throwable) args[2]);
                 break;
             case SCENARIO_STARTED:
                 this.scenarioStarted((String) args[0]);
