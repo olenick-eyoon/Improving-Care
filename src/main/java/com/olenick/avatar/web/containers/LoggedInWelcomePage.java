@@ -32,7 +32,8 @@ public class LoggedInWelcomePage extends WebContainer<LoggedInWelcomePage> {
         this.patientExperienceTab = new ExtendedWebElement(this);
         this.controlCenterTab = new ExtendedWebElement(this);
         this.homeFrame = new HomeIFrame(this.driver);
-        this.patientExperienceFrame = new PatientExperienceIFrame(this.driver);
+        this.patientExperienceFrame = new PatientExperienceIFrame(this.driver,
+                this);
         this.controlCenterFrame = new ControlCenterIFrame(this.driver);
     }
 

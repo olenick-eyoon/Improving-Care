@@ -473,4 +473,15 @@ public class ExtendedSelectWebElement extends ExtendedWebElement {
         }
         return this.select;
     }
+
+    /**
+     * Sets the underlying web element and resets the Selenium Select helper.
+     * 
+     * @param element Underlying web element.
+     */
+    @Override
+    public void setUnderlyingWebElement(@NotNull final WebElement element) {
+        super.setUnderlyingWebElement(element);
+        this.select = null;
+    }
 }

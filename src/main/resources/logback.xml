@@ -6,7 +6,8 @@
         </encoder>
     </appender>
 
-    <logger name="com.olenick.avatar" level="TRACE"/>
+    <!-- logger name="com.olenick.avatar" level="TRACE"/ -->
+    <logger name="com.olenick.avatar" level="DEBUG"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>

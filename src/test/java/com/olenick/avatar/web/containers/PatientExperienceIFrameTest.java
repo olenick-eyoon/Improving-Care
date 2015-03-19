@@ -56,14 +56,9 @@ public class PatientExperienceIFrameTest extends SeleniumTest {
         providerFilter.setProviders("_FOC_NULL");
         reportFilter.setProviderFilter(providerFilter);
 
-        PatientExperienceIFrame patientExperienceIFrame = new LoginPage(
-                this.driver, URL_ROOT_DEV).open().login(USERNAME, PASSWORD)
-                .waitForElementsToLoad().navigateToPatientExperienceTab()
-                .waitForElementsToLoad().configureFilters(reportFilter);
-
-        /*
-         * try { Thread.sleep(5000); } catch (InterruptedException e) {
-         * e.printStackTrace(); }
-         */
+        new LoginPage(this.driver, URL_ROOT_DEV).open()
+                .login(USERNAME, PASSWORD).waitForElementsToLoad()
+                .navigateToPatientExperienceTab().waitForElementsToLoad()
+                .configureFilters(reportFilter);
     }
 }

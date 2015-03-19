@@ -8,13 +8,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.EnumMap;
 
-import com.olenick.avatar.uses.PatientExperienceFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.olenick.avatar.exceptions.FeatureExecutorListenerException;
 import com.olenick.avatar.model.ReportTab;
+import com.olenick.avatar.uses.PatientExperienceFeature;
 import com.olenick.avatar.uses.PatientExperienceScenario;
+import com.olenick.avatar.util.FilenameUtils;
 
 /**
  * FeatureExecutor listener: Timer.
@@ -27,8 +28,8 @@ public class FeatureTimer extends FeatureExecutorListener {
             ReportTab.OVERVIEW, ReportTab.COMPOSITE, ReportTab.SIDE_BY_SIDE,
             ReportTab.DEMOGRAPHICS };
 
-    // private DateFormat fileSuffixDateFormat = new SimpleDateFormat(
-    // "yyyyMMdd_HHmmss");
+    private DateFormat fileSuffixDateFormat = new SimpleDateFormat(
+            "yyyyMMdd-HHmmss");
     private DateFormat csvDateFormat = new SimpleDateFormat(
             "MM-dd-yyyy  HH:mm:ss");
 
@@ -44,13 +45,14 @@ public class FeatureTimer extends FeatureExecutorListener {
     private String hostName;
     private String scenarioName;
 
-    public FeatureTimer(String filename, String hostName)
-            throws FeatureExecutorListenerException {
+    public FeatureTimer(String csvDirName, String xmlSpecFilename,
+            String hostName) throws FeatureExecutorListenerException {
         this.reportTabStartTimes = new EnumMap<>(ReportTab.class);
         this.reportTabEndTimes = new EnumMap<>(ReportTab.class);
         this.reportTabExportToPDFStartTimes = new EnumMap<>(ReportTab.class);
         this.reportTabExportToPDFEndTimes = new EnumMap<>(ReportTab.class);
-        this.filename = filename;
+        this.filename = this.initCSVFilename(csvDirName, xmlSpecFilename,
+                hostName);
         this.hostName = hostName;
     }
 
@@ -72,8 +74,12 @@ public class FeatureTimer extends FeatureExecutorListener {
 
     @Override
     public void featureFailed(PatientExperienceFeature feature, String message,
-                              Throwable cause) throws FeatureExecutorListenerException {
-        log.debug("Feature failed");
+            Throwable cause) throws FeatureExecutorListenerException {
+        if (message != null && !message.isEmpty()) {
+            log.debug("Feature failed: " + message);
+        } else {
+            log.debug("Feature failed");
+        }
         this.writer.flush();
         this.clearScenario();
         this.writer.close();
@@ -104,8 +110,13 @@ public class FeatureTimer extends FeatureExecutorListener {
             String message, Throwable cause)
             throws FeatureExecutorListenerException {
         this.endTime = new Date();
-        log.error("[{}] Scenario failed. Ran for {}ms.", this.scenarioName,
-                this.getScenarioTimeInMillis());
+        if (message != null && !message.isEmpty()) {
+            log.debug("[{}] Scenario failed: {}. Ran for {}ms.", message,
+                    this.scenarioName, this.getScenarioTimeInMillis());
+        } else {
+            log.error("[{}] Scenario failed. Ran for {}ms.", this.scenarioName,
+                    this.getScenarioTimeInMillis());
+        }
         this.writeLine(); // TODO: Check if this is OK to be done.
         this.clearScenario();
     }
@@ -198,12 +209,6 @@ public class FeatureTimer extends FeatureExecutorListener {
                 this.reportTabExportToPDFEndTimes.get(tab));
     }
 
-    @Override
-    public void warning(PatientExperienceScenario scenario, String message,
-            Throwable cause) throws FeatureExecutorListenerException {
-        // NOTHING TO DO HERE
-    }
-
     private void checkTimeMemberReady(Date timeMember)
             throws FeatureExecutorListenerException {
         if (timeMember != null) {
@@ -231,6 +236,14 @@ public class FeatureTimer extends FeatureExecutorListener {
         } else {
             return 0L;
         }
+    }
+
+    private String initCSVFilename(String csvDirName, String xmlSpecFilename,
+            String hostName) {
+        return FilenameUtils.slashed(csvDirName)
+                + FilenameUtils.basename(xmlSpecFilename).replace(".xml", "")
+                + "_" + hostName + "_"
+                + this.fileSuffixDateFormat.format(new Date()) + ".csv";
     }
 
     private void initializeWriter() throws FeatureExecutorListenerException {

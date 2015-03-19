@@ -16,6 +16,7 @@ public class OverviewTabIFrame extends ReportGraphsTabIFrame<OverviewTabIFrame> 
 
     private static final String ELEMENT_ID_GRAPHS_FRAME = "visframe";
     private static final String ELEMENT_ID_RESULTS_FRAME = "ovrvwframe";
+    private static final String XPATH_TOTAL_VALUE = "//td[normalize-space(text())='Total']/../td[6]";
 
     private PatientExperienceIFrame parent;
 
@@ -48,5 +49,11 @@ public class OverviewTabIFrame extends ReportGraphsTabIFrame<OverviewTabIFrame> 
         // This is a bit rubbish...
         throw new UnsupportedOperationException(
                 "This operation is non-existent in the Overview tab.");
+    }
+
+    public long getTotalCount() {
+        return Long.valueOf(this.getDriver()
+                .findElementByXPath(XPATH_TOTAL_VALUE).getText()
+                .replace(",", ""));
     }
 }

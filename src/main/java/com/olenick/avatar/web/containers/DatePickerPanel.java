@@ -61,6 +61,19 @@ public class DatePickerPanel extends WebContainer<DatePickerPanel> {
         return this.parent;
     }
 
+    public PatientExperienceIFrame safePick(final MonthSpec monthSpec) {
+        if (monthSpec == null) {
+            return this.cancel();
+        } else {
+            return this.pick(monthSpec);
+        }
+    }
+
+    public PatientExperienceIFrame cancel() {
+        this.cancelButton.click();
+        return this.parent;
+    }
+
     @Override
     public DatePickerPanel waitForElementsToLoad() {
         for (Map.Entry<Month, ExtendedWebElement> entry : this.monthElements

@@ -27,6 +27,8 @@ public abstract class WelcomePageIFrame<T extends WebContainer<T>> extends
     private static final long TIMEOUT_SECS_LOADING_IFRAME = 200;
     private static final long TIMEOUT_SECS_SWITCH_TO_FRAME = 240;
 
+    protected static final String ELEMENT_NAME_PANEL_IFRAME = "Panel_1_1";
+
     protected WebDriverWait waitForIFrame;
 
     public WelcomePageIFrame(@NotNull ExtendedRemoteWebDriver driver) {
@@ -61,6 +63,13 @@ public abstract class WelcomePageIFrame<T extends WebContainer<T>> extends
                         : element;
             }
         };
+    }
+
+    public T accessPanelFrame() {
+        this.getDriver().switchTo().defaultContent();
+        this.getDriver().switchTo().frame(0);
+        this.switchToFrame(ELEMENT_NAME_PANEL_IFRAME);
+        return this.castThis();
     }
 
     protected void ensureIFrameLoaded() {

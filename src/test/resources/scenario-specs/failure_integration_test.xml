@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature>
+    <scenario name="XXX" user="performance.test3@avatarsolutions.com"
+              password="password">
+        <report-filter>
+            <system>wrong</system>
+            <organizations>
+                <organization>252</organization>
+            </organizations>
+            <departments>
+                <department>5720</department>
+            </departments>
+            <locations>
+                <location>_FOC_NULL</location>
+            </locations>
+
+            <survey-type>Avatar</survey-type>
+            <patient-types>
+                <patient-type>_FOC_NULL</patient-type>
+            </patient-types>
+            <factor-composites>
+                <factor-composite>Billing</factor-composite>
+            </factor-composites>
+            <item-questions>
+                <item-question>_FOC_NULL</item-question>
+            </item-questions>
+
+            <from month="01" year="2013"/>
+            <to month="05" year="2013"/>
+            <group-by>QUARTERLY</group-by>
+
+            <calculation>TOP_BOX</calculation>
+
+            <tab-specs>
+                <tab-spec tab="DEMOGRAPHICS"/>
+            </tab-specs>
+        </report-filter>
+    </scenario>
+    <scenario name="XXY" user="performance.test3@avatarsolutions.com"
+              password="password">
+        <report-filter>
+            <system>wrong</system>
+            <organizations>
+                <organization>252</organization>
+            </organizations>
+            <departments>
+                <department>5720</department>
+            </departments>
+            <locations>
+                <location>_FOC_NULL</location>
+            </locations>
+
+            <survey-type>Avatar</survey-type>
+            <patient-types>
+                <patient-type>_FOC_NULL</patient-type>
+            </patient-types>
+            <factor-composites>
+                <factor-composite>Billing</factor-composite>
+            </factor-composites>
+            <item-questions>
+                <item-question>_FOC_NULL</item-question>
+            </item-questions>
+
+            <from month="01" year="2013"/>
+            <to month="05" year="2013"/>
+            <group-by>QUARTERLY</group-by>
+
+            <calculation>TOP_BOX</calculation>
+
+            <tab-specs>
+                <tab-spec tab="DEMOGRAPHICS"/>
+            </tab-specs>
+        </report-filter>
+    </scenario>
+</feature>

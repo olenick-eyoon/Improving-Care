@@ -56,28 +56,32 @@ public class FeatureExecutor {
             throw new FeatureExecutionException("Error while parsing XML file",
                     exception);
         }
-        this.notifyListenersOrFailFeature(FeatureExecutorEvent.FEATURE_STARTED);
-        for (PatientExperienceScenario scenario : feature.getScenarios()) {
-            try {
-                this.runScenario(urlRoot, scenario);
-            } catch (FeatureExecutorListenerException | RuntimeException exception) {
-                this.notifyListenersOrFailFeature(
-                        FeatureExecutorEvent.SCENARIO_FAILED, scenario, "",
-                        exception);
+        try {
+            this.notifyListeners(FeatureExecutorEvent.FEATURE_STARTED);
+            for (PatientExperienceScenario scenario : feature.getScenarios()) {
+                try {
+                    this.runScenario(urlRoot, scenario);
+                } catch (FeatureExecutorListenerException | RuntimeException exception) {
+                    this.notifyListeners(FeatureExecutorEvent.SCENARIO_FAILED,
+                            scenario, "", exception);
+                }
+                try {
+                    Thread.sleep(SLEEP_MILLIS_BETWEEN_SCENARIOS);
+                } catch (InterruptedException ignored) {
+                }
             }
-            try {
-                Thread.sleep(SLEEP_MILLIS_BETWEEN_SCENARIOS);
-            } catch (InterruptedException ignored) {
-            }
+            this.notifyListeners(FeatureExecutorEvent.FEATURE_ENDED);
+        } catch (FeatureExecutorListenerException exception) {
+            this.notifyListenersQuietly(FeatureExecutorEvent.FEATURE_FAILED,
+                    feature, "", exception);
         }
-        this.notifyListenersOrFailFeature(FeatureExecutorEvent.FEATURE_ENDED);
     }
 
     private void runScenario(final String urlRoot,
             final PatientExperienceScenario scenario)
             throws FeatureExecutorListenerException {
-        this.notifyListenersOrFailScenario(
-                FeatureExecutorEvent.SCENARIO_STARTED, scenario.getName());
+        this.notifyListeners(FeatureExecutorEvent.SCENARIO_STARTED,
+                scenario.getName());
 
         LoggedInWelcomePage welcomePage = this.login(urlRoot, scenario);
         PatientExperienceIFrame patientExperienceIFrame = this
@@ -86,7 +90,7 @@ public class FeatureExecutor {
                 patientExperienceIFrame);
         this.loadReports(patientExperienceIFrame, reportFilter);
 
-        this.notifyListenersOrFailScenario(FeatureExecutorEvent.SCENARIO_ENDED);
+        this.notifyListeners(FeatureExecutorEvent.SCENARIO_ENDED);
     }
 
     private ReportFilter configureReportFilter(
@@ -101,10 +105,10 @@ public class FeatureExecutor {
 
     private void exportToPDF(ReportTab tab, ReportGraphsTabIFrame<?> iFrame)
             throws FeatureExecutorListenerException {
-        this.notifyListenersOrFailScenario(
+        this.notifyListeners(
                 FeatureExecutorEvent.REPORT_TAB_EXPORT_TO_PDF_STARTED, tab);
         iFrame.exportToPDF();
-        this.notifyListenersOrFailScenario(
+        this.notifyListeners(
                 FeatureExecutorEvent.REPORT_TAB_EXPORT_TO_PDF_ENDED, tab);
     }
 
@@ -117,11 +121,11 @@ public class FeatureExecutor {
     private PatientExperienceIFrame loadPatientExperience(
             LoggedInWelcomePage welcomePage)
             throws FeatureExecutorListenerException {
-        this.notifyListenersOrFailScenario(FeatureExecutorEvent.PATIENT_EXPERIENCE_STARTED);
+        this.notifyListeners(FeatureExecutorEvent.PATIENT_EXPERIENCE_STARTED);
         PatientExperienceIFrame patientExperienceIFrame = welcomePage
                 .navigateToPatientExperienceTab().waitForElementsToLoad();
         patientExperienceIFrame.openOverviewTab().waitForElementsToLoad();
-        this.notifyListenersOrFailScenario(FeatureExecutorEvent.PATIENT_EXPERIENCE_ENDED);
+        this.notifyListeners(FeatureExecutorEvent.PATIENT_EXPERIENCE_ENDED);
         return patientExperienceIFrame;
     }
 
@@ -140,47 +144,38 @@ public class FeatureExecutor {
     private ReportGraphsTabIFrame<?> loadReportTab(
             PatientExperienceIFrame patientExperienceIFrame, ReportTab tab)
             throws FeatureExecutorListenerException {
-        this.notifyListenersOrFailScenario(
-                FeatureExecutorEvent.REPORT_TAB_STARTED, tab);
+        this.notifyListeners(FeatureExecutorEvent.REPORT_TAB_STARTED, tab);
         ReportGraphsTabIFrame<?> iFrame = (ReportGraphsTabIFrame<?>) patientExperienceIFrame
                 .openReportTab(tab).waitForElementsToLoad();
-        this.notifyListenersOrFailScenario(
-                FeatureExecutorEvent.REPORT_TAB_ENDED, tab);
+        this.notifyListeners(FeatureExecutorEvent.REPORT_TAB_ENDED, tab);
         return iFrame;
     }
 
     private LoggedInWelcomePage login(String urlRoot,
             PatientExperienceScenario scenario)
             throws FeatureExecutorListenerException {
-        this.notifyListenersOrFailScenario(FeatureExecutorEvent.LOGIN_PAGE_STARTED);
+        this.notifyListeners(FeatureExecutorEvent.LOGIN_PAGE_STARTED);
         LoginPage loginPage = new LoginPage(this.driver, urlRoot).open()
                 .waitForElementsToLoad();
-        this.notifyListenersOrFailScenario(FeatureExecutorEvent.LOGIN_PAGE_ENDED);
+        this.notifyListeners(FeatureExecutorEvent.LOGIN_PAGE_ENDED);
 
         return loginPage.login(scenario.getUser(), scenario.getPassword())
                 .waitForElementsToLoad();
     }
 
-    private void notifyListenersOrFailFeature(final FeatureExecutorEvent event,
-            final Object... args) throws FeatureExecutionException {
-        try {
-            this.notifyListenersOrFailScenario(event, args);
-        } catch (FeatureExecutorListenerException exception) {
-            StringBuilder argsSB = new StringBuilder();
-            for (Object arg : args) {
-                argsSB.append(", ").append(arg);
-            }
-            throw new FeatureExecutionException("Event: " + event
-                    + argsSB.toString(), exception);
-        }
-    }
-
-    private void notifyListenersOrFailScenario(
-            final FeatureExecutorEvent event, final Object... args)
-            throws FeatureExecutorListenerException {
+    private void notifyListeners(final FeatureExecutorEvent event,
+            final Object... args) throws FeatureExecutorListenerException {
         for (FeatureExecutorListener listener : this.listeners) {
             log.trace("Notifying {} of {}", listener, event);
             listener.listen(event, args);
+        }
+    }
+
+    private void notifyListenersQuietly(final FeatureExecutorEvent event,
+            final Object... args) {
+        try {
+            this.notifyListeners(event, args);
+        } catch (FeatureExecutorListenerException ignored) {
         }
     }
 }
