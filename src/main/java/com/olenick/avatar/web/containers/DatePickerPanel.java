@@ -1,15 +1,17 @@
 package com.olenick.avatar.web.containers;
 
 import java.time.Month;
-import java.util.Calendar;
 import java.util.EnumMap;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.validation.constraints.NotNull;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import com.olenick.avatar.model.MonthSpec;
 import com.olenick.avatar.web.ExtendedRemoteWebDriver;
@@ -19,11 +21,14 @@ import com.olenick.avatar.web.elements.ExtendedWebElement;
  * Date Picker panel.
  */
 public class DatePickerPanel extends WebContainer<DatePickerPanel> {
-    public static final String ELEMENT_ID_OK_BUTTON = "btn_ok";
-    public static final String ELEMENT_ID_CANCEL_BUTTON = "btn_cls";
-    private static final int NUMBER_OF_YEARS = 9;
-    private static final String ELEMENT_CLASS_MONTH_PREFIX = "month_";
-    private static final String ELEMENT_CLASS_YEAR_PREFIX = "year_";
+    private static final String ATTRIBUTE_NAME_CLASS = "class";
+    private static final String ELEMENT_ID_OK_BUTTON = "btn_ok";
+    private static final String ELEMENT_ID_CANCEL_BUTTON = "btn_cls";
+    private static final String ELEMENT_CLASS_PREFIX_MONTH = "month_";
+    private static final String ELEMENT_CLASS_PREFIX_YEAR = "year_";
+    private static final String ELEMENT_CLASS_YEAR_BUTTON = "yearbutton";
+    private static final Pattern YEAR_BUTTON_CLASS_PATTERN = Pattern
+            .compile("^.*" + ELEMENT_CLASS_PREFIX_YEAR + "([0-9]{4}).*$");
 
     private PatientExperienceIFrame parent;
 
@@ -43,12 +48,7 @@ public class DatePickerPanel extends WebContainer<DatePickerPanel> {
             this.monthElements.put(Month.of(monthIndex),
                     new ExtendedWebElement(this));
         }
-        this.yearElements = new HashMap<>(NUMBER_OF_YEARS);
-        int currentYear = new GregorianCalendar().get(Calendar.YEAR);
-        for (int yearIndex = 0; yearIndex < NUMBER_OF_YEARS; ++yearIndex) {
-            this.yearElements.put(String.valueOf(currentYear - yearIndex),
-                    new ExtendedWebElement(this));
-        }
+        this.yearElements = new HashMap<>();
 
         this.okButton = new ExtendedWebElement(this);
         this.cancelButton = new ExtendedWebElement(this);
@@ -80,15 +80,16 @@ public class DatePickerPanel extends WebContainer<DatePickerPanel> {
                 .entrySet()) {
             entry.getValue().setUnderlyingWebElement(
                     this.driver.findElement(By
-                            .className(ELEMENT_CLASS_MONTH_PREFIX
+                            .className(ELEMENT_CLASS_PREFIX_MONTH
                                     + (entry.getKey().getValue() - 1))));
         }
-        for (Map.Entry<String, ExtendedWebElement> entry : this.yearElements
-                .entrySet()) {
-            entry.getValue().setUnderlyingWebElement(
-                    this.driver.findElement(By
-                            .className(ELEMENT_CLASS_YEAR_PREFIX
-                                    + entry.getKey())));
+        List<WebElement> yearButtons = this.getDriver()
+                .findElementsByClassName(ELEMENT_CLASS_YEAR_BUTTON);
+        for (WebElement yearButton : yearButtons) {
+            Matcher yearButtonMatcher = YEAR_BUTTON_CLASS_PATTERN
+                    .matcher(yearButton.getAttribute(ATTRIBUTE_NAME_CLASS));
+            this.yearElements.put(yearButtonMatcher.replaceFirst("$1"),
+                    new ExtendedWebElement(this, yearButton));
         }
 
         this.okButton.setUnderlyingWebElement(this.driver.findElement(By

@@ -14,10 +14,10 @@ import com.olenick.avatar.model.MonthSpec;
 public class TotalsSearchSpec {
     private String systemCode;
     private String systemName;
+    private String systemSearchString;
     private MonthSpec fromMonthSpec;
     private MonthSpec toMonthSpec;
     private String surveyType;
-    private String systemSearchString;
 
     public TotalsSearchSpec() {}
 
@@ -26,10 +26,10 @@ public class TotalsSearchSpec {
             String systemSearchString) {
         this.systemCode = systemCode;
         this.systemName = systemName;
+        this.systemSearchString = systemSearchString;
         this.fromMonthSpec = fromMonthSpec;
         this.toMonthSpec = toMonthSpec;
         this.surveyType = surveyType;
-        this.systemSearchString = systemSearchString;
     }
 
     public TotalsSearchSpec(String systemCode, String systemName,
@@ -132,5 +132,52 @@ public class TotalsSearchSpec {
 
     public void setSystemSearchString(String systemSearchString) {
         this.systemSearchString = systemSearchString;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TotalsSearchSpec that = (TotalsSearchSpec) o;
+
+        if (fromMonthSpec != null ? !fromMonthSpec.equals(that.fromMonthSpec) : that.fromMonthSpec != null)
+            return false;
+        if (surveyType != null ? !surveyType.equals(that.surveyType) : that.surveyType != null)
+            return false;
+        if (systemCode != null ? !systemCode.equals(that.systemCode) : that.systemCode != null)
+            return false;
+        if (systemName != null ? !systemName.equals(that.systemName) : that.systemName != null)
+            return false;
+        if (systemSearchString != null ? !systemSearchString.equals(that.systemSearchString) : that.systemSearchString != null)
+            return false;
+        if (toMonthSpec != null ? !toMonthSpec.equals(that.toMonthSpec) : that.toMonthSpec != null)
+            return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = systemCode != null ? systemCode.hashCode() : 0;
+        result = 31 * result + (systemName != null ? systemName.hashCode() : 0);
+        result = 31 * result + (systemSearchString != null ? systemSearchString.hashCode() : 0);
+        result = 31 * result + (fromMonthSpec != null ? fromMonthSpec.hashCode() : 0);
+        result = 31 * result + (toMonthSpec != null ? toMonthSpec.hashCode() : 0);
+        result = 31 * result + (surveyType != null ? surveyType.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("TotalsSearchSpec{");
+        sb.append("sysCode='").append(systemCode).append('\'');
+        sb.append(", sysName='").append(systemName).append('\'');
+        sb.append(", sysSearch='").append(systemSearchString).append('\'');
+        sb.append(", from=").append(fromMonthSpec);
+        sb.append(", to=").append(toMonthSpec);
+        sb.append(", surveyType='").append(surveyType).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }

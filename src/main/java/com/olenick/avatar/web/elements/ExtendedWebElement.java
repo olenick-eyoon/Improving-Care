@@ -252,6 +252,10 @@ public class ExtendedWebElement implements WebElement {
         }
     }
 
+    public void refreshAllElementsInContainer() {
+        this.container.waitForElementsToLoad();
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("ExtendedWebElement{");

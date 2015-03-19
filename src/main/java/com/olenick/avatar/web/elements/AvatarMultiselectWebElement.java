@@ -3,6 +3,7 @@ package com.olenick.avatar.web.elements;
 import java.util.List;
 
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 import org.slf4j.Logger;
@@ -434,6 +435,13 @@ public class AvatarMultiselectWebElement extends ExtendedSelectWebElement {
                 "document.getElementsByTagName('html')[0].scrollIntoView();");
     }
 
+    public void retryDeselectAll() {
+        log.trace("retryDeselectAll()");
+        this.beforeAction();
+        ((AvatarSelect)this.safeGetSelect()).tryDeselectAll();
+        this.afterAction();
+    }
+
     protected static class AvatarSelect extends Select {
         private boolean multiple = false;
         private AvatarMultiselectWebElement superElement;
@@ -451,6 +459,16 @@ public class AvatarMultiselectWebElement extends ExtendedSelectWebElement {
                         "You may only deselect all options of a multi-select");
             }
 
+            try {
+                this.tryDeselectAll();
+            } catch (StaleElementReferenceException exception) {
+                log.warn("Got StaleElementReferenceException on the first try of deselecting all options");
+                this.superElement.refreshAllElementsInContainer();
+                this.superElement.retryDeselectAll();
+            }
+        }
+
+        private void tryDeselectAll() {
             for (WebElement option : getOptions()) {
                 if (option.isSelected()) {
                     this.superElement.scrollUp();

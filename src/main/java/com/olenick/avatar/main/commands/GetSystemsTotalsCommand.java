@@ -51,9 +51,12 @@ public class GetSystemsTotalsCommand implements Command {
     private static final String USERNAME = "rferrari@avatarsolutions.com";
 
     private final String inputCSVFilename;
+    private final String outputXLSXFilename;
 
-    public GetSystemsTotalsCommand(@NotNull final String inputCSVFilename) {
+    public GetSystemsTotalsCommand(@NotNull final String inputCSVFilename,
+            @NotNull final String outputXLSXFilename) {
         this.inputCSVFilename = inputCSVFilename;
+        this.outputXLSXFilename = outputXLSXFilename;
     }
 
     @Override
@@ -68,8 +71,8 @@ public class GetSystemsTotalsCommand implements Command {
             TotalsSearchSpec searchSpec = this.getSearchSpec(record);
             Totals totals = this.fetchTotals(searchSpec);
             this.writeTotals(sheet, recordNumber++, searchSpec, totals);
+            this.writeWorkbook(workbook, outputXLSXFilename);
         }
-        this.writeWorkbook(workbook, "garompa.xlsx");
     }
 
     private ReportFilter buildReportFilter(TotalsSearchSpec searchSpec) {
@@ -114,6 +117,7 @@ public class GetSystemsTotalsCommand implements Command {
     private void fetchTotals(Totals totals, Environment environment,
             String username, String password, TotalsSearchSpec searchSpec,
             ReportFilter reportFilter) {
+        log.info("Fetching totals for " + searchSpec);
         ExtendedRemoteWebDriver driver = null;
         try {
             driver = new ExtendedRemoteWebDriver(new FirefoxDriver());
@@ -126,6 +130,8 @@ public class GetSystemsTotalsCommand implements Command {
                     .applyConfiguredFilters().openOverviewTab()
                     .waitForElementsToLoad().getTotalCount();
             totals.set(environment, DataSet.ALL, totalAll);
+            log.info("Total (" + environment + ", " + DataSet.ALL + ") = "
+                    + totalAll);
             if (!searchSpec.getSurveyType().equals(NO_QUALIFIED_SURVEY_TYPE)) {
                 reportFilter.setDataSet(DataSet.QUALIFIED);
                 Long totalQualified = patientExperienceIFrame
@@ -134,6 +140,8 @@ public class GetSystemsTotalsCommand implements Command {
                         .applyConfiguredFilters().openOverviewTab()
                         .waitForElementsToLoad().getTotalCount();
                 totals.set(environment, DataSet.QUALIFIED, totalQualified);
+                log.info("Total (" + environment + ", " + DataSet.QUALIFIED
+                        + ") = " + totalAll);
             }
         } catch (WebDriverException exception) {
             log.error("Failed fetching totals", exception);
