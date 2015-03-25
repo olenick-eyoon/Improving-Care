@@ -437,9 +437,11 @@ public class AvatarMultiselectWebElement extends ExtendedSelectWebElement {
 
     public void retryDeselectAll() {
         log.trace("retryDeselectAll()");
+        this.sendKeys(Keys.ENTER);
+        this.sendKeys(Keys.TAB);
         this.beforeAction();
         ((AvatarSelect)this.safeGetSelect()).tryDeselectAll();
-        this.afterAction();
+        // this.afterAction();
     }
 
     protected static class AvatarSelect extends Select {
@@ -463,7 +465,6 @@ public class AvatarMultiselectWebElement extends ExtendedSelectWebElement {
                 this.tryDeselectAll();
             } catch (StaleElementReferenceException exception) {
                 log.warn("Got StaleElementReferenceException on the first try of deselecting all options");
-                this.superElement.refreshAllElementsInContainer();
                 this.superElement.retryDeselectAll();
             }
         }

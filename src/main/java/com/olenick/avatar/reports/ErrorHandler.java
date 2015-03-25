@@ -2,14 +2,11 @@ package com.olenick.avatar.reports;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.openqa.selenium.OutputType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -143,24 +140,12 @@ public class ErrorHandler extends FeatureExecutorListener {
     }
 
     private File takeScreenshot() throws FeatureExecutorListenerException {
-        File outputScreenshot = new File(this.getScreenshotFilename());
-        OutputStream stream = null;
         try {
-            stream = new FileOutputStream(outputScreenshot);
-            stream.write(this.driver.getScreenshotAs(OutputType.BYTES));
+            return this.driver.takeScreenshot(this.getScreenshotFilename());
         } catch (IOException exception) {
             throw new FeatureExecutorListenerException(
                     "Exception while taking screenshot", exception);
-        } finally {
-            if (stream != null) {
-                try {
-                    stream.close();
-                } catch (IOException exception) {
-                    // Nothing sane to do
-                }
-            }
         }
-        return outputScreenshot;
     }
 
     @Override

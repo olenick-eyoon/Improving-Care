@@ -1,5 +1,6 @@
 package com.olenick.avatar.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * Patient Demographics. To be used in the report filter.
  */
 @XmlRootElement()
-public class PatientDemographics {
+public class PatientDemographics implements Cloneable {
     private List<String> admissionSources;
     private List<String> ages;
     private List<String> dischargeStatuses;
@@ -150,6 +151,37 @@ public class PatientDemographics {
     @XmlElement(name = "service-line")
     public void setServiceLines(List<String> serviceLines) {
         this.serviceLines = serviceLines;
+    }
+
+    @Override
+    @SuppressWarnings("super")
+    public PatientDemographics clone() {
+        PatientDemographics clone = new PatientDemographics();
+        if (this.admissionSources != null) {
+            clone.setAdmissionSources(new ArrayList<>(this.admissionSources));
+        }
+        if (this.ages != null) {
+            clone.setAges(new ArrayList<>(this.ages));
+        }
+        if (this.dischargeStatuses != null) {
+            clone.setDischargeStatuses(new ArrayList<>(this.dischargeStatuses));
+        }
+        if (this.genders != null) {
+            clone.setGenders(new ArrayList<>(this.genders));
+        }
+        if (this.languages != null) {
+            clone.setLanguages(new ArrayList<>(this.languages));
+        }
+        if (this.lengthsOfStay != null) {
+            clone.setLengthsOfStay(new ArrayList<>(this.lengthsOfStay));
+        }
+        if (this.races != null) {
+            clone.setRaces(new ArrayList<>(this.races));
+        }
+        if (this.serviceLines != null) {
+            clone.setServiceLines(new ArrayList<>(this.serviceLines));
+        }
+        return clone;
     }
 
     @Override

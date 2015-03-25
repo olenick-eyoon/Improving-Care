@@ -1,5 +1,6 @@
 package com.olenick.avatar.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * Provider Filter.
  */
 @XmlRootElement
-public class ProviderFilter {
+public class ProviderFilter implements Cloneable {
     private ProviderGrouping grouping;
     private List<String> groupingElements;
     private List<String> providers;
@@ -51,6 +52,20 @@ public class ProviderFilter {
     @XmlElement(name = "provider")
     public void setProviders(List<String> providers) {
         this.providers = providers;
+    }
+
+    @Override
+    @SuppressWarnings("super")
+    public ProviderFilter clone() {
+        ProviderFilter clone = new ProviderFilter();
+        clone.setGrouping(this.grouping);
+        if (this.groupingElements != null) {
+            clone.setGroupingElements(new ArrayList<>(this.groupingElements));
+        }
+        if (this.providers != null) {
+            clone.setProviders(new ArrayList<>(this.providers));
+        }
+        return clone;
     }
 
     @Override

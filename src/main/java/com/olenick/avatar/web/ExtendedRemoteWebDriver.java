@@ -1,5 +1,9 @@
 package com.olenick.avatar.web;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Set;
 
@@ -291,6 +295,27 @@ public class ExtendedRemoteWebDriver implements WebDriver, WrapsDriver,
             throws WebDriverException {
         log.trace("getScreenshotAs({})", target);
         return this.underlyingDriver.getScreenshotAs(target);
+    }
+
+    public File takeScreenshot(String filename) throws IOException {
+        return this.takeScreenshot(new File(filename));
+    }
+
+    public File takeScreenshot(File outputScreenshot) throws IOException {
+        OutputStream stream = null;
+        try {
+            stream = new FileOutputStream(outputScreenshot);
+            stream.write(this.getScreenshotAs(OutputType.BYTES));
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException exception) {
+                    // Nothing sane to do
+                }
+            }
+        }
+        return outputScreenshot;
     }
 
     @Override

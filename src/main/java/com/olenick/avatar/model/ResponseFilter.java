@@ -1,5 +1,6 @@
 package com.olenick.avatar.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * Response filter.
  */
 @XmlRootElement
-public class ResponseFilter {
+public class ResponseFilter implements Cloneable {
     private String surveyType;
     private String patientType;
     private String composite;
@@ -66,6 +67,20 @@ public class ResponseFilter {
     @XmlElement(name = "response")
     public void setResponses(List<String> responses) {
         this.responses = responses;
+    }
+
+    @Override
+    @SuppressWarnings("super")
+    public ResponseFilter clone() {
+        ResponseFilter clone = new ResponseFilter();
+        clone.setSurveyType(this.surveyType);
+        clone.setPatientType(this.patientType);
+        clone.setComposite(this.composite);
+        clone.setItem(this.item);
+        if (this.responses != null) {
+            clone.setResponses(new ArrayList<>(this.responses));
+        }
+        return clone;
     }
 
     @Override

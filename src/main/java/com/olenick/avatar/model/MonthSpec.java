@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import com.olenick.avatar.parsers.xml.adapters.MonthSpecAdapter;
 
 @XmlJavaTypeAdapter(MonthSpecAdapter.class)
-public class MonthSpec {
+public class MonthSpec implements Cloneable {
     private Month month;
     private String year;
 
@@ -32,6 +32,11 @@ public class MonthSpec {
 
     public void setYear(final String year) {
         this.year = year;
+    }
+
+    @Override
+    public MonthSpec clone() {
+        return new MonthSpec(this.month, this.year);
     }
 
     @Override

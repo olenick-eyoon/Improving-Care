@@ -15,12 +15,20 @@ public class Totals {
         this.totals = new EnumMap<>(Environment.class);
     }
 
+    public DataSetTotals get(Environment environment) {
+        return this.totals.get(environment);
+    }
+
     public Long get(Environment environment, DataSet dataSet) {
         DataSetTotals dataSetTotals = this.totals.get(environment);
         if (dataSetTotals != null) {
             return dataSetTotals.get(dataSet);
         }
         return null;
+    }
+
+    public void set(Environment environment, DataSetTotals dataSetTotals) {
+        this.totals.put(environment, dataSetTotals);
     }
 
     public void set(Environment environment, DataSet dataSet, Long total) {

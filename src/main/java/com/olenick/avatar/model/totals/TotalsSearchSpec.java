@@ -1,5 +1,6 @@
 package com.olenick.avatar.model.totals;
 
+import java.io.File;
 import java.time.Month;
 import java.time.format.TextStyle;
 import java.util.Locale;
@@ -12,6 +13,8 @@ import com.olenick.avatar.model.MonthSpec;
  * TODO: Use something like JSefa.
  */
 public class TotalsSearchSpec {
+    private File csvFile;
+    private Long recordNumber;
     private String systemCode;
     private String systemName;
     private String systemSearchString;
@@ -21,9 +24,11 @@ public class TotalsSearchSpec {
 
     public TotalsSearchSpec() {}
 
-    public TotalsSearchSpec(String systemCode, String systemName,
-            MonthSpec fromMonthSpec, MonthSpec toMonthSpec, String surveyType,
-            String systemSearchString) {
+    public TotalsSearchSpec(File csvFile, long recordNumber, String systemCode,
+            String systemName, MonthSpec fromMonthSpec, MonthSpec toMonthSpec,
+            String surveyType, String systemSearchString) {
+        this.csvFile = csvFile;
+        this.recordNumber = recordNumber;
         this.systemCode = systemCode;
         this.systemName = systemName;
         this.systemSearchString = systemSearchString;
@@ -32,11 +37,13 @@ public class TotalsSearchSpec {
         this.surveyType = surveyType;
     }
 
-    public TotalsSearchSpec(String systemCode, String systemName,
-            String fromYear, String fromMonth, String toYear, String toMonth,
-            String surveyType, String systemSearchString) {
-        this(systemCode, systemName, buildMonthSpec(fromYear, fromMonth),
-                buildMonthSpec(toYear, toMonth), surveyType, systemSearchString);
+    public TotalsSearchSpec(File csvFile, long recordNumber, String systemCode,
+            String systemName, String fromYear, String fromMonth,
+            String toYear, String toMonth, String surveyType,
+            String systemSearchString) {
+        this(csvFile, recordNumber, systemCode, systemName, buildMonthSpec(
+                fromYear, fromMonth), buildMonthSpec(toYear, toMonth),
+                surveyType, systemSearchString);
     }
 
     private static MonthSpec buildMonthSpec(@NotNull final String year,
@@ -76,6 +83,22 @@ public class TotalsSearchSpec {
 
     private String getShortYear(String year) {
         return "'" + year.substring(2);
+    }
+
+    public File getCsvFile() {
+        return csvFile;
+    }
+
+    public void setCsvFile(File csvFile) {
+        this.csvFile = csvFile;
+    }
+
+    public Long getRecordNumber() {
+        return recordNumber;
+    }
+
+    public void setRecordNumber(long recordNumber) {
+        this.recordNumber = recordNumber;
     }
 
     public String getSystemCode() {
@@ -141,7 +164,11 @@ public class TotalsSearchSpec {
 
         TotalsSearchSpec that = (TotalsSearchSpec) o;
 
+        if (csvFile != null ? !csvFile.equals(that.csvFile) : that.csvFile != null)
+            return false;
         if (fromMonthSpec != null ? !fromMonthSpec.equals(that.fromMonthSpec) : that.fromMonthSpec != null)
+            return false;
+        if (recordNumber != null ? !recordNumber.equals(that.recordNumber) : that.recordNumber != null)
             return false;
         if (surveyType != null ? !surveyType.equals(that.surveyType) : that.surveyType != null)
             return false;
@@ -159,7 +186,9 @@ public class TotalsSearchSpec {
 
     @Override
     public int hashCode() {
-        int result = systemCode != null ? systemCode.hashCode() : 0;
+        int result = csvFile != null ? csvFile.hashCode() : 0;
+        result = 31 * result + (recordNumber != null ? recordNumber.hashCode() : 0);
+        result = 31 * result + (systemCode != null ? systemCode.hashCode() : 0);
         result = 31 * result + (systemName != null ? systemName.hashCode() : 0);
         result = 31 * result + (systemSearchString != null ? systemSearchString.hashCode() : 0);
         result = 31 * result + (fromMonthSpec != null ? fromMonthSpec.hashCode() : 0);
@@ -171,12 +200,14 @@ public class TotalsSearchSpec {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("TotalsSearchSpec{");
-        sb.append("sysCode='").append(systemCode).append('\'');
+        sb.append("csv=").append(csvFile);
+        sb.append(", recNo=").append(recordNumber);
+        sb.append(", sysCode='").append(systemCode).append('\'');
         sb.append(", sysName='").append(systemName).append('\'');
         sb.append(", sysSearch='").append(systemSearchString).append('\'');
         sb.append(", from=").append(fromMonthSpec);
         sb.append(", to=").append(toMonthSpec);
-        sb.append(", surveyType='").append(surveyType).append('\'');
+        sb.append(", survey='").append(surveyType).append('\'');
         sb.append('}');
         return sb.toString();
     }

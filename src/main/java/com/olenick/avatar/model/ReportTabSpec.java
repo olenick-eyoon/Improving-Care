@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * Report tab.
  */
 @XmlRootElement
-public class ReportTabSpec {
+public class ReportTabSpec implements Cloneable {
     @NotNull
     private ReportTab tab;
     @Null
@@ -38,6 +38,12 @@ public class ReportTabSpec {
     @XmlAttribute(name = "filter")
     public void setFilter(@Null final String filter) {
         this.filter = filter;
+    }
+
+    @Override
+    @SuppressWarnings("super")
+    public ReportTabSpec clone() {
+        return new ReportTabSpec(this.tab, this.filter);
     }
 
     @Override

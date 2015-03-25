@@ -1,5 +1,6 @@
 package com.olenick.avatar.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * "Simple" Report Filter.
  */
 @XmlRootElement
-public class ReportFilter {
+public class ReportFilter implements Cloneable {
     private Calculation calculation;
     private DateKey dateKey;
     private DataSet dataSet;
@@ -226,6 +227,59 @@ public class ReportFilter {
     @XmlElement(name = "response")
     public void setResponseFilter(ResponseFilter responseFilter) {
         this.responseFilter = responseFilter;
+    }
+
+    @Override
+    @SuppressWarnings("super")
+    public ReportFilter clone() {
+        ReportFilter clone = new ReportFilter();
+        clone.setCalculation(this.calculation);
+        clone.setDateKey(this.dateKey);
+        clone.setDataSet(this.dataSet);
+        clone.setGroupBy(this.groupBy);
+        clone.setSurveyType(surveyType);
+        clone.setSystem(system);
+        if (this.departments != null) {
+            clone.setDepartments(new ArrayList<>(this.departments));
+        }
+        if (this.factorComposites != null) {
+            clone.setFactorComposites(new ArrayList<>(this.factorComposites));
+        }
+        if (this.itemQuestions != null) {
+            clone.setItemQuestions(new ArrayList<>(this.itemQuestions));
+        }
+        if (this.locations != null) {
+            clone.setLocations(new ArrayList<>(this.locations));
+        }
+        if (this.organizations != null) {
+            clone.setOrganizations(new ArrayList<>(this.organizations));
+        }
+        if (this.patientTypes != null) {
+            clone.setPatientTypes(new ArrayList<>(this.patientTypes));
+        }
+        if (this.tabSpecs != null) {
+            List<ReportTabSpec> clonedTabSpecs = new ArrayList<>(this.tabSpecs.size());
+            for (ReportTabSpec tabSpec : this.tabSpecs) {
+                clonedTabSpecs.add(tabSpec.clone());
+            }
+            clone.setTabSpecs(clonedTabSpecs);
+        }
+        if (this.from != null) {
+            clone.setFrom(this.from.clone());
+        }
+        if (this.to != null) {
+            clone.setTo(this.to.clone());
+        }
+        if (this.demographics != null) {
+            clone.setDemographics(this.demographics.clone());
+        }
+        if (this.providerFilter != null) {
+            clone.setProviderFilter(this.providerFilter.clone());
+        }
+        if (this.responseFilter != null) {
+            clone.setResponseFilter(this.responseFilter.clone());
+        }
+        return clone;
     }
 
     @Override
