@@ -55,8 +55,8 @@ public class DatePickerPanel extends WebContainer<DatePickerPanel> {
     }
 
     public PatientExperienceIFrame pick(final MonthSpec monthSpec) {
-        this.monthElements.get(monthSpec.getMonth()).click();
         this.yearElements.get(monthSpec.getYear()).click();
+        this.monthElements.get(monthSpec.getMonth()).click();
         this.okButton.click();
         return this.parent;
     }

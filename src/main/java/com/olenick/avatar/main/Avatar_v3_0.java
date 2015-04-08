@@ -1,7 +1,7 @@
 package com.olenick.avatar.main;
 
 import com.olenick.avatar.main.commands.ExecuteFeatureCommand;
-import com.olenick.avatar.main.commands.GetSystemsTotalsCommand;
+import com.olenick.avatar.main.commands.GetSystemsOverviewsCommand;
 
 public class Avatar_v3_0 {
     private static final int ERROR_IN_ARGUMENTS = -1;
@@ -16,7 +16,7 @@ public class Avatar_v3_0 {
         System.err.println("  E.g.: java -jar avatar.jar /xmls/all-1.xml");
         System.err.println();
         System.err
-                .println("System totals arguments: SPEC_CSV_FILENAME EXCEL_FILENAME");
+                .println("Overview values arguments: SPEC_CSV_FILENAME EXCEL_FILENAME");
         System.err
                 .println("  E.g.: java -jar avatar.jar totals1.csv totals1.xlsx");
         System.exit(returnValue);
@@ -39,7 +39,7 @@ public class Avatar_v3_0 {
             } else if (args.length > 2) {
                 printUsage("Too many arguments.", ERROR_IN_ARGUMENTS);
             }
-            new GetSystemsTotalsCommand(args[0], args[1]).execute();
+            new GetSystemsOverviewsCommand(args[0], args[1]).execute();
         } else {
             printUsage("Unexpected argument" + (args.length > 1 ? "s" : "")
                     + ".", ERROR_IN_ARGUMENTS);
