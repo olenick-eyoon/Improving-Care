@@ -11,12 +11,16 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import javax.validation.constraints.NotNull;
 
@@ -46,6 +50,7 @@ import com.olenick.avatar.exceptions.FetchSystemTotalsException;
 import com.olenick.avatar.model.DataSet;
 import com.olenick.avatar.model.Environment;
 import com.olenick.avatar.model.ReportFilter;
+import com.olenick.avatar.model.User;
 import com.olenick.avatar.model.overview_values.CrossEnvironmentOverviewValues;
 import com.olenick.avatar.model.overview_values.DataSetOverviewValues;
 import com.olenick.avatar.model.overview_values.OverviewValues;
@@ -65,6 +70,10 @@ public class GetSystemsOverviewsCommand implements Command {
     private static final Logger log = LoggerFactory
             .getLogger(GetSystemsOverviewsCommand.class);
 
+    private static final String USERNAME_TEMPLATE = "ielia-test-%03d@avatarsolutions.com";
+    private static final String PASSWORD = "Password1";
+    private static final long TIMEOUT_SECS_FETCH_VALUES = 900L;
+
     private static final int NUMBER_OF_RECORD_THREADS = 3;
     private static final int RETRIES = 3;
 
@@ -81,11 +90,12 @@ public class GetSystemsOverviewsCommand implements Command {
     private static final int SECTION_TITLE_POSITION = 0;
     private static final int SYSTEM_CODE_POSITION = 1;
     private static final int ORGANIZATION_CODE_POSITION = 2;
-    private static final int FROM_YEAR_POSITION = 3;
-    private static final int FROM_MONTH_POSITION = 4;
-    private static final int TO_YEAR_POSITION = 5;
-    private static final int TO_MONTH_POSITION = 6;
-    private static final int SURVEY_TYPE_POSITION = 7;
+    private static final int PATIENT_TYPE_POSITION = 3;
+    private static final int FROM_YEAR_POSITION = 4;
+    private static final int FROM_MONTH_POSITION = 5;
+    private static final int TO_YEAR_POSITION = 6;
+    private static final int TO_MONTH_POSITION = 7;
+    private static final int SURVEY_TYPE_POSITION = 8;
 
     private static final String ITEM_NAME_TOTAL = "Total";
     private static final String MULTI_SELECT_ALL = "_FOC_NULL";
@@ -102,14 +112,10 @@ public class GetSystemsOverviewsCommand implements Command {
     private static final String LABEL_TOTALS_A = "Prod";
     private static final String LABEL_TOTALS_B = "QA";
 
-    private static final String USERNAME = "rferrari@avatarsolutions.com";
-    private static final String PASSWORD = "password";
-
-    private final DateFormat currentDateFormat = new SimpleDateFormat(
-            "dd-MMM-yyyy");
-
     private final String inputCSVFilename;
     private final String outputXLSXFilename;
+
+    private final BlockingQueue<User> users;
 
     private Font boldRedFont;
     private Font redFont;
@@ -118,11 +124,16 @@ public class GetSystemsOverviewsCommand implements Command {
             @NotNull final String outputXLSXFilename) {
         this.inputCSVFilename = inputCSVFilename;
         this.outputXLSXFilename = outputXLSXFilename;
+        this.users = new ArrayBlockingQueue<>(NUMBER_OF_RECORD_THREADS);
+        for (int i = 1; i <= NUMBER_OF_RECORD_THREADS; ++i) {
+            this.users.add(new User(String.format(USERNAME_TEMPLATE, i),
+                    PASSWORD));
+        }
     }
 
     /**
      * TODO: Split this method.
-     * 
+     *
      * @throws Exception
      */
     @Override
@@ -156,14 +167,17 @@ public class GetSystemsOverviewsCommand implements Command {
                             boolean done = false;
                             int trial = 0;
                             while (!done && trial++ < RETRIES) {
+                                User user = users.poll(
+                                        TIMEOUT_SECS_FETCH_VALUES,
+                                        TimeUnit.SECONDS);
                                 try {
                                     // XLSX Format testing:
-                                    // return new DecoratedTotals(rNumber,
-                                    // searchSpec,
-                                    // new Totals());
+                                    // return new DecoratedOverviewValues(
+                                    // rNumber, searchSpec,
+                                    // new CrossEnvironmentOverviewValues());
                                     totals = new DecoratedOverviewValues(
-                                            rNumber, searchSpec,
-                                            fetchValues(searchSpec));
+                                            rNumber, searchSpec, fetchValues(
+                                                    user, searchSpec));
                                     done = true;
                                 } catch (WebDriverException exception) {
                                     log.warn(
@@ -172,10 +186,14 @@ public class GetSystemsOverviewsCommand implements Command {
                                                     + searchSpec
                                                     + ", trial number: "
                                                     + trial, exception);
+                                } finally {
+                                    users.offer(user);
                                 }
                             }
                             if (totals == null) {
                                 recordThreadPool.shutdown();
+                                log.error("Failed fetching values for (record: "
+                                        + rNumber + ") " + searchSpec);
                                 throw new FetchSystemTotalsException(
                                         "Error fetching values for (record: "
                                                 + rNumber + ") " + searchSpec);
@@ -224,7 +242,7 @@ public class GetSystemsOverviewsCommand implements Command {
 
     /**
      * TODO: Generalise ExecutorService/ExecutorCompletionService usage.
-     * 
+     *
      * @param searchSpec
      * @return
      */
@@ -235,7 +253,7 @@ public class GetSystemsOverviewsCommand implements Command {
         reportFilter.setDepartments(MULTI_SELECT_ALL);
         reportFilter.setLocations(MULTI_SELECT_ALL);
         reportFilter.setSurveyType(searchSpec.getSurveyType());
-        reportFilter.setPatientTypes(MULTI_SELECT_ALL);
+        reportFilter.setPatientTypes(searchSpec.getPatientType());
         reportFilter.setFactorComposites(MULTI_SELECT_ALL);
         reportFilter.setItemQuestions(MULTI_SELECT_ALL);
         // reportFilter.setDateKey(DateKey.DISCHARGE_VISIT);
@@ -267,7 +285,7 @@ public class GetSystemsOverviewsCommand implements Command {
         return sheet;
     }
 
-    private CrossEnvironmentOverviewValues fetchValues(
+    private CrossEnvironmentOverviewValues fetchValues(final User user,
             final OverviewValuesSearchSpec searchSpec)
             throws FetchSystemTotalsException {
         CrossEnvironmentOverviewValues crossEnvironmentOverviewValues = new CrossEnvironmentOverviewValues();
@@ -287,8 +305,10 @@ public class GetSystemsOverviewsCommand implements Command {
                             int trial = 0;
                             while (!done && trial++ < RETRIES) {
                                 try {
-                                    result = fetchValues(environment, USERNAME,
-                                            PASSWORD, searchSpec, reportFilter);
+                                    result = fetchValues(environment,
+                                            user.getUsername(),
+                                            user.getPassword(), searchSpec,
+                                            reportFilter);
                                     done = true;
                                 } catch (WebDriverException exception) {
                                     log.warn("Error fetching values for "
@@ -297,6 +317,8 @@ public class GetSystemsOverviewsCommand implements Command {
                                 }
                             }
                             if (result == null) {
+                                log.error("Failed fetching values for "
+                                        + searchSpec);
                                 throw new FetchSystemTotalsException(
                                         "Error fetching values for "
                                                 + searchSpec);
@@ -312,7 +334,7 @@ public class GetSystemsOverviewsCommand implements Command {
                 crossEnvironmentOverviewValues.set(futureEntry.getKey(),
                         futureEntry.getValue().get());
             } catch (ExecutionException exception) {
-                log.warn("Error while fetching a pair of value maps for "
+                log.error("Error while fetching a pair of value maps for "
                         + environment);
             } catch (InterruptedException exception) {
                 throw new FetchSystemTotalsException("While fetching "
@@ -325,7 +347,7 @@ public class GetSystemsOverviewsCommand implements Command {
 
     /**
      * TODO: Split this method.
-     * 
+     *
      * @param environment Environment spec.
      * @param username Username.
      * @param password Password.
@@ -374,6 +396,7 @@ public class GetSystemsOverviewsCommand implements Command {
                     driver.quit();
                 }
             } catch (WebDriverException ignored) {
+                log.error("Unable to make driver quit.");
             }
         }
         return result;
@@ -435,7 +458,7 @@ public class GetSystemsOverviewsCommand implements Command {
 
     /**
      * TODO: Move this.
-     * 
+     *
      * @param csvFile
      * @param record
      * @return
@@ -448,11 +471,12 @@ public class GetSystemsOverviewsCommand implements Command {
         searchSpec.setSectionTitle(record.get(SECTION_TITLE_POSITION));
         searchSpec.setSystemCode(record.get(SYSTEM_CODE_POSITION));
         searchSpec.setOrganizationCode(record.get(ORGANIZATION_CODE_POSITION));
+        searchSpec.setSurveyType(record.get(SURVEY_TYPE_POSITION));
+        searchSpec.setPatientType(record.get(PATIENT_TYPE_POSITION));
         searchSpec.setFromMonthSpec(record.get(FROM_YEAR_POSITION),
                 record.get(FROM_MONTH_POSITION));
         searchSpec.setToMonthSpec(record.get(TO_YEAR_POSITION),
                 record.get(TO_MONTH_POSITION));
-        searchSpec.setSurveyType(record.get(SURVEY_TYPE_POSITION));
         return searchSpec;
     }
 
@@ -575,8 +599,15 @@ public class GetSystemsOverviewsCommand implements Command {
     private void writeRowCurrentDate(final Workbook workbook,
             final Sheet sheet, final int rowNumber, final Date today) {
         Row currentDateRow = sheet.createRow(rowNumber);
-        currentDateRow.createCell(1).setCellValue(
-                this.currentDateFormat.format(today));
+        // DateFormat currentDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        DateFormat currentDateFormat = new SimpleDateFormat("dd-MMM-yyyy",
+                Locale.ENGLISH);
+        Cell cell = currentDateRow.createCell(1);
+        cell.setCellValue(currentDateFormat.format(today));
+        /*
+         * DataFormat dataFormat = workbook.createDataFormat();
+         * dataFormat.getFormat("dd-MMM-yyyy"); formatCellValue(cell);
+         */
         new RegionFormatter(new CellRangeAddress(rowNumber, rowNumber, 1, 3),
                 sheet, workbook).setAlignment(CellStyle.ALIGN_CENTER)
                 .setBorder(CellStyle.BORDER_MEDIUM).mergeRegion();
@@ -629,7 +660,11 @@ public class GetSystemsOverviewsCommand implements Command {
             final String surveyTypeNotes) {
         Row surveyTypeRow = sheet.createRow(rowNumber);
         surveyTypeRow.setHeightInPoints(rowHeight);
-        surveyTypeRow.createCell(0).setCellValue(searchSpec.getSurveyType());
+        String surveyString = searchSpec.getSurveyType();
+        if (!MULTI_SELECT_ALL.equals(searchSpec.getPatientType())) {
+            surveyString += " " + searchSpec.getPatientType();
+        }
+        surveyTypeRow.createCell(0).setCellValue(surveyString);
         surveyTypeRow.createCell(1).setCellValue(surveyTypeLabel);
         surveyTypeRow.createCell(4).setCellValue(surveyTypeNotes);
         new RegionFormatter(new CellRangeAddress(rowNumber, rowNumber, 0, 0),
@@ -641,6 +676,9 @@ public class GetSystemsOverviewsCommand implements Command {
                 .setFillForegroundColor(IndexedColors.YELLOW.getIndex())
                 .setFillPattern(CellStyle.SOLID_FOREGROUND).setWrapText(true)
                 .mergeRegion();
+        new RegionFormatter(new CellRangeAddress(rowNumber, rowNumber, 4, 4),
+                sheet, workbook).setAlignment(CellStyle.ALIGN_CENTER)
+                .setWrapText(true);
         // TODO: Find the way of doing this below properly
         surveyTypeRow.getCell(0).getCellStyle().setFont(this.boldRedFont);
     }
@@ -736,6 +774,17 @@ public class GetSystemsOverviewsCommand implements Command {
             this.recordNumber = recordNumber;
             this.searchSpec = searchSpec;
             this.crossEnvironmentOverviewValues = crossEnvironmentOverviewValues;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder(
+                    "DecoratedOverviewValues{");
+            sb.append("rec#=").append(recordNumber);
+            sb.append(", searchSpec=").append(searchSpec);
+            sb.append(", values=").append(crossEnvironmentOverviewValues);
+            sb.append('}');
+            return sb.toString();
         }
     }
 }

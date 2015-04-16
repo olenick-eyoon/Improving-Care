@@ -25,6 +25,7 @@ public class OverviewValuesSearchSpec {
     private String sectionTitle;
     private String systemCode;
     private String organizationCode;
+    private String patientType;
     private MonthSpec fromMonthSpec;
     private MonthSpec toMonthSpec;
     private String surveyType;
@@ -33,12 +34,14 @@ public class OverviewValuesSearchSpec {
 
     public OverviewValuesSearchSpec(File csvFile, long recordNumber,
             String sectionTitle, String systemCode, String organizationCode,
-            MonthSpec fromMonthSpec, MonthSpec toMonthSpec, String surveyType) {
+            String patientType, MonthSpec fromMonthSpec, MonthSpec toMonthSpec,
+            String surveyType) {
         this.csvFile = csvFile;
         this.recordNumber = recordNumber;
         this.sectionTitle = sectionTitle;
         this.systemCode = systemCode;
         this.organizationCode = organizationCode;
+        this.patientType = patientType;
         this.fromMonthSpec = fromMonthSpec;
         this.toMonthSpec = toMonthSpec;
         this.surveyType = surveyType;
@@ -46,11 +49,11 @@ public class OverviewValuesSearchSpec {
 
     public OverviewValuesSearchSpec(File csvFile, long recordNumber,
             String sectionTitle, String systemCode, String organizationCode,
-            String fromYear, String fromMonth, String toYear, String toMonth,
-            String surveyType) {
+            String patientType, String fromYear, String fromMonth,
+            String toYear, String toMonth, String surveyType) {
         this(csvFile, recordNumber, sectionTitle, systemCode, organizationCode,
-                buildMonthSpec(fromYear, fromMonth), buildMonthSpec(toYear,
-                        toMonth), surveyType);
+                patientType, buildMonthSpec(fromYear, fromMonth),
+                buildMonthSpec(toYear, toMonth), surveyType);
     }
 
     private static MonthSpec buildMonthSpec(@NotNull final String year,
@@ -105,6 +108,14 @@ public class OverviewValuesSearchSpec {
 
     public void setOrganizationCode(String organizationCode) {
         this.organizationCode = organizationCode;
+    }
+
+    public String getPatientType() {
+        return patientType;
+    }
+
+    public void setPatientType(String patientType) {
+        this.patientType = patientType;
     }
 
     public MonthSpec getFromMonthSpec() {

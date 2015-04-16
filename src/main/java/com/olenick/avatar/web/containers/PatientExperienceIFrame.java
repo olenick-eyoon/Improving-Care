@@ -212,7 +212,7 @@ public class PatientExperienceIFrame extends
             loadCombos("surveyType", reportFilter.getSurveyType());
             new Select(this.getDriver().findElement(
                     By.id(ELEMENT_ID_SURVEY_TYPE_SELECT)))
-                    .selectByValue("Avatar");
+                    .selectByValue(reportFilter.getSurveyType());
             this.patientTypeSelect.safeSelectByValue(true,
                     reportFilter.getPatientTypes());
             loadCombos("patientType", reportFilter.getPatientTypes());

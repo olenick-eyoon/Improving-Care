@@ -20,6 +20,8 @@ public class OverviewTabIFrame extends ReportGraphsTabIFrame<OverviewTabIFrame> 
     private static final Logger log = LoggerFactory
             .getLogger(OverviewTabIFrame.class);
 
+    private static final long TIMEOUT_SECS_GET_ROWS = 240;
+
     private static final String ELEMENT_ID_GRAPHS_FRAME = "visframe";
     private static final String ELEMENT_ID_RESULTS_FRAME = "ovrvwframe";
     private static final String FINAL_ITEM_NAME = "Total";
@@ -84,8 +86,8 @@ public class OverviewTabIFrame extends ReportGraphsTabIFrame<OverviewTabIFrame> 
     }
 
     private List<WebElement> getRows() {
-        List<WebElement> rows = this.getDriver()
-                .findElementsByXPath(XPATH_ROWS);
+        List<WebElement> rows = this.getDriver().findElements(
+                By.xpath(XPATH_ROWS), TIMEOUT_SECS_GET_ROWS);
         rows.remove(0);
         return rows;
     }
