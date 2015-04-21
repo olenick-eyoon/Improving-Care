@@ -396,6 +396,16 @@ public class AvatarMultiselectWebElement extends ExtendedSelectWebElement {
         }
     }
 
+    /**
+     * Convenience method.
+     *
+     * @return Select instance for this.
+     */
+    protected Select overwriteSelect() {
+        this.select = new AvatarSelect(this.safeGetUnderlyingWebElement(), this);
+        return this.select;
+    }
+
     protected void revertSelectSize() {
         if (this.isMultiple()) {
             this.container.getDriver().executeScript(
@@ -439,8 +449,9 @@ public class AvatarMultiselectWebElement extends ExtendedSelectWebElement {
         log.trace("retryDeselectAll()");
         this.sendKeys(Keys.ENTER);
         this.sendKeys(Keys.TAB);
+        this.overwriteSelect();
         this.beforeAction();
-        ((AvatarSelect)this.safeGetSelect()).tryDeselectAll();
+        ((AvatarSelect) this.safeGetSelect()).tryDeselectAll();
         // this.afterAction();
     }
 

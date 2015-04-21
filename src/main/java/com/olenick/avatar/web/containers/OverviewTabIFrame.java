@@ -28,9 +28,9 @@ public class OverviewTabIFrame extends ReportGraphsTabIFrame<OverviewTabIFrame> 
     private static final String XPATH_ROWS = "//td[normalize-space(text())='Total']/../../tr";
     private static final String XPATH_RELATIVE_ITEM_NAME = "td[1]";
     private static final String XPATH_RELATIVE_TOP_BOX_PERCENTAGE = "td[2]";
-    private static final String XPATH_RELATIVE_COUNT = "td[6]";
+    private static final String XPATH_RELATIVE_COUNT = "td[last()-2]";
     // private static final String XPATH_TOTAL_VALUE =
-    // "//td[normalize-space(text())='Total']/../td[6]";
+    // "//td[normalize-space(text())='Total']/../td[last()-2]";
 
     private PatientExperienceIFrame parent;
 

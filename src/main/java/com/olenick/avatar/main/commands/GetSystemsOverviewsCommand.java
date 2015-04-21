@@ -314,6 +314,10 @@ public class GetSystemsOverviewsCommand implements Command {
                                     log.warn("Error fetching values for "
                                             + searchSpec + ", trial number: "
                                             + trial, exception);
+                                } catch (Exception exception) {
+                                    log.error("Failed fetching values for "
+                                            + searchSpec, exception);
+                                    throw exception;
                                 }
                             }
                             if (result == null) {
