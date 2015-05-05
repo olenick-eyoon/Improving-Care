@@ -70,6 +70,18 @@ public class GetSystemsOverviewsCommand implements Command {
     private static final Logger log = LoggerFactory
             .getLogger(GetSystemsOverviewsCommand.class);
 
+    private static final int SHEET_NUMBER_POSITION = 0;
+    private static final int SECTION_TITLE_POSITION = 1;
+    private static final int SYSTEM_CODE_POSITION = 2;
+    private static final int ORGANIZATION_CODE_POSITION = 3;
+    private static final int SURVEY_TYPE_POSITION = 4;
+    private static final int PATIENT_TYPE_POSITION = 5;
+    private static final int FROM_YEAR_POSITION = 6;
+    private static final int FROM_MONTH_POSITION = 7;
+    private static final int TO_YEAR_POSITION = 8;
+    private static final int TO_MONTH_POSITION = 9;
+    private static final int ITEMS_POSITION = 10;
+
     private static final String USERNAME_TEMPLATE = "ielia-test-%03d@avatarsolutions.com";
     private static final String PASSWORD = "Password1";
     private static final long TIMEOUT_SECS_FETCH_VALUES = 900L;
@@ -86,16 +98,6 @@ public class GetSystemsOverviewsCommand implements Command {
     private static final float DEFAULT_ROW_HEIGHT = 15.75f;
     private static final float ROW_HEIGHT_SURVEY_TYPE_TOTALS = 30f;
     private static final float ROW_HEIGHT_SURVEY_TYPE_ALL_VALUES = 60f;
-
-    private static final int SECTION_TITLE_POSITION = 0;
-    private static final int SYSTEM_CODE_POSITION = 1;
-    private static final int ORGANIZATION_CODE_POSITION = 2;
-    private static final int PATIENT_TYPE_POSITION = 3;
-    private static final int FROM_YEAR_POSITION = 4;
-    private static final int FROM_MONTH_POSITION = 5;
-    private static final int TO_YEAR_POSITION = 6;
-    private static final int TO_MONTH_POSITION = 7;
-    private static final int SURVEY_TYPE_POSITION = 8;
 
     private static final String ITEM_NAME_TOTAL = "Total";
     private static final String MULTI_SELECT_ALL = "_FOC_NULL";
@@ -163,7 +165,7 @@ public class GetSystemsOverviewsCommand implements Command {
                     .submit(new Callable<DecoratedOverviewValues>() {
                         @Override
                         public DecoratedOverviewValues call() throws Exception {
-                            DecoratedOverviewValues totals = null;
+                            DecoratedOverviewValues values = null;
                             boolean done = false;
                             int trial = 0;
                             while (!done && trial++ < RETRIES) {
@@ -175,7 +177,7 @@ public class GetSystemsOverviewsCommand implements Command {
                                     // return new DecoratedOverviewValues(
                                     // rNumber, searchSpec,
                                     // new CrossEnvironmentOverviewValues());
-                                    totals = new DecoratedOverviewValues(
+                                    values = new DecoratedOverviewValues(
                                             rNumber, searchSpec, fetchValues(
                                                     user, searchSpec));
                                     done = true;
@@ -190,7 +192,7 @@ public class GetSystemsOverviewsCommand implements Command {
                                     users.offer(user);
                                 }
                             }
-                            if (totals == null) {
+                            if (values == null) {
                                 recordThreadPool.shutdown();
                                 log.error("Failed fetching values for (record: "
                                         + rNumber + ") " + searchSpec);
@@ -198,7 +200,7 @@ public class GetSystemsOverviewsCommand implements Command {
                                         "Error fetching values for (record: "
                                                 + rNumber + ") " + searchSpec);
                             }
-                            return totals;
+                            return values;
                         }
                     }));
         }
@@ -208,8 +210,7 @@ public class GetSystemsOverviewsCommand implements Command {
         for (Future<DecoratedOverviewValues> future : futures) {
             try {
                 DecoratedOverviewValues decoratedOverviewValues = future.get();
-                if (MULTI_SELECT_ALL.equals(decoratedOverviewValues.searchSpec
-                        .getOrganizationCode())) {
+                if (decoratedOverviewValues.searchSpec.getSheetNumber() == 0) {
                     totalsTabRowNumber = this
                             .writeTotals(
                                     workbook,
@@ -472,6 +473,7 @@ public class GetSystemsOverviewsCommand implements Command {
         OverviewValuesSearchSpec searchSpec = new OverviewValuesSearchSpec();
         searchSpec.setCsvFile(csvFile);
         searchSpec.setRecordNumber(record.getRecordNumber());
+        searchSpec.setSheetNumber(record.get(SHEET_NUMBER_POSITION));
         searchSpec.setSectionTitle(record.get(SECTION_TITLE_POSITION));
         searchSpec.setSystemCode(record.get(SYSTEM_CODE_POSITION));
         searchSpec.setOrganizationCode(record.get(ORGANIZATION_CODE_POSITION));
@@ -481,6 +483,7 @@ public class GetSystemsOverviewsCommand implements Command {
                 record.get(FROM_MONTH_POSITION));
         searchSpec.setToMonthSpec(record.get(TO_YEAR_POSITION),
                 record.get(TO_MONTH_POSITION));
+        searchSpec.setItems(record.get(ITEMS_POSITION));
         return searchSpec;
     }
 
@@ -501,19 +504,25 @@ public class GetSystemsOverviewsCommand implements Command {
         this.writeRowDateRange(workbook, sheet, rowNumber++, searchSpec);
 
         // Respondents
-        Long count = this.getCount(crossEnvironmentOverviewValues,
-                Environment.QA, dataSet, ITEM_NAME_TOTAL);
-        this.writeDataSetCount(true, sheet, rowNumber++, count, null,
-                "Respondents");
+        if (searchSpec.isAllItems() || searchSpec.getItems().contains(ITEM_NAME_TOTAL)) {
+            Long count = this.getCount(crossEnvironmentOverviewValues,
+                    Environment.QA, dataSet, ITEM_NAME_TOTAL);
+            this.writeDataSetCount(true, sheet, rowNumber++, count, null,
+                    "Respondents");
+        }
 
         // %TB
         List<String> itemNames;
-        try {
-            itemNames = crossEnvironmentOverviewValues.get(Environment.QA)
-                    .get(dataSet).getItemNames();
-            itemNames.remove(ITEM_NAME_TOTAL);
-        } catch (NullPointerException exception) {
-            itemNames = Collections.emptyList();
+        if (searchSpec.isAllItems()) {
+            try {
+                itemNames = crossEnvironmentOverviewValues.get(Environment.QA)
+                        .get(dataSet).getItemNames();
+                itemNames.remove(ITEM_NAME_TOTAL);
+            } catch (NullPointerException exception) {
+                itemNames = Collections.emptyList();
+            }
+        } else {
+            itemNames = searchSpec.getItems();
         }
         for (String itemName : itemNames) {
             Float tbPercentage = this.getTopBoxPercentage(
