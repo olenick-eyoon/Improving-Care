@@ -67,20 +67,25 @@ public class OverviewTabIFrame extends ReportGraphsTabIFrame<OverviewTabIFrame> 
 
     public OverviewValues getValues() {
         OverviewValues result = new OverviewValues();
-        for (WebElement row : this.getRows()) {
-            String itemName = row
-                    .findElement(By.xpath(XPATH_RELATIVE_ITEM_NAME)).getText()
-                    .trim();
-            long count = Long.valueOf(row
-                    .findElement(By.xpath(XPATH_RELATIVE_COUNT)).getText()
-                    .trim().replace(",", ""));
-            float topBoxPercentage = Float.valueOf(row
-                    .findElement(By.xpath(XPATH_RELATIVE_TOP_BOX_PERCENTAGE))
-                    .getText().trim());
-            result.set(itemName, new OverviewValue(count, topBoxPercentage));
-            if (FINAL_ITEM_NAME.equals(itemName)) {
-                break; // YES! This is awful, I know.
+        if (this.dataAvailable) {
+            for (WebElement row : this.getRows()) {
+                String itemName = row
+                        .findElement(By.xpath(XPATH_RELATIVE_ITEM_NAME))
+                        .getText().trim();
+                long count = Long.valueOf(row
+                        .findElement(By.xpath(XPATH_RELATIVE_COUNT)).getText()
+                        .trim().replace(",", ""));
+                float topBoxPercentage = Float.valueOf(row
+                        .findElement(
+                                By.xpath(XPATH_RELATIVE_TOP_BOX_PERCENTAGE))
+                        .getText().trim());
+                result.set(itemName, new OverviewValue(count, topBoxPercentage));
+                if (FINAL_ITEM_NAME.equals(itemName)) {
+                    break; // YES! This is awful, I know.
+                }
             }
+        } else {
+            result.setDataAvailable(false);
         }
         return result;
     }

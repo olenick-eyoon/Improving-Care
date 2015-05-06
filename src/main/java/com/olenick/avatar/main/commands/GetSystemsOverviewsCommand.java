@@ -113,6 +113,11 @@ public class GetSystemsOverviewsCommand implements Command {
     private static final String LABEL_ALL_VALUES_B = "iCare1";
     private static final String LABEL_TOTALS_A = "Prod";
     private static final String LABEL_TOTALS_B = "QA";
+    private static final String NO_DATA_CELL_VALUE = "N/D";
+
+    private static final Environment[][] ENVIRONMENTS_PER_SHEET = new Environment[][] {
+            new Environment[] { Environment.PRODUCTION, Environment.QA },
+            new Environment[] { Environment.QA } };
 
     private final String inputCSVFilename;
     private final String outputXLSXFilename;
@@ -291,7 +296,8 @@ public class GetSystemsOverviewsCommand implements Command {
             throws FetchSystemTotalsException {
         CrossEnvironmentOverviewValues crossEnvironmentOverviewValues = new CrossEnvironmentOverviewValues();
         final ReportFilter reportFilter = this.buildReportFilter(searchSpec);
-        Environment[] environments = Environment.values();
+        Environment[] environments = ENVIRONMENTS_PER_SHEET[searchSpec
+                .getSheetNumber()];
         final ExecutorService envThreadPool = Executors
                 .newFixedThreadPool(environments.length);
         EnumMap<Environment, Future<DataSetOverviewValues>> futures = new EnumMap<>(
@@ -313,20 +319,23 @@ public class GetSystemsOverviewsCommand implements Command {
                                     done = true;
                                 } catch (WebDriverException exception) {
                                     log.warn("Error fetching values for "
-                                            + searchSpec + ", trial number: "
-                                            + trial, exception);
+                                            + searchSpec + ", " + environment
+                                            + ", trial number: " + trial,
+                                            exception);
                                 } catch (Exception exception) {
                                     log.error("Failed fetching values for "
-                                            + searchSpec, exception);
+                                            + searchSpec + ", " + environment,
+                                            exception);
                                     throw exception;
                                 }
                             }
                             if (result == null) {
                                 log.error("Failed fetching values for "
-                                        + searchSpec);
+                                        + searchSpec + ", " + environment);
                                 throw new FetchSystemTotalsException(
                                         "Error fetching values for "
-                                                + searchSpec);
+                                                + searchSpec + ", "
+                                                + environment);
                             }
                             return result;
                         }
@@ -340,7 +349,7 @@ public class GetSystemsOverviewsCommand implements Command {
                         futureEntry.getValue().get());
             } catch (ExecutionException exception) {
                 log.error("Error while fetching a pair of value maps for "
-                        + environment);
+                        + searchSpec + " on " + environment);
             } catch (InterruptedException exception) {
                 throw new FetchSystemTotalsException("While fetching "
                         + searchSpec + " on " + environment, exception);
@@ -363,7 +372,7 @@ public class GetSystemsOverviewsCommand implements Command {
     private DataSetOverviewValues fetchValues(Environment environment,
             String username, String password,
             OverviewValuesSearchSpec searchSpec, ReportFilter reportFilter) {
-        log.info("Fetching values for " + searchSpec);
+        log.info("Fetching values for " + searchSpec + ", " + environment);
         DataSetOverviewValues result = new DataSetOverviewValues();
         ExtendedRemoteWebDriver driver = null;
         try {
@@ -407,26 +416,36 @@ public class GetSystemsOverviewsCommand implements Command {
         return result;
     }
 
-    private Long getCount(
+    private Object getCount(
             CrossEnvironmentOverviewValues crossEnvironmentOverviewValues,
             Environment environment, DataSet dataSet, String itemName) {
-        Long count;
+        Object count;
         try {
-            count = crossEnvironmentOverviewValues.get(environment)
-                    .get(dataSet).get(itemName).getCount();
+            OverviewValues values = crossEnvironmentOverviewValues.get(
+                    environment).get(dataSet);
+            if (values.isDataAvailable()) {
+                count = values.get(itemName).getCount();
+            } else {
+                count = NO_DATA_CELL_VALUE;
+            }
         } catch (NullPointerException exception) {
             count = null;
         }
         return count;
     }
 
-    private Float getTopBoxPercentage(
+    private Object getTopBoxPercentage(
             CrossEnvironmentOverviewValues crossEnvironmentOverviewValues,
             Environment environment, DataSet dataSet, String itemName) {
-        Float tbPercentage;
+        Object tbPercentage;
         try {
-            tbPercentage = crossEnvironmentOverviewValues.get(environment)
-                    .get(dataSet).get(itemName).getTopBoxPercentage();
+            OverviewValues values = crossEnvironmentOverviewValues.get(
+                    environment).get(dataSet);
+            if (values.isDataAvailable()) {
+                tbPercentage = values.get(itemName).getTopBoxPercentage();
+            } else {
+                tbPercentage = NO_DATA_CELL_VALUE;
+            }
         } catch (NullPointerException exception) {
             tbPercentage = null;
         }
@@ -504,8 +523,9 @@ public class GetSystemsOverviewsCommand implements Command {
         this.writeRowDateRange(workbook, sheet, rowNumber++, searchSpec);
 
         // Respondents
-        if (searchSpec.isAllItems() || searchSpec.getItems().contains(ITEM_NAME_TOTAL)) {
-            Long count = this.getCount(crossEnvironmentOverviewValues,
+        if (searchSpec.isAllItems()
+                || searchSpec.getItems().contains(ITEM_NAME_TOTAL)) {
+            Object count = this.getCount(crossEnvironmentOverviewValues,
                     Environment.QA, dataSet, ITEM_NAME_TOTAL);
             this.writeDataSetCount(true, sheet, rowNumber++, count, null,
                     "Respondents");
@@ -525,7 +545,7 @@ public class GetSystemsOverviewsCommand implements Command {
             itemNames = searchSpec.getItems();
         }
         for (String itemName : itemNames) {
-            Float tbPercentage = this.getTopBoxPercentage(
+            Object tbPercentage = this.getTopBoxPercentage(
                     crossEnvironmentOverviewValues, Environment.QA, dataSet,
                     itemName);
             this.writeDataSetCount(true, sheet, rowNumber++, tbPercentage,
@@ -539,18 +559,20 @@ public class GetSystemsOverviewsCommand implements Command {
         return rowNumber;
     }
 
-    private void writeCellValue(Cell cell, Number value) {
+    private void writeCellValue(Cell cell, Object value) {
         if (value == null) {
             cell.setCellValue(STRING_VALUE_ERROR);
         } else if (value instanceof Long) {
             cell.setCellValue((long) value);
         } else if (value instanceof Float) {
             cell.setCellValue((float) value);
+        } else {
+            cell.setCellValue(value.toString());
         }
     }
 
     private void writeDataSetCount(boolean fetch, Sheet sheet, int rowNumber,
-            Number valueA, Number valueB, String itemName) {
+            Object valueA, Object valueB, String itemName) {
         Row row = sheet.createRow(rowNumber);
 
         row.createCell(0).setCellValue(itemName);
@@ -745,7 +767,7 @@ public class GetSystemsOverviewsCommand implements Command {
 
         // Qualified
         boolean qualified = searchSpec.isQualifiedEnabled();
-        Long valueA = null, valueB = null;
+        Object valueA = null, valueB = null;
         if (qualified) {
             valueA = this.getCount(crossEnvironmentOverviewValues,
                     Environment.PRODUCTION, DataSet.QUALIFIED, ITEM_NAME_TOTAL);

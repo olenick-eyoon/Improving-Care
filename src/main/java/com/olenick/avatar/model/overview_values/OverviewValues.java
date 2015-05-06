@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
  */
 public class OverviewValues {
     private final Map<String, OverviewValue> values;
+    private boolean dataAvailable = true;
 
     public OverviewValues() {
         this.values = new ConcurrentSkipListMap<>();
@@ -30,10 +31,19 @@ public class OverviewValues {
         this.values.put(itemName, value);
     }
 
+    public boolean isDataAvailable() {
+        return dataAvailable;
+    }
+
+    public void setDataAvailable(boolean dataAvailable) {
+        this.dataAvailable = dataAvailable;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("OverviewValues{");
         sb.append("values=").append(values);
+        sb.append(", dataAvailable=").append(dataAvailable);
         sb.append('}');
         return sb.toString();
     }
