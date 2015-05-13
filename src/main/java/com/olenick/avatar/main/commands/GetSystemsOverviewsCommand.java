@@ -384,8 +384,8 @@ public class GetSystemsOverviewsCommand implements Command {
                     .loadPatientExperience(driver, environment.getURLRoot(),
                             username, password);
             OverviewValues valuesAll = patientExperienceIFrame
-                    .accessPanelFrame().changeSystem(reportFilter)
-                    .configureFilters(reportFilter).applyConfiguredFilters()
+                    .accessPanelFrame().changeSystem(myReportFilter)
+                    .configureFilters(myReportFilter).applyConfiguredFilters()
                     .openOverviewTab().waitForElementsToLoad().getValues();
             result.set(dataSet, valuesAll);
             log.info("OverviewValues (" + environment + ", " + dataSet + ") = "
