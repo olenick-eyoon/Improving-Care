@@ -55,10 +55,10 @@ import com.olenick.avatar.model.overview_values.CrossEnvironmentOverviewValues;
 import com.olenick.avatar.model.overview_values.DataSetOverviewValues;
 import com.olenick.avatar.model.overview_values.OverviewValues;
 import com.olenick.avatar.model.overview_values.OverviewValuesSearchSpec;
-import com.olenick.avatar.poi.excel.RegionFormatter;
 import com.olenick.avatar.web.ExtendedRemoteWebDriver;
 import com.olenick.avatar.web.containers.LoginPage;
 import com.olenick.avatar.web.containers.PatientExperienceIFrame;
+import com.olenick.util.poi.excel.RegionFormatter;
 
 /**
  * Get Systems "Overview" (tab) values command.
