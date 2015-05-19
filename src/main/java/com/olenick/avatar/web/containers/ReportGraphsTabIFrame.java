@@ -17,7 +17,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.olenick.avatar.web.ExtendedRemoteWebDriver;
+import com.olenick.avatar.model.report_values.ReportValues;
+import com.olenick.selenium.drivers.ExtendedRemoteWebDriver;
 
 /**
  * Report graphs tab (e.g.: "Overview", "Composite/Item", "Side-by-Side",
@@ -108,6 +109,8 @@ public abstract class ReportGraphsTabIFrame<T extends ReportGraphsTabIFrame<T>>
 
     public abstract T exportToPDF();
 
+    public abstract ReportValues getValues();
+
     protected void handlePDFNewWindow() {
         new WebDriverWait(this.getDriver(),
                 TIMEOUT_SECS_EXPORT_ALL_TO_PDF_WINDOW_OPEN)
@@ -129,5 +132,12 @@ public abstract class ReportGraphsTabIFrame<T extends ReportGraphsTabIFrame<T>>
                 && graphElements.containsKey(NO_DATA_INDICATOR)) {
             this.dataAvailable = false;
         }
+    }
+
+    public T waitForElementsToLoad() {
+        throw new RuntimeException("This should not have happened. "
+                + "Either you didn't implement this method for the "
+                + "corresponding child class or Java has done it again with "
+                + "its static type inference.");
     }
 }

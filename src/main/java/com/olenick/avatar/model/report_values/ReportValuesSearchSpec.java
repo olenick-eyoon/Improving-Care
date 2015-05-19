@@ -1,4 +1,4 @@
-package com.olenick.avatar.model.overview_values;
+package com.olenick.avatar.model.report_values;
 
 import java.io.File;
 import java.time.Month;
@@ -17,7 +17,7 @@ import com.olenick.avatar.model.MonthSpec;
 /**
  * TODO: Use something like JSefa.
  */
-public class OverviewValuesSearchSpec {
+public class ReportValuesSearchSpec {
     private static final String ALL_ITEMS = "ALL";
     private static final String ITEMS_SEPARATOR = "\\|";
     private static final Set<String> NO_QUALIFIED_SURVEY_TYPES = Collections
@@ -35,14 +35,14 @@ public class OverviewValuesSearchSpec {
     private MonthSpec toMonthSpec;
     private List<String> items;
 
-    public OverviewValuesSearchSpec() {
+    public ReportValuesSearchSpec() {
         this.items = Collections.emptyList();
     }
 
-    public OverviewValuesSearchSpec(File csvFile, long recordNumber,
-            int sheetNumber, String sectionTitle, String systemCode,
-            String organizationCode, String surveyType, String patientType,
-            MonthSpec fromMonthSpec, MonthSpec toMonthSpec, List<String> items) {
+    public ReportValuesSearchSpec(File csvFile, long recordNumber,
+                                  int sheetNumber, String sectionTitle, String systemCode,
+                                  String organizationCode, String surveyType, String patientType,
+                                  MonthSpec fromMonthSpec, MonthSpec toMonthSpec, List<String> items) {
         this.csvFile = csvFile;
         this.recordNumber = recordNumber;
         this.sheetNumber = sheetNumber;
@@ -56,11 +56,11 @@ public class OverviewValuesSearchSpec {
         this.items = items;
     }
 
-    public OverviewValuesSearchSpec(File csvFile, long recordNumber,
-            int sheetNumber, String sectionTitle, String systemCode,
-            String organizationCode, String surveyType, String patientType,
-            String fromYear, String fromMonth, String toYear, String toMonth,
-            String items) {
+    public ReportValuesSearchSpec(File csvFile, long recordNumber,
+                                  int sheetNumber, String sectionTitle, String systemCode,
+                                  String organizationCode, String surveyType, String patientType,
+                                  String fromYear, String fromMonth, String toYear, String toMonth,
+                                  String items) {
         this(csvFile, recordNumber, sheetNumber, sectionTitle, systemCode,
                 organizationCode, surveyType, patientType, buildMonthSpec(
                         fromYear, fromMonth), buildMonthSpec(toYear, toMonth),
@@ -191,7 +191,7 @@ public class OverviewValuesSearchSpec {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        OverviewValuesSearchSpec that = (OverviewValuesSearchSpec) o;
+        ReportValuesSearchSpec that = (ReportValuesSearchSpec) o;
 
         if (csvFile != null ? !csvFile.equals(that.csvFile)
                 : that.csvFile != null)
@@ -252,7 +252,7 @@ public class OverviewValuesSearchSpec {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("OverviewValuesSearchSpec{");
+        final StringBuilder sb = new StringBuilder("ReportValuesSearchSpec{");
         sb.append("csv=").append(csvFile);
         sb.append(", recNo=").append(recordNumber);
         sb.append(", sheetNo=").append(sheetNumber);

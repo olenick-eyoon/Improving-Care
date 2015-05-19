@@ -1,9 +1,11 @@
-package com.olenick.avatar.model.overview_values;
+package com.olenick.avatar.model.report_values;
+
+import com.olenick.avatar.model.ReportTab;
 
 /**
  * Single Overview tab value.
  */
-public class OverviewValue {
+public class OverviewValue implements ReportValue {
     private final float topBoxPercentage;
     private final long count;
 
@@ -27,5 +29,10 @@ public class OverviewValue {
         sb.append(", %TB=").append(topBoxPercentage);
         sb.append('}');
         return sb.toString();
+    }
+
+    @Override
+    public ReportTab getTab() {
+        return ReportTab.OVERVIEW;
     }
 }

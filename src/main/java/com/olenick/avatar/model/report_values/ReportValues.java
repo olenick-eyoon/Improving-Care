@@ -1,4 +1,4 @@
-package com.olenick.avatar.model.overview_values;
+package com.olenick.avatar.model.report_values;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,15 +10,15 @@ import javax.validation.constraints.NotNull;
 /**
  * Overview tab values for a single view.
  */
-public class OverviewValues {
-    private final Map<String, OverviewValue> values;
+public class ReportValues {
+    private final Map<String, ReportValue> values;
     private boolean dataAvailable = true;
 
-    public OverviewValues() {
+    public ReportValues() {
         this.values = new ConcurrentSkipListMap<>();
     }
 
-    public OverviewValue get(@NotNull final String itemName) {
+    public ReportValue get(@NotNull final String itemName) {
         return this.values.get(itemName);
     }
 
@@ -27,7 +27,7 @@ public class OverviewValues {
     }
 
     public void set(@NotNull final String itemName,
-            @NotNull final OverviewValue value) {
+            @NotNull final ReportValue value) {
         this.values.put(itemName, value);
     }
 
@@ -41,7 +41,7 @@ public class OverviewValues {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("OverviewValues{");
+        final StringBuilder sb = new StringBuilder("ReportValues{");
         sb.append("values=").append(values);
         sb.append(", dataAvailable=").append(dataAvailable);
         sb.append('}');

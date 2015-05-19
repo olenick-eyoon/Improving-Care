@@ -14,7 +14,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.olenick.avatar.web.ExtendedRemoteWebDriver;
+import com.olenick.selenium.containers.WebContainer;
+import com.olenick.selenium.drivers.ExtendedRemoteWebDriver;
 
 /**
  * Welcome page iframe.

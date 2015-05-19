@@ -6,7 +6,7 @@
 
     <groupId>com.olenick</groupId>
     <artifactId>Improving-Care</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -74,12 +74,12 @@
         <dependency>
             <groupId>com.olenick.util.poi</groupId>
             <artifactId>apache-poi-util</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>com.olenick.selenium</groupId>
             <artifactId>selenium-wrapper</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0.3</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

@@ -1,5 +1,7 @@
 package com.olenick.avatar.model;
 
+import com.olenick.selenium.model.Valued;
+
 /**
  * Group By in the date range section of a report filter.
  */

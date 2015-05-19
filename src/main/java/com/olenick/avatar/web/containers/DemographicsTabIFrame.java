@@ -6,7 +6,9 @@ import org.openqa.selenium.By;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.olenick.avatar.web.ExtendedRemoteWebDriver;
+import com.olenick.avatar.exceptions.NotImplementedException;
+import com.olenick.avatar.model.report_values.ReportValues;
+import com.olenick.selenium.drivers.ExtendedRemoteWebDriver;
 
 /**
  * Report composite tab.
@@ -69,5 +71,10 @@ public class DemographicsTabIFrame extends
                 .click();
         this.handlePDFNewWindow();
         return this;
+    }
+
+    @Override
+    public ReportValues getValues() {
+        throw new NotImplementedException();
     }
 }

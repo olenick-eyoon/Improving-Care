@@ -5,9 +5,10 @@ import javax.validation.constraints.NotNull;
 import org.openqa.selenium.By;
 
 import com.olenick.avatar.model.ResponseFilter;
-import com.olenick.avatar.web.ExtendedRemoteWebDriver;
-import com.olenick.avatar.web.elements.ExtendedSelectWebElement;
-import com.olenick.avatar.web.elements.ExtendedWebElement;
+import com.olenick.selenium.containers.WebContainer;
+import com.olenick.selenium.drivers.ExtendedRemoteWebDriver;
+import com.olenick.selenium.elements.ExtendedSelectWebElement;
+import com.olenick.selenium.elements.ExtendedWebElement;
 
 /**
  * "Filter by Response" panel inside "REPORT FILTERS".

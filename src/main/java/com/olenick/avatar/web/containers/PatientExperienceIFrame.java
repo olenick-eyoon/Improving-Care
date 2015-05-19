@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.UnhandledAlertException;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,16 +17,17 @@ import org.slf4j.LoggerFactory;
 import com.olenick.avatar.model.Calculation;
 import com.olenick.avatar.model.DataSet;
 import com.olenick.avatar.model.DateKey;
+import com.olenick.avatar.model.DateRangeGroupBy;
 import com.olenick.avatar.model.PatientDemographics;
 import com.olenick.avatar.model.ProviderFilter;
 import com.olenick.avatar.model.ReportFilter;
 import com.olenick.avatar.model.ReportTab;
 import com.olenick.avatar.model.ResponseFilter;
-import com.olenick.avatar.web.ExtendedRemoteWebDriver;
 import com.olenick.avatar.web.elements.AvatarMultiselectWebElement;
-import com.olenick.avatar.web.elements.ExclusiveGroup;
-import com.olenick.avatar.web.elements.ExtendedSelectWebElement;
-import com.olenick.avatar.web.elements.ExtendedWebElement;
+import com.olenick.selenium.drivers.ExtendedRemoteWebDriver;
+import com.olenick.selenium.elements.ExclusiveGroup;
+import com.olenick.selenium.elements.ExtendedSelectWebElement;
+import com.olenick.selenium.elements.ExtendedWebElement;
 
 /**
  * Improving Care Patient Experience iframe.
@@ -57,6 +59,7 @@ public class PatientExperienceIFrame extends
     private static final String ELEMENT_ID_DEMOGRAPHICS_TAB = "tabitem1";
     private static final String ELEMENT_ID_DEPARTMENT_SELECT = "department";
     private static final String ELEMENT_ID_GROUP_BY_SELECT = "date_option";
+    private static final String ELEMENT_ID_HCAHPS_NATIONAL_TAB = "tabitem7";
     private static final String ELEMENT_ID_ITEM_SELECT = "item";
     private static final String ELEMENT_ID_KEEP_VISIBLE_CHECKBOX = "checkbox1_0";
     private static final String ELEMENT_ID_LOCATION_SELECT = "location";
@@ -74,6 +77,7 @@ public class PatientExperienceIFrame extends
     private static final String ELEMENT_ID_SIDE_BY_SIDE_TAB = "tabitem3";
     private static final String ELEMENT_ID_SURVEY_TYPE_SELECT = "surveytype";
     private static final String ELEMENT_ID_SYSTEM_SELECT = "system";
+    private static final String XPATH_RELATIVE_ALL_REPORT_TABS = "../span";
 
     private final LoggedInWelcomePage parent;
 
@@ -115,7 +119,7 @@ public class PatientExperienceIFrame extends
 
     // Actual report tabs
     private ExtendedWebElement overviewTab, compositeTab, sideBySideTab,
-            demographicsTab;
+            demographicsTab, hcahpsNationalTab;
     private ExclusiveGroup<ReportTab> tabs;
     private EnumMap<ReportTab, ReportGraphsTabIFrame<?>> tabIFrames;
 
@@ -236,8 +240,11 @@ public class PatientExperienceIFrame extends
                     .safePick(reportFilter.getFrom());
             this.openDatePickerTo().waitForElementsToLoad()
                     .safePick(reportFilter.getTo());
-            this.dateRangeGroupBySelect.safeSelectByValue(reportFilter
-                    .getGroupBy());
+            DateRangeGroupBy groupBy = reportFilter.getGroupBy();
+            if (groupBy != null) {
+                this.dateRangeGroupBySelect.safeSelectByValue(groupBy
+                        .getValue());
+            }
             this.scrollUp();
         }
         return this;
@@ -290,6 +297,11 @@ public class PatientExperienceIFrame extends
     public DemographicsTabIFrame openDemographicsTab() {
         return (DemographicsTabIFrame) this
                 .openReportTab(ReportTab.DEMOGRAPHICS);
+    }
+
+    public HCAHPSNationalTabIFrame openHCAHPSNationalTab() {
+        return (HCAHPSNationalTabIFrame) this
+                .openReportTab(ReportTab.HCAHPS_NATIONAL);
     }
 
     public OverviewTabIFrame openOverviewTab() {
@@ -420,26 +432,36 @@ public class PatientExperienceIFrame extends
     private void initActualReportTabElements() {
         this.tabs = new ExclusiveGroup<>(ReportTab.class);
         this.tabIFrames = new EnumMap<>(ReportTab.class);
+
         this.overviewTab = new ExtendedWebElement(this);
         OverviewTabIFrame overviewTabIFrame = new OverviewTabIFrame(
                 this.getDriver(), this);
         this.tabs.add(ReportTab.OVERVIEW, this.overviewTab);
         this.tabIFrames.put(ReportTab.OVERVIEW, overviewTabIFrame);
+
         this.compositeTab = new ExtendedWebElement(this);
         CompositeTabIFrame compositeTabIFrame = new CompositeTabIFrame(
                 this.getDriver(), this);
         this.tabs.add(ReportTab.COMPOSITE, this.compositeTab);
         this.tabIFrames.put(ReportTab.COMPOSITE, compositeTabIFrame);
+
         this.sideBySideTab = new ExtendedWebElement(this);
         SideBySideTabIFrame sideBySideTabIFrame = new SideBySideTabIFrame(
                 this.getDriver(), this);
         this.tabs.add(ReportTab.SIDE_BY_SIDE, this.sideBySideTab);
         this.tabIFrames.put(ReportTab.SIDE_BY_SIDE, sideBySideTabIFrame);
+
         this.demographicsTab = new ExtendedWebElement(this);
         DemographicsTabIFrame demographicsTabIFrame = new DemographicsTabIFrame(
                 this.getDriver(), this);
         this.tabs.add(ReportTab.DEMOGRAPHICS, this.demographicsTab);
         this.tabIFrames.put(ReportTab.DEMOGRAPHICS, demographicsTabIFrame);
+
+        this.hcahpsNationalTab = new ExtendedWebElement(this);
+        HCAHPSNationalTabIFrame hcahpsNationalTabIFrame = new HCAHPSNationalTabIFrame(
+                this.getDriver(), this);
+        this.tabs.add(ReportTab.HCAHPS_NATIONAL, this.hcahpsNationalTab);
+        this.tabIFrames.put(ReportTab.HCAHPS_NATIONAL, hcahpsNationalTabIFrame);
     }
 
     protected void loadCombos(String control, String value) {
@@ -517,6 +539,15 @@ public class PatientExperienceIFrame extends
                 this.sideBySideTab, this.demographicsTab).byId(true,
                 ELEMENT_ID_OVERVIEW_TAB, ELEMENT_ID_COMPOSITE_TAB,
                 ELEMENT_ID_SIDE_BY_SIDE_TAB, ELEMENT_ID_DEMOGRAPHICS_TAB);
+        // TODO: Find a better way to do this...
+        for (WebElement tabRelated : this.overviewTab.findElements(By
+                .xpath(XPATH_RELATIVE_ALL_REPORT_TABS))) {
+            if (ELEMENT_ID_HCAHPS_NATIONAL_TAB.equals(tabRelated
+                    .getAttribute("id"))) {
+                this.hcahpsNationalTab.setUnderlyingWebElement(tabRelated);
+                break;
+            }
+        }
     }
 
     protected void waitForSurveySelectionToLoad() {

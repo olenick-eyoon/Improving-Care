@@ -14,7 +14,7 @@ import com.olenick.avatar.exceptions.FeatureExecutorListenerException;
 import com.olenick.avatar.uses.PatientExperienceFeature;
 import com.olenick.avatar.uses.PatientExperienceScenario;
 import com.olenick.avatar.util.FilenameUtils;
-import com.olenick.avatar.web.ExtendedRemoteWebDriver;
+import com.olenick.selenium.drivers.ExtendedRemoteWebDriver;
 
 /**
  * Error Handler listener of FeatureExecutor.

@@ -5,9 +5,10 @@ import javax.validation.constraints.NotNull;
 import org.openqa.selenium.By;
 
 import com.olenick.avatar.model.PatientDemographics;
-import com.olenick.avatar.web.ExtendedRemoteWebDriver;
 import com.olenick.avatar.web.elements.AvatarMultiselectWebElement;
-import com.olenick.avatar.web.elements.ExtendedWebElement;
+import com.olenick.selenium.containers.WebContainer;
+import com.olenick.selenium.drivers.ExtendedRemoteWebDriver;
+import com.olenick.selenium.elements.ExtendedWebElement;
 
 /**
  * "Filter by Demographics" panel inside "REPORT FILTERS".

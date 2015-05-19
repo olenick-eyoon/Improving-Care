@@ -14,8 +14,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.olenick.avatar.model.MonthSpec;
-import com.olenick.avatar.web.ExtendedRemoteWebDriver;
-import com.olenick.avatar.web.elements.ExtendedWebElement;
+import com.olenick.selenium.containers.WebContainer;
+import com.olenick.selenium.drivers.ExtendedRemoteWebDriver;
+import com.olenick.selenium.elements.ExtendedWebElement;
 
 /**
  * Date Picker panel.

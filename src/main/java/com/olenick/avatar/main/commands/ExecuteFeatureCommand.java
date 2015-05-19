@@ -11,7 +11,7 @@ import com.olenick.avatar.exceptions.FeatureExecutorListenerException;
 import com.olenick.avatar.main.FeatureExecutor;
 import com.olenick.avatar.reports.ErrorHandler;
 import com.olenick.avatar.reports.FeatureTimer;
-import com.olenick.avatar.web.ExtendedRemoteWebDriver;
+import com.olenick.selenium.drivers.ExtendedRemoteWebDriver;
 
 /**
  * Execute feature command.

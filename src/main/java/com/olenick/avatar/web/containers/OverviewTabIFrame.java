@@ -9,9 +9,9 @@ import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.olenick.avatar.model.overview_values.OverviewValue;
-import com.olenick.avatar.model.overview_values.OverviewValues;
-import com.olenick.avatar.web.ExtendedRemoteWebDriver;
+import com.olenick.avatar.model.report_values.OverviewValue;
+import com.olenick.avatar.model.report_values.ReportValues;
+import com.olenick.selenium.drivers.ExtendedRemoteWebDriver;
 
 /**
  * Report Overview tab.
@@ -65,8 +65,8 @@ public class OverviewTabIFrame extends ReportGraphsTabIFrame<OverviewTabIFrame> 
                 "This operation is non-existent in the Overview tab.");
     }
 
-    public OverviewValues getValues() {
-        OverviewValues result = new OverviewValues();
+    public ReportValues getValues() {
+        ReportValues result = new ReportValues();
         if (this.dataAvailable) {
             for (WebElement row : this.getRows()) {
                 String itemName = row

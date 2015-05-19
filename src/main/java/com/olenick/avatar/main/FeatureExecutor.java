@@ -19,11 +19,11 @@ import com.olenick.avatar.reports.FeatureExecutorEvent;
 import com.olenick.avatar.reports.FeatureExecutorListener;
 import com.olenick.avatar.uses.PatientExperienceFeature;
 import com.olenick.avatar.uses.PatientExperienceScenario;
-import com.olenick.avatar.web.ExtendedRemoteWebDriver;
 import com.olenick.avatar.web.containers.LoggedInWelcomePage;
 import com.olenick.avatar.web.containers.LoginPage;
 import com.olenick.avatar.web.containers.PatientExperienceIFrame;
 import com.olenick.avatar.web.containers.ReportGraphsTabIFrame;
+import com.olenick.selenium.drivers.ExtendedRemoteWebDriver;
 
 /**
  * Feature Executor

@@ -2,7 +2,8 @@ package com.olenick.avatar.web.containers;
 
 import javax.validation.constraints.NotNull;
 
-import com.olenick.avatar.web.ExtendedRemoteWebDriver;
+import com.olenick.selenium.containers.WebContainer;
+import com.olenick.selenium.drivers.ExtendedRemoteWebDriver;
 
 /**
  * Improving Care Home page.

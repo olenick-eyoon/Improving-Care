@@ -6,8 +6,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.olenick.avatar.web.ExtendedRemoteWebDriver;
-import com.olenick.avatar.web.elements.ExtendedWebElement;
+import com.olenick.selenium.containers.WebContainer;
+import com.olenick.selenium.drivers.ExtendedRemoteWebDriver;
+import com.olenick.selenium.elements.ExtendedWebElement;
 
 /**
  * Improving Care Welcome page when logged in.

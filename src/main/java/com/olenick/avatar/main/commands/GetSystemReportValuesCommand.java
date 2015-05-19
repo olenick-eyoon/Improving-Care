@@ -47,17 +47,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.olenick.avatar.exceptions.FetchSystemTotalsException;
+import com.olenick.avatar.main.commands.system_report_values.ReportValueAdapter;
 import com.olenick.avatar.model.DataSet;
 import com.olenick.avatar.model.Environment;
 import com.olenick.avatar.model.ReportFilter;
+import com.olenick.avatar.model.ReportTab;
 import com.olenick.avatar.model.User;
-import com.olenick.avatar.model.overview_values.CrossEnvironmentOverviewValues;
-import com.olenick.avatar.model.overview_values.DataSetOverviewValues;
-import com.olenick.avatar.model.overview_values.OverviewValues;
-import com.olenick.avatar.model.overview_values.OverviewValuesSearchSpec;
-import com.olenick.avatar.web.ExtendedRemoteWebDriver;
+import com.olenick.avatar.model.report_values.CrossEnvironmentReportValues;
+import com.olenick.avatar.model.report_values.DataSetReportValues;
+import com.olenick.avatar.model.report_values.ReportValues;
+import com.olenick.avatar.model.report_values.ReportValuesSearchSpec;
 import com.olenick.avatar.web.containers.LoginPage;
 import com.olenick.avatar.web.containers.PatientExperienceIFrame;
+import com.olenick.selenium.drivers.ExtendedRemoteWebDriver;
+import com.olenick.selenium.exceptions.ElementNotLoadedException;
 import com.olenick.util.poi.excel.RegionFormatter;
 
 /**
@@ -66,9 +69,9 @@ import com.olenick.util.poi.excel.RegionFormatter;
  * TODO: Split this class into several builders.
  * </p>
  */
-public class GetSystemsOverviewsCommand implements Command {
+public class GetSystemReportValuesCommand implements Command {
     private static final Logger log = LoggerFactory
-            .getLogger(GetSystemsOverviewsCommand.class);
+            .getLogger(GetSystemReportValuesCommand.class);
 
     private static final int SHEET_NUMBER_POSITION = 0;
     private static final int SECTION_TITLE_POSITION = 1;
@@ -115,6 +118,11 @@ public class GetSystemsOverviewsCommand implements Command {
     private static final String LABEL_TOTALS_B = "QA";
     private static final String NO_DATA_CELL_VALUE = "N/D";
 
+    public static final int SHEET_INDEX_ALL_VALUES = 1;
+    public static final String SURVEY_TYPE_HCAHPS = "HCAHPS";
+
+    private static final ReportValueAdapter REPORT_VALUE_ADAPTER = new ReportValueAdapter();
+
     private static final Environment[][] ENVIRONMENTS_PER_SHEET = new Environment[][] {
             new Environment[] { Environment.PRODUCTION, Environment.QA },
             new Environment[] { Environment.QA } };
@@ -127,7 +135,7 @@ public class GetSystemsOverviewsCommand implements Command {
     private Font boldRedFont;
     private Font redFont;
 
-    public GetSystemsOverviewsCommand(@NotNull final String inputCSVFilename,
+    public GetSystemReportValuesCommand(@NotNull final String inputCSVFilename,
             @NotNull final String outputXLSXFilename) {
         this.inputCSVFilename = inputCSVFilename;
         this.outputXLSXFilename = outputXLSXFilename;
@@ -163,7 +171,7 @@ public class GetSystemsOverviewsCommand implements Command {
         List<Future<DecoratedOverviewValues>> futures = new ArrayList<>(
                 records.size());
         for (CSVRecord record : records) {
-            final OverviewValuesSearchSpec searchSpec = this.getSearchSpec(
+            final ReportValuesSearchSpec searchSpec = this.getSearchSpec(
                     inputCSVFile, record);
             final int rNumber = recordNumber++;
             futures.add(recordThreadPool
@@ -181,12 +189,13 @@ public class GetSystemsOverviewsCommand implements Command {
                                     // XLSX Format testing:
                                     // return new DecoratedOverviewValues(
                                     // rNumber, searchSpec,
-                                    // new CrossEnvironmentOverviewValues());
+                                    // new CrossEnvironmentReportValues());
                                     values = new DecoratedOverviewValues(
                                             rNumber, searchSpec, fetchValues(
                                                     user, searchSpec));
                                     done = true;
-                                } catch (WebDriverException exception) {
+                                } catch (ElementNotLoadedException
+                                        | WebDriverException exception) {
                                     log.warn(
                                             "Error fetching values for (record: "
                                                     + rNumber + ") "
@@ -222,7 +231,7 @@ public class GetSystemsOverviewsCommand implements Command {
                                     totalsSheet,
                                     totalsTabRowNumber,
                                     decoratedOverviewValues.searchSpec,
-                                    decoratedOverviewValues.crossEnvironmentOverviewValues,
+                                    decoratedOverviewValues.crossEnvironmentReportValues,
                                     today);
                 } else {
                     specificOrgsTabRowNumber = this
@@ -231,7 +240,7 @@ public class GetSystemsOverviewsCommand implements Command {
                                     allValuesSheet,
                                     specificOrgsTabRowNumber,
                                     decoratedOverviewValues.searchSpec,
-                                    decoratedOverviewValues.crossEnvironmentOverviewValues,
+                                    decoratedOverviewValues.crossEnvironmentReportValues,
                                     today);
                 }
                 this.writeWorkbook(workbook, outputXLSXFilename);
@@ -252,7 +261,7 @@ public class GetSystemsOverviewsCommand implements Command {
      * @param searchSpec
      * @return
      */
-    private ReportFilter buildReportFilter(OverviewValuesSearchSpec searchSpec) {
+    private ReportFilter buildReportFilter(ReportValuesSearchSpec searchSpec) {
         ReportFilter reportFilter = new ReportFilter();
         reportFilter.setSystem(searchSpec.getSystemCode());
         reportFilter.setOrganizations(searchSpec.getOrganizationCode());
@@ -291,23 +300,23 @@ public class GetSystemsOverviewsCommand implements Command {
         return sheet;
     }
 
-    private CrossEnvironmentOverviewValues fetchValues(final User user,
-            final OverviewValuesSearchSpec searchSpec)
+    private CrossEnvironmentReportValues fetchValues(final User user,
+            final ReportValuesSearchSpec searchSpec)
             throws FetchSystemTotalsException {
-        CrossEnvironmentOverviewValues crossEnvironmentOverviewValues = new CrossEnvironmentOverviewValues();
+        CrossEnvironmentReportValues crossEnvironmentReportValues = new CrossEnvironmentReportValues();
         final ReportFilter reportFilter = this.buildReportFilter(searchSpec);
         Environment[] environments = ENVIRONMENTS_PER_SHEET[searchSpec
                 .getSheetNumber()];
         final ExecutorService envThreadPool = Executors
                 .newFixedThreadPool(environments.length);
-        EnumMap<Environment, Future<DataSetOverviewValues>> futures = new EnumMap<>(
+        EnumMap<Environment, Future<DataSetReportValues>> futures = new EnumMap<>(
                 Environment.class);
         for (final Environment environment : environments) {
             futures.put(environment,
-                    envThreadPool.submit(new Callable<DataSetOverviewValues>() {
+                    envThreadPool.submit(new Callable<DataSetReportValues>() {
                         @Override
-                        public DataSetOverviewValues call() throws Exception {
-                            DataSetOverviewValues result = null;
+                        public DataSetReportValues call() throws Exception {
+                            DataSetReportValues result = null;
                             boolean done = false;
                             int trial = 0;
                             while (!done && trial++ < RETRIES) {
@@ -317,7 +326,8 @@ public class GetSystemsOverviewsCommand implements Command {
                                             user.getPassword(), searchSpec,
                                             reportFilter);
                                     done = true;
-                                } catch (WebDriverException exception) {
+                                } catch (ElementNotLoadedException
+                                        | WebDriverException exception) {
                                     log.warn("Error fetching values for "
                                             + searchSpec + ", " + environment
                                             + ", trial number: " + trial,
@@ -341,11 +351,11 @@ public class GetSystemsOverviewsCommand implements Command {
                         }
                     }));
         }
-        for (Map.Entry<Environment, Future<DataSetOverviewValues>> futureEntry : futures
+        for (Map.Entry<Environment, Future<DataSetReportValues>> futureEntry : futures
                 .entrySet()) {
             Environment environment = futureEntry.getKey();
             try {
-                crossEnvironmentOverviewValues.set(futureEntry.getKey(),
+                crossEnvironmentReportValues.set(futureEntry.getKey(),
                         futureEntry.getValue().get());
             } catch (ExecutionException exception) {
                 log.error("Error while fetching a pair of value maps for "
@@ -356,7 +366,7 @@ public class GetSystemsOverviewsCommand implements Command {
             }
         }
         envThreadPool.shutdown();
-        return crossEnvironmentOverviewValues;
+        return crossEnvironmentReportValues;
     }
 
     /**
@@ -369,13 +379,14 @@ public class GetSystemsOverviewsCommand implements Command {
      * @param reportFilter "Template" report filter.
      * @return Overview values for all data-sets.
      */
-    private DataSetOverviewValues fetchValues(Environment environment,
+    private DataSetReportValues fetchValues(Environment environment,
             String username, String password,
-            OverviewValuesSearchSpec searchSpec, ReportFilter reportFilter) {
+            ReportValuesSearchSpec searchSpec, ReportFilter reportFilter) {
         log.info("Fetching values for " + searchSpec + ", " + environment);
-        DataSetOverviewValues result = new DataSetOverviewValues();
+        DataSetReportValues result = new DataSetReportValues();
         ExtendedRemoteWebDriver driver = null;
         try {
+            ReportTab reportTab = this.getReportTab(searchSpec);
             DataSet dataSet = DataSet.ALL;
             driver = new ExtendedRemoteWebDriver(new FirefoxDriver());
             ReportFilter myReportFilter = reportFilter.clone();
@@ -383,24 +394,25 @@ public class GetSystemsOverviewsCommand implements Command {
             PatientExperienceIFrame patientExperienceIFrame = this
                     .loadPatientExperience(driver, environment.getURLRoot(),
                             username, password);
-            OverviewValues valuesAll = patientExperienceIFrame
-                    .accessPanelFrame().changeSystem(myReportFilter)
+            ReportValues valuesAll = patientExperienceIFrame.accessPanelFrame()
+                    .changeSystem(myReportFilter)
                     .configureFilters(myReportFilter).applyConfiguredFilters()
-                    .openOverviewTab().waitForElementsToLoad().getValues();
+                    .openReportTab(reportTab).waitForElementsToLoad()
+                    .getValues();
             result.set(dataSet, valuesAll);
-            log.info("OverviewValues (" + environment + ", " + dataSet + ") = "
+            log.info("ReportValues (" + environment + ", " + dataSet + ") = "
                     + valuesAll);
             this.takeScreenshot(driver, searchSpec, environment, dataSet);
             if (searchSpec.isQualifiedEnabled()) {
                 dataSet = DataSet.QUALIFIED;
                 myReportFilter.setDataSet(dataSet);
-                OverviewValues valuesQualified = patientExperienceIFrame
+                ReportValues valuesQualified = patientExperienceIFrame
                         .waitForElementsToLoad()
                         .configureCalculationFilter(myReportFilter)
-                        .applyConfiguredFilters().openOverviewTab()
+                        .applyConfiguredFilters().openReportTab(reportTab)
                         .waitForElementsToLoad().getValues();
                 result.set(dataSet, valuesQualified);
-                log.info("OverviewValues (" + environment + ", " + dataSet
+                log.info("ReportValues (" + environment + ", " + dataSet
                         + ") = " + valuesQualified);
                 this.takeScreenshot(driver, searchSpec, environment, dataSet);
             }
@@ -416,44 +428,38 @@ public class GetSystemsOverviewsCommand implements Command {
         return result;
     }
 
-    private Object getCount(
-            CrossEnvironmentOverviewValues crossEnvironmentOverviewValues,
-            Environment environment, DataSet dataSet, String itemName) {
-        Object count;
-        try {
-            OverviewValues values = crossEnvironmentOverviewValues.get(
-                    environment).get(dataSet);
-            if (values.isDataAvailable()) {
-                count = values.get(itemName).getCount();
-            } else {
-                count = NO_DATA_CELL_VALUE;
-            }
-        } catch (NullPointerException exception) {
-            count = null;
+    private ReportTab getReportTab(ReportValuesSearchSpec searchSpec) {
+        ReportTab result;
+        if (searchSpec.getSheetNumber() == SHEET_INDEX_ALL_VALUES
+                && SURVEY_TYPE_HCAHPS.equals(searchSpec.getSurveyType())) {
+            result = ReportTab.HCAHPS_NATIONAL;
+        } else {
+            result = ReportTab.OVERVIEW;
         }
-        return count;
+        return result;
     }
 
-    private Object getTopBoxPercentage(
-            CrossEnvironmentOverviewValues crossEnvironmentOverviewValues,
+    private Object getValue(
+            CrossEnvironmentReportValues crossEnvironmentReportValues,
             Environment environment, DataSet dataSet, String itemName) {
-        Object tbPercentage;
+        Object value;
         try {
-            OverviewValues values = crossEnvironmentOverviewValues.get(
-                    environment).get(dataSet);
+            ReportValues values = crossEnvironmentReportValues.get(environment)
+                    .get(dataSet);
             if (values.isDataAvailable()) {
-                tbPercentage = values.get(itemName).getTopBoxPercentage();
+                value = REPORT_VALUE_ADAPTER.getValue(itemName,
+                        values.get(itemName));
             } else {
-                tbPercentage = NO_DATA_CELL_VALUE;
+                value = NO_DATA_CELL_VALUE;
             }
         } catch (NullPointerException exception) {
-            tbPercentage = null;
+            value = null;
         }
-        return tbPercentage;
+        return value;
     }
 
     private void takeScreenshot(ExtendedRemoteWebDriver driver,
-            OverviewValuesSearchSpec searchSpec, Environment environment,
+            ReportValuesSearchSpec searchSpec, Environment environment,
             DataSet dataSet) {
         File csvFile = searchSpec.getCsvFile();
         File dir = csvFile.getParentFile();
@@ -487,9 +493,8 @@ public class GetSystemsOverviewsCommand implements Command {
      * @param record
      * @return
      */
-    private OverviewValuesSearchSpec getSearchSpec(File csvFile,
-            CSVRecord record) {
-        OverviewValuesSearchSpec searchSpec = new OverviewValuesSearchSpec();
+    private ReportValuesSearchSpec getSearchSpec(File csvFile, CSVRecord record) {
+        ReportValuesSearchSpec searchSpec = new ReportValuesSearchSpec();
         searchSpec.setCsvFile(csvFile);
         searchSpec.setRecordNumber(record.getRecordNumber());
         searchSpec.setSheetNumber(record.get(SHEET_NUMBER_POSITION));
@@ -507,8 +512,8 @@ public class GetSystemsOverviewsCommand implements Command {
     }
 
     private int writeAllOverviewValues(Workbook workbook, Sheet sheet,
-            int startingRowNumber, OverviewValuesSearchSpec searchSpec,
-            CrossEnvironmentOverviewValues crossEnvironmentOverviewValues,
+            int startingRowNumber, ReportValuesSearchSpec searchSpec,
+            CrossEnvironmentReportValues crossEnvironmentReportValues,
             Date today) {
         boolean qualified = searchSpec.isQualifiedEnabled();
         DataSet dataSet = qualified ? DataSet.QUALIFIED : DataSet.ALL;
@@ -523,9 +528,10 @@ public class GetSystemsOverviewsCommand implements Command {
         this.writeRowDateRange(workbook, sheet, rowNumber++, searchSpec);
 
         // Respondents
-        if (searchSpec.isAllItems()
+        if ((searchSpec.isAllItems() && !SURVEY_TYPE_HCAHPS.equals(searchSpec
+                .getSurveyType()))
                 || searchSpec.getItems().contains(ITEM_NAME_TOTAL)) {
-            Object count = this.getCount(crossEnvironmentOverviewValues,
+            Object count = this.getValue(crossEnvironmentReportValues,
                     Environment.QA, dataSet, ITEM_NAME_TOTAL);
             this.writeDataSetCount(true, sheet, rowNumber++, count, null,
                     "Respondents");
@@ -535,7 +541,7 @@ public class GetSystemsOverviewsCommand implements Command {
         List<String> itemNames;
         if (searchSpec.isAllItems()) {
             try {
-                itemNames = crossEnvironmentOverviewValues.get(Environment.QA)
+                itemNames = crossEnvironmentReportValues.get(Environment.QA)
                         .get(dataSet).getItemNames();
                 itemNames.remove(ITEM_NAME_TOTAL);
             } catch (NullPointerException exception) {
@@ -545,11 +551,10 @@ public class GetSystemsOverviewsCommand implements Command {
             itemNames = searchSpec.getItems();
         }
         for (String itemName : itemNames) {
-            Object tbPercentage = this.getTopBoxPercentage(
-                    crossEnvironmentOverviewValues, Environment.QA, dataSet,
+            Object value = this.getValue(crossEnvironmentReportValues,
+                    Environment.QA, dataSet, itemName);
+            this.writeDataSetCount(true, sheet, rowNumber++, value, null,
                     itemName);
-            this.writeDataSetCount(true, sheet, rowNumber++, tbPercentage,
-                    null, itemName);
         }
 
         --rowNumber;
@@ -649,7 +654,7 @@ public class GetSystemsOverviewsCommand implements Command {
     }
 
     private void writeRowDateRange(final Workbook workbook, final Sheet sheet,
-            final int rowNumber, final OverviewValuesSearchSpec searchSpec) {
+            final int rowNumber, final ReportValuesSearchSpec searchSpec) {
         Row dateRangeRow = sheet.createRow(rowNumber);
         dateRangeRow.createCell(0).setCellValue(
                 searchSpec.getHumanReadableMonthRange());
@@ -674,7 +679,7 @@ public class GetSystemsOverviewsCommand implements Command {
 
     private void writeRowSectionTitle(final Workbook workbook,
             final Sheet sheet, final int rowNumber,
-            final OverviewValuesSearchSpec searchSpec) {
+            final ReportValuesSearchSpec searchSpec) {
         Row systemNameRow = sheet.createRow(rowNumber);
         CellRangeAddress systemNameRange = new CellRangeAddress(rowNumber,
                 rowNumber, 0, 3);
@@ -690,7 +695,7 @@ public class GetSystemsOverviewsCommand implements Command {
     }
 
     private void writeRowSurveyType(final Workbook workbook, final Sheet sheet,
-            final int rowNumber, final OverviewValuesSearchSpec searchSpec,
+            final int rowNumber, final ReportValuesSearchSpec searchSpec,
             final float rowHeight, final String surveyTypeLabel,
             final String surveyTypeNotes) {
         Row surveyTypeRow = sheet.createRow(rowNumber);
@@ -730,7 +735,7 @@ public class GetSystemsOverviewsCommand implements Command {
      */
     private int writeSectionHeader(final Workbook workbook, final Sheet sheet,
             final int startingRowNumber,
-            final OverviewValuesSearchSpec searchSpec, final Date today,
+            final ReportValuesSearchSpec searchSpec, final Date today,
             final String labelA, final String labelB,
             final float surveyTypeRowHeight, final String surveyTypeLabel,
             final String surveyTypeNotes) {
@@ -750,13 +755,13 @@ public class GetSystemsOverviewsCommand implements Command {
      * @param sheet Workbook sheet.
      * @param startingRowNumber Starting row number of the section.
      * @param searchSpec Search specification used to get the values.
-     * @param crossEnvironmentOverviewValues Values to write.
+     * @param crossEnvironmentReportValues Values to write.
      * @param today Today's date.
      * @return Next row to last (i.e., row to next section).
      */
     private int writeTotals(Workbook workbook, Sheet sheet,
-            int startingRowNumber, OverviewValuesSearchSpec searchSpec,
-            CrossEnvironmentOverviewValues crossEnvironmentOverviewValues,
+            int startingRowNumber, ReportValuesSearchSpec searchSpec,
+            CrossEnvironmentReportValues crossEnvironmentReportValues,
             Date today) {
         int rowNumber = this.writeSectionHeader(workbook, sheet,
                 startingRowNumber, searchSpec, today, LABEL_TOTALS_A,
@@ -769,18 +774,18 @@ public class GetSystemsOverviewsCommand implements Command {
         boolean qualified = searchSpec.isQualifiedEnabled();
         Object valueA = null, valueB = null;
         if (qualified) {
-            valueA = this.getCount(crossEnvironmentOverviewValues,
+            valueA = this.getValue(crossEnvironmentReportValues,
                     Environment.PRODUCTION, DataSet.QUALIFIED, ITEM_NAME_TOTAL);
-            valueB = this.getCount(crossEnvironmentOverviewValues,
+            valueB = this.getValue(crossEnvironmentReportValues,
                     Environment.QA, DataSet.QUALIFIED, ITEM_NAME_TOTAL);
         }
         this.writeDataSetCount(qualified, sheet, rowNumber++, valueA, valueB,
                 "Qualified");
 
         // All
-        valueA = this.getCount(crossEnvironmentOverviewValues,
+        valueA = this.getValue(crossEnvironmentReportValues,
                 Environment.PRODUCTION, DataSet.ALL, ITEM_NAME_TOTAL);
-        valueB = this.getCount(crossEnvironmentOverviewValues, Environment.QA,
+        valueB = this.getValue(crossEnvironmentReportValues, Environment.QA,
                 DataSet.ALL, ITEM_NAME_TOTAL);
         this.writeDataSetCount(true, sheet, rowNumber, valueA, valueB, "All");
 
@@ -799,16 +804,15 @@ public class GetSystemsOverviewsCommand implements Command {
 
     private static class DecoratedOverviewValues {
         public final int recordNumber;
-        public final OverviewValuesSearchSpec searchSpec;
-        public final CrossEnvironmentOverviewValues crossEnvironmentOverviewValues;
+        public final ReportValuesSearchSpec searchSpec;
+        public final CrossEnvironmentReportValues crossEnvironmentReportValues;
 
-        public DecoratedOverviewValues(
-                final int recordNumber,
-                final OverviewValuesSearchSpec searchSpec,
-                final CrossEnvironmentOverviewValues crossEnvironmentOverviewValues) {
+        public DecoratedOverviewValues(final int recordNumber,
+                final ReportValuesSearchSpec searchSpec,
+                final CrossEnvironmentReportValues crossEnvironmentReportValues) {
             this.recordNumber = recordNumber;
             this.searchSpec = searchSpec;
-            this.crossEnvironmentOverviewValues = crossEnvironmentOverviewValues;
+            this.crossEnvironmentReportValues = crossEnvironmentReportValues;
         }
 
         @Override
@@ -817,7 +821,7 @@ public class GetSystemsOverviewsCommand implements Command {
                     "DecoratedOverviewValues{");
             sb.append("rec#=").append(recordNumber);
             sb.append(", searchSpec=").append(searchSpec);
-            sb.append(", values=").append(crossEnvironmentOverviewValues);
+            sb.append(", values=").append(crossEnvironmentReportValues);
             sb.append('}');
             return sb.toString();
         }

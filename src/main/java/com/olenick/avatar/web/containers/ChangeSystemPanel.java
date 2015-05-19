@@ -3,9 +3,9 @@ package com.olenick.avatar.web.containers;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 
-import com.olenick.avatar.web.ExtendedRemoteWebDriver;
-import com.olenick.avatar.web.elements.ExtendedSelectWebElement;
-import com.olenick.avatar.web.elements.ExtendedWebElement;
+import com.olenick.selenium.drivers.ExtendedRemoteWebDriver;
+import com.olenick.selenium.elements.ExtendedSelectWebElement;
+import com.olenick.selenium.elements.ExtendedWebElement;
 
 /**
  * "Change System" panel.

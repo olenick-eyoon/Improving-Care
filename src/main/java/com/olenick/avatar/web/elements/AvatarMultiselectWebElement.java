@@ -9,8 +9,10 @@ import org.openqa.selenium.support.ui.Select;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.olenick.avatar.util.SafeArrays;
-import com.olenick.avatar.web.containers.WebContainer;
+import com.olenick.selenium.containers.WebContainer;
+import com.olenick.selenium.elements.ExtendedSelectWebElement;
+import com.olenick.selenium.elements.ExtendedWebElement;
+import com.olenick.selenium.util.SafeArrays;
 
 /**
  * Select support for Avatar's weird implementation of drop-down multi-selects.
