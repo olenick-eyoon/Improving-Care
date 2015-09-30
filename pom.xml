@@ -12,28 +12,28 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <scm>
+        <connection>scm:git:https://github.com/ielia/</connection>
+        <tag>HEAD</tag>
+    </scm>
+
     <distributionManagement>
         <repository>
             <id>nexus</id>
             <layout>default</layout>
             <name>Internal Repository</name>
             <uniqueVersion>false</uniqueVersion>
-            <url>http://172.20.18.50:8081/nexus/content/repositories/central/</url>
+            <url>http://172.20.18.50:8081/nexus/content/repositories/releases/
+            </url>
         </repository>
         <snapshotRepository>
             <id>nexus</id>
             <name>Internal Repository</name>
-            <url>http://172.20.18.50:8081/nexus/content/repositories/snapshots/</url>
+            <url>
+                http://172.20.18.50:8081/nexus/content/repositories/snapshots/
+            </url>
         </snapshotRepository>
     </distributionManagement>
-
-    <repositories>
-        <repository>
-            <id>nexus</id>
-            <name>Internal Repository</name>
-            <url>http://172.20.18.50:8081/nexus/content/repositories/snapshots/</url>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>
