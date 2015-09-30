@@ -3,7 +3,6 @@ package com.olenick.avatar.parsers.xml;
 import static org.junit.Assert.assertEquals;
 
 import java.net.URL;
-import java.time.Month;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -27,6 +26,7 @@ import com.olenick.avatar.model.PatientDemographics;
 import com.olenick.avatar.model.ReportFilter;
 import com.olenick.avatar.model.ReportTab;
 import com.olenick.avatar.model.ReportTabSpec;
+import com.olenick.avatar.model.java8.Month;
 import com.olenick.avatar.uses.PatientExperienceFeature;
 import com.olenick.avatar.uses.PatientExperienceScenario;
 

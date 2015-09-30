@@ -1,7 +1,5 @@
 package com.olenick.avatar.web.containers;
 
-import java.time.Month;
-
 import org.junit.Test;
 
 import com.olenick.avatar.SeleniumTest;
@@ -13,6 +11,7 @@ import com.olenick.avatar.model.PatientDemographics;
 import com.olenick.avatar.model.ProviderFilter;
 import com.olenick.avatar.model.ProviderGrouping;
 import com.olenick.avatar.model.ReportFilter;
+import com.olenick.avatar.model.java8.Month;
 
 public class PatientExperienceIFrameTest extends SeleniumTest {
     private static final String USERNAME = "performance.test3@avatarsolutions.com";

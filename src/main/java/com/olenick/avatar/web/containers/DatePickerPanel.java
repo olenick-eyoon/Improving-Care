@@ -1,6 +1,5 @@
 package com.olenick.avatar.web.containers;
 
-import java.time.Month;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +13,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.olenick.avatar.model.MonthSpec;
+import com.olenick.avatar.model.java8.Month;
 import com.olenick.selenium.containers.WebContainer;
 import com.olenick.selenium.drivers.ExtendedRemoteWebDriver;
 import com.olenick.selenium.elements.ExtendedWebElement;

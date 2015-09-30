@@ -1,8 +1,6 @@
 package com.olenick.avatar.model.report_values;
 
 import java.io.File;
-import java.time.Month;
-import java.time.format.TextStyle;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -13,6 +11,8 @@ import java.util.Set;
 import javax.validation.constraints.NotNull;
 
 import com.olenick.avatar.model.MonthSpec;
+import com.olenick.avatar.model.java8.Month;
+import com.olenick.avatar.model.java8.TextStyle;
 
 /**
  * TODO: Use something like JSefa.

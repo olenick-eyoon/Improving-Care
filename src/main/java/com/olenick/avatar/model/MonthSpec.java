@@ -1,9 +1,8 @@
 package com.olenick.avatar.model;
 
-import java.time.Month;
-
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import com.olenick.avatar.model.java8.Month;
 import com.olenick.avatar.parsers.xml.adapters.MonthSpecAdapter;
 
 @XmlJavaTypeAdapter(MonthSpecAdapter.class)
