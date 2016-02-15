@@ -24,6 +24,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.validation.constraints.NotNull;
 
@@ -425,7 +427,10 @@ public class GetSystemReportValuesCommand implements Command {
         ArrayList<ReportValuesSearchSpec> searchSpecList = new ArrayList<>();
         ReportValuesSearchSpec searchSpec = new ReportValuesSearchSpec();
         String datesSpecs, fromYear, fromMonth, toYear, toMonth;
-        String[] dateParts, datesRange, datesSet;
+        String[] datesRange, datesSet;
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM");
+        GregorianCalendar gCal = new GregorianCalendar();
+        Date start, end;
 
         //Setting all the common aspects
         searchSpec.setCsvFile(csvFile);
@@ -440,78 +445,111 @@ public class GetSystemReportValuesCommand implements Command {
         searchSpec.setEnvironments(record.get(CSVParameters.ENVIRONMENTS_POSITION.GetValue()));
 
         //Dates search specs
-        datesSpecs = record.get(CSVParameters.DATES_POSITION.GetValue());
-        datesRange = datesSpecs.split(":");
-        datesSet = datesSpecs.split("-");
+        try {
+            datesSpecs = record.get(CSVParameters.DATES_POSITION.GetValue());
 
-        if (datesRange.length > 1) {
-            //From date to date
-            //From
-            dateParts = datesRange[0].split("/");
+            //Format validation for date 'yyyy/MM' - set 'yyyy/MM-yyyy/MM' - range 'yyyy/MM:yyyy/MM'
+            Pattern datesPattern = Pattern.compile("^\\d{4}/\\d{1,2}((-|:)\\d{4}/\\d{1,2})?$");
+            Matcher datesMatcher = datesPattern.matcher(datesSpecs);
 
-            fromYear = dateParts[0];
-            fromMonth = dateParts[1];
+            if (!datesMatcher.matches()) {
+                // throw exception.
+                throw new ParseException();
+            } else if (datesMatcher.group(1) == null) {
+                //A specific date
+                try {
+                    start = dateFormat.parse(datesSpecs);
+                    gCal.setTime(start);
 
-            //To
-            dateParts = datesRange[1].split("/");
+                    fromYear = toYear = getYearAsStringFromCalendar(gCal);
+                    fromMonth = toMonth = getMonthAsStringFromCalendar(gCal);
 
-            toYear = dateParts[0];
-            toMonth = dateParts[1];
+                    searchSpec.setFromMonthSpec(fromYear, fromMonth);
+                    searchSpec.setToMonthSpec(toYear, toMonth);
 
-            searchSpec.setFromMonthSpec(fromYear, fromMonth);
-            searchSpec.setToMonthSpec(toYear, toMonth);
-
-            searchSpecList.add(searchSpec);
-        } else if (datesSet.length > 1) {
-            //Each date
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM");
-
-            try {
-                GregorianCalendar gCal = new GregorianCalendar();
-                Date start = dateFormat.parse(datesSet[0]);
-                Date end = dateFormat.parse(datesSet[1]);
-                gCal.setTime(start);
-
-                if (start.after(end)) {
-                    while (!gCal.getTime().before(end)) {
-                        searchSpec.setFromMonthSpec(
-                                String.valueOf(gCal.get(Calendar.YEAR)),
-                                String.valueOf(gCal.get(Calendar.MONTH) + 1));
-                        searchSpec.setToMonthSpec(searchSpec.getFromMonthSpec());
-
-                        searchSpecList.add(searchSpec.clone());
-
-                        gCal.add(Calendar.MONTH, -1);
-                    }
-                } else {
-                    while (!gCal.getTime().after(end)) {
-                        searchSpec.setFromMonthSpec(
-                                String.valueOf(gCal.get(Calendar.YEAR)),
-                                String.valueOf(gCal.get(Calendar.MONTH) + 1));
-                        searchSpec.setToMonthSpec(searchSpec.getFromMonthSpec());
-
-                        searchSpecList.add(searchSpec.clone());
-
-                        gCal.add(Calendar.MONTH, 1);
-                    }
+                    searchSpecList.add(searchSpec);
+                } catch (java.text.ParseException e) {
+                    throw new ParseException("Date error.");
                 }
-            } catch (java.text.ParseException e) {
-                e.printStackTrace();
+            } else if ("-".equals(datesMatcher.group(2))) {
+                //Each date
+                try {
+                    datesSet = datesSpecs.split("-");
+
+                    start = dateFormat.parse(datesSet[0]);
+                    end = dateFormat.parse(datesSet[1]);
+                    gCal.setTime(start);
+
+                    if (start.after(end)) {
+                        while (!gCal.getTime().before(end)) {
+                            searchSpec.setFromMonthSpec(getYearAsStringFromCalendar(gCal), getMonthAsStringFromCalendar(gCal));
+                            searchSpec.setToMonthSpec(searchSpec.getFromMonthSpec());
+
+                            searchSpecList.add(searchSpec.clone());
+
+                            gCal.add(Calendar.MONTH, -1);
+                        }
+                    } else {
+                        while (!gCal.getTime().after(end)) {
+                            searchSpec.setFromMonthSpec(getYearAsStringFromCalendar(gCal), getMonthAsStringFromCalendar(gCal));
+                            searchSpec.setToMonthSpec(searchSpec.getFromMonthSpec());
+
+                            searchSpecList.add(searchSpec.clone());
+
+                            gCal.add(Calendar.MONTH, 1);
+                        }
+                    }
+                } catch (java.text.ParseException e) {
+                    throw new ParseException("Dates set error.");
+                }
+            } else {
+                try {
+                    datesRange = datesSpecs.split(":");
+
+                    start = dateFormat.parse(datesRange[0]);
+                    end = dateFormat.parse(datesRange[1]);
+
+                    if (start.after(end)) {
+                        throw new ParseException("Invalid input order for dates range. Dates must be written as FROM:TO order.");
+                    }
+
+                    //From date to date
+                    //From
+                    gCal.setTime(start);
+
+                    fromYear = getYearAsStringFromCalendar(gCal);
+                    fromMonth = getMonthAsStringFromCalendar(gCal);
+
+                    //To
+                    gCal.setTime(end);
+
+                    toYear = getYearAsStringFromCalendar(gCal);
+                    toMonth = getMonthAsStringFromCalendar(gCal);
+
+                    searchSpec.setFromMonthSpec(fromYear, fromMonth);
+                    searchSpec.setToMonthSpec(toYear, toMonth);
+
+                    searchSpecList.add(searchSpec);
+                } catch (java.text.ParseException te) {
+                    throw new ParseException("Dates range error.");
+                }
             }
-        } else {
-            //A specific date
-            dateParts = datesSpecs.split("/");
 
-            fromYear = toYear = dateParts[0];
-            fromMonth = toMonth = dateParts[1];
-
-            searchSpec.setFromMonthSpec(fromYear, fromMonth);
-            searchSpec.setToMonthSpec(toYear, toMonth);
-
-            searchSpecList.add(searchSpec);
+            return searchSpecList;
+        } catch (ParseException fe) {
+            throw new ParseException(fe.getMessage() +
+                    " Invalid date format. Expecting format: (Range) 'yyyy/MM:yyyy/MM' or (Set) 'yyyy/MM-yyyy/MM' " +
+                    " or (a particular date) 'yyyy/MM'."
+            );
         }
+    }
 
-        return searchSpecList;
+    private String getMonthAsStringFromCalendar(GregorianCalendar gCal) {
+        return String.valueOf(gCal.get(Calendar.MONTH) + 1);
+    }
+
+    private String getYearAsStringFromCalendar(GregorianCalendar gCal) {
+        return String.valueOf(gCal.get(Calendar.YEAR));
     }
 
     private int writeAllOverviewValues(Workbook workbook, Sheet sheet, int startingRowNumber, ReportValuesSearchSpec searchSpec, CrossEnvironmentReportValues crossEnvironmentReportValues, Date today) {
