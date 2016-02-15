@@ -33,6 +33,6 @@ SPEC_CSV_FILENAME EXCEL_FILENAME
 E.g.:
 
 <pre>
-0,"Univ. of Colorado - All Orgs","129","_FOC_NULL","HCAHPS","_FOC_NULL",2014,2,2015,1,"Total"
-1,"Eastern Maine - Medical Center","18","106","HCAHPS","_FOC_NULL",2014,2,2015,1,"ALL"
+0,"Univ. of Colorado - All Orgs","129","_FOC_NULL","HCAHPS","_FOC_NULL","2014/2:2015/1,"Total","DEFAULT"
+1,"Eastern Maine - Medical Center","18","106","HCAHPS","_FOC_NULL","2014/2-2015/1","QA"
 </pre>

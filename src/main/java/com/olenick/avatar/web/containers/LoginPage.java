@@ -1,7 +1,6 @@
 package com.olenick.avatar.web.containers;
 
 import org.openqa.selenium.By;
-
 import com.olenick.selenium.containers.WebContainer;
 import com.olenick.selenium.drivers.ExtendedRemoteWebDriver;
 import com.olenick.selenium.elements.ExtendedWebElement;
@@ -38,19 +37,24 @@ public class LoginPage extends WebContainer<LoginPage> {
     }
 
     public LoginPage sendUsername(String username) {
+        this.usernameInputField.click();
         this.usernameInputField.clear();
         this.usernameInputField.sendKeys(username);
+
         return this;
     }
 
     public LoginPage sendPassword(String password) {
+        this.passwordInputField.click();
         this.passwordInputField.clear();
         this.passwordInputField.sendKeys(password);
+
         return this;
     }
 
     public LoginPage submit() {
         this.submitButton.click();
+
         return this;
     }
 
@@ -70,11 +74,11 @@ public class LoginPage extends WebContainer<LoginPage> {
 
     @Override
     public LoginPage waitForElementsToLoad() {
-        this.usernameInputField.setUnderlyingWebElement(driver.findElement(By
+        this.usernameInputField.setUnderlyingWebElement(driver.findVisibleElement(By
                 .id(ELEMENT_ID_USERNAME_INPUT)));
-        this.passwordInputField.setUnderlyingWebElement(driver.findElement(By
+        this.passwordInputField.setUnderlyingWebElement(driver.findVisibleElement(By
                 .id(ELEMENT_ID_PASSWORD_INPUT)));
-        this.submitButton.setUnderlyingWebElement(driver.findElement(By
+        this.submitButton.setUnderlyingWebElement(driver.findVisibleElement(By
                 .id(ELEMENT_ID_SUBMIT_BUTTON)));
         return this;
     }

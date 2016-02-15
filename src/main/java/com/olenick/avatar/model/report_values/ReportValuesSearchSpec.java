@@ -1,6 +1,7 @@
 package com.olenick.avatar.model.report_values;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -10,18 +11,28 @@ import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
+import com.olenick.avatar.exceptions.ParseException;
+import com.olenick.avatar.model.Environment;
 import com.olenick.avatar.model.MonthSpec;
 import com.olenick.avatar.model.java8.Month;
 import com.olenick.avatar.model.java8.TextStyle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO: Use something like JSefa.
  */
 public class ReportValuesSearchSpec {
+    private static final Logger log = LoggerFactory.getLogger(ReportValuesSearchSpec.class);
     private static final String ALL_ITEMS = "ALL";
     private static final String ITEMS_SEPARATOR = "\\|";
     private static final Set<String> NO_QUALIFIED_SURVEY_TYPES = Collections
             .unmodifiableSet(new HashSet<>(Arrays.asList("Avatar")));
+    private static final Set<String> VALID_ENVIRONMENTS = Collections.unmodifiableSet(
+            new HashSet<>(Arrays.asList("QA", "PRODUCTION", "DEFAULT")));
+    private static final Environment[][] ENVIRONMENTS_PER_SHEET = new Environment[][]{
+            new Environment[]{Environment.PRODUCTION, Environment.QA},
+            new Environment[]{Environment.QA}};
 
     private File csvFile;
     private Long recordNumber;
@@ -34,37 +45,60 @@ public class ReportValuesSearchSpec {
     private MonthSpec fromMonthSpec;
     private MonthSpec toMonthSpec;
     private List<String> items;
+    private List<Environment> environments;
 
     public ReportValuesSearchSpec() {
         this.items = Collections.emptyList();
+        this.environments = new ArrayList<>();
     }
 
     public ReportValuesSearchSpec(File csvFile, long recordNumber,
                                   int sheetNumber, String sectionTitle, String systemCode,
                                   String organizationCode, String surveyType, String patientType,
-                                  MonthSpec fromMonthSpec, MonthSpec toMonthSpec, List<String> items) {
-        this.csvFile = csvFile;
-        this.recordNumber = recordNumber;
-        this.sheetNumber = sheetNumber;
-        this.sectionTitle = sectionTitle;
-        this.systemCode = systemCode;
-        this.organizationCode = organizationCode;
-        this.surveyType = surveyType;
-        this.patientType = patientType;
-        this.fromMonthSpec = fromMonthSpec;
-        this.toMonthSpec = toMonthSpec;
-        this.items = items;
+                                  MonthSpec fromMonthSpec, MonthSpec toMonthSpec,
+                                  List<String> items, String environments) throws ParseException {
+        this.setCsvFile(csvFile);
+        this.setRecordNumber(recordNumber);
+        this.setSheetNumber(sheetNumber);
+        this.setSectionTitle(sectionTitle);
+        this.setSystemCode(systemCode);
+        this.setOrganizationCode(organizationCode);
+        this.setSurveyType(surveyType);
+        this.setPatientType(patientType);
+        this.setFromMonthSpec(fromMonthSpec);
+        this.setToMonthSpec(toMonthSpec);
+        this.setItems(items);
+        this.setEnvironments(environments);
+    }
+
+    public ReportValuesSearchSpec(File csvFile, long recordNumber,
+                                  int sheetNumber, String sectionTitle, String systemCode,
+                                  String organizationCode, String surveyType, String patientType,
+                                  MonthSpec fromMonthSpec, MonthSpec toMonthSpec,
+                                  List<String> items, List<Environment> environments) throws ParseException {
+        this.setCsvFile(csvFile);
+        this.setRecordNumber(recordNumber);
+        this.setSheetNumber(sheetNumber);
+        this.setSectionTitle(sectionTitle);
+        this.setSystemCode(systemCode);
+        this.setOrganizationCode(organizationCode);
+        this.setSurveyType(surveyType);
+        this.setPatientType(patientType);
+        this.setFromMonthSpec(fromMonthSpec);
+        this.setToMonthSpec(toMonthSpec);
+        this.setItems(items);
+        this.setEnvironments(environments);
     }
 
     public ReportValuesSearchSpec(File csvFile, long recordNumber,
                                   int sheetNumber, String sectionTitle, String systemCode,
                                   String organizationCode, String surveyType, String patientType,
                                   String fromYear, String fromMonth, String toYear, String toMonth,
-                                  String items) {
+                                  String items, String environments) throws ParseException {
         this(csvFile, recordNumber, sheetNumber, sectionTitle, systemCode,
                 organizationCode, surveyType, patientType, buildMonthSpec(
                         fromYear, fromMonth), buildMonthSpec(toYear, toMonth),
-                Arrays.asList(items.split(ITEMS_SEPARATOR)));
+                Arrays.asList(items.split(ITEMS_SEPARATOR)), environments);
     }
 
     public String getHumanReadableMonthRange() {
@@ -100,12 +134,19 @@ public class ReportValuesSearchSpec {
         return sheetNumber;
     }
 
-    public void setSheetNumber(Integer sheetNumber) {
-        this.sheetNumber = sheetNumber;
+    public void setSheetNumber(Integer sheetNumber) throws ParseException {
+        if (sheetNumber >= 0 && sheetNumber < ENVIRONMENTS_PER_SHEET.length)
+            this.sheetNumber = sheetNumber;
+        else
+            throw new ParseException("Sheet number value: " + sheetNumber + ", refers to an invalid worksheet.");
     }
 
-    public void setSheetNumber(String sheetNumber) {
-        this.sheetNumber = Integer.valueOf(sheetNumber);
+    public void setSheetNumber(String sheetNumber) throws ParseException {
+        try{
+            this.setSheetNumber(Integer.valueOf(sheetNumber));
+        } catch (NumberFormatException e) {
+            throw new ParseException("Sheet number value: " + sheetNumber + ", is not an integer number.");
+        }
     }
 
     public String getSectionTitle() {
@@ -184,6 +225,53 @@ public class ReportValuesSearchSpec {
         this.items = Arrays.asList(items.split(ITEMS_SEPARATOR));
     }
 
+    public List<Environment> getEnvironments() {
+        return environments;
+    }
+
+    public void setEnvironments(List<Environment> environment) { this.environments = environment; }
+
+    public void setEnvironments(String environments) throws ParseException {
+        int originalSize, afterHashedSize;
+
+        List<String> environmentList = Arrays.asList(environments.split(ITEMS_SEPARATOR));
+        originalSize = environmentList.size();
+
+        //All to uppercase
+        for(int i = 0; i < environmentList.size(); i++) {
+            environmentList.set(i, environmentList.get(i).toUpperCase());
+        }
+
+        //Check for duplicates
+        HashSet<String> noDuplicates = new HashSet(environmentList);
+        afterHashedSize = noDuplicates.size();
+
+        if (originalSize != afterHashedSize) {
+            throw new ParseException("Environment list parameter has duplicated values: " + environments);
+        }
+
+        //Check for invalid options not available in VALID_ENVIRONMENTS
+        for (String env : environmentList) {
+            try {
+                this.environments.add(Environment.valueOf(env));
+            } catch (IllegalArgumentException e) {
+                //DEFAULT is not a valid environment as is, but we handle it here
+                if (env.equals("DEFAULT")) {
+                    if (this.environments.size() > 0)
+                        log.warn("Enviroment list parameter has the DEFAULT value among others. " +
+                                "Other values will be discarded if DEFAULT is present.");
+                    this.environments.clear();
+                    this.environments.addAll(Arrays.asList(ENVIRONMENTS_PER_SHEET[this.sheetNumber]));
+                    break;
+                } else {
+                    throw new ParseException(
+                            "Environment list parameter has invalid values. Valid values are: " + VALID_ENVIRONMENTS
+                                    + ". Provided values: " + environments);
+                }
+            }
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -223,6 +311,8 @@ public class ReportValuesSearchSpec {
         if (toMonthSpec != null ? !toMonthSpec.equals(that.toMonthSpec)
                 : that.toMonthSpec != null)
             return false;
+        if (environments != null ? !environments.equals(that.environments) : that.environments != null)
+            return false;
         return !(items != null ? !items.equals(that.items) : that.items != null);
 
     }
@@ -247,6 +337,8 @@ public class ReportValuesSearchSpec {
         result = 31 * result
                 + (toMonthSpec != null ? toMonthSpec.hashCode() : 0);
         result = 31 * result + (items != null ? items.hashCode() : 0);
+        result = 31 * result + (environments != null ? environments.hashCode() : 0);
+
         return result;
     }
 
@@ -264,8 +356,47 @@ public class ReportValuesSearchSpec {
         sb.append(", from=").append(fromMonthSpec);
         sb.append(", to=").append(toMonthSpec);
         sb.append(", items=").append(items);
+        sb.append(", environments=").append(environments);
         sb.append('}');
         return sb.toString();
+    }
+
+    @Override
+    public ReportValuesSearchSpec clone() {
+        ReportValuesSearchSpec clone = null;
+        List<String> clonedItems = new ArrayList<>();
+        List<Environment> clonedEnvironments = new ArrayList<>();
+
+        try {
+            //Deep copy of the items property
+            for(String item : this.getItems()) {
+                clonedItems.add(item);
+            }
+
+            //Deep copy of the environments property
+            for(Environment item : this.getEnvironments()) {
+                clonedEnvironments.add(item);
+            }
+
+            clone = new ReportValuesSearchSpec(
+                new File(this.csvFile.getPath()),
+                this.getRecordNumber(),
+                this.getSheetNumber(),
+                this.getSectionTitle(),
+                this.getSystemCode(),
+                this.getOrganizationCode(),
+                this.getSurveyType(),
+                this.getPatientType(),
+                this.getFromMonthSpec(),
+                this.getToMonthSpec(),
+                clonedItems,
+                clonedEnvironments
+            );
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return clone;
     }
 
     private static MonthSpec buildMonthSpec(@NotNull final String year,

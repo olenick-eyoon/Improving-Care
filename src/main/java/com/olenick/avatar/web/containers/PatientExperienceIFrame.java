@@ -39,6 +39,8 @@ public class PatientExperienceIFrame extends
 
     private static final String ATTRIBUTE_NAME_VALUE = "value";
     private static final String ELEMENT_ID_APPLY_BUTTON = "button2";
+    private static final String ELEMENT_ID_CALCULATION_ITEM_TO_INCLUDE_CORE = "corecustom_0";
+    private static final String ELEMENT_ID_CALCULATION_ITEM_TO_INCLUDE_CUSTOM = "corecustom_1";
     private static final String ELEMENT_ID_CALCULATION_MEAN_RADIO = "top_box_0";
     private static final String ELEMENT_ID_CALCULATION_TOP_BOX_RADIO = "top_box_1";
     private static final String ELEMENT_ID_CANCEL_BUTTON = "button4";
@@ -208,7 +210,7 @@ public class PatientExperienceIFrame extends
             ReportFilter reportFilter) {
         if (reportFilter != null) {
             this.accessPanelFrame();
-            // THESE NEXT THREE LINES ARE A BIT RIDICULOUS,
+            // TODO: THESE NEXT THREE LINES ARE A BIT RIDICULOUS,
             // BUT IT DOESN'T WORK OTHERWISE...
             this.surveyTypeSelect.sendKeys(reportFilter.getSurveyType());
             this.surveyTypeSelect.click();

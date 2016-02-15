@@ -26,7 +26,7 @@ import com.olenick.selenium.drivers.ExtendedRemoteWebDriver;
  */
 public abstract class ReportGraphsTabIFrame<T extends ReportGraphsTabIFrame<T>>
         extends WelcomePageIFrame<T> {
-    protected static final int TIMEOUT_SECS_GRAPH_ELEMENTS_PRESENT = 60;
+    protected static final int TIMEOUT_SECS_GRAPH_ELEMENTS_PRESENT = 3000;
     protected static final long TIMEOUT_SECS_EXPORT_ALL_TO_PDF_WINDOW_OPEN = 300;
     protected static final String ELEMENT_TAG_NO_DATA_INDICATOR = "center";
     protected static final String ELEMENT_TAG_RESULTS_TABLE = "table";
