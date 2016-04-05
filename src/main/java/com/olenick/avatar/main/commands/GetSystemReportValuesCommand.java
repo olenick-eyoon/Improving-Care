@@ -1,14 +1,20 @@
 package com.olenick.avatar.main.commands;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.GregorianCalendar;
@@ -16,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -31,6 +39,7 @@ import javax.validation.constraints.NotNull;
 
 import com.olenick.avatar.exceptions.ParseException;
 import com.olenick.avatar.model.CSVParameters;
+import com.olenick.avatar.model.SurveyType;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -48,6 +57,10 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.NoAlertPresentException;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.slf4j.Logger;
@@ -82,9 +95,11 @@ public class GetSystemReportValuesCommand implements Command {
     private static final Logger log = LoggerFactory.getLogger(GetSystemReportValuesCommand.class);
     private static final String USERNAME_TEMPLATE = "ielia-test-%03d@olenick.com";
     private static final String PASSWORD = "Password1";
+    private static final int NUMBER_OF_AVAILABLE_USERS = 4;
     private static final long TIMEOUT_SECS_FETCH_VALUES = 900L;
     private static final int NUMBER_OF_RECORD_THREADS = 3;
     private static final int RETRIES = 3;
+    private static final int ALERT_RETRIES = 3;
     private static final int COLUMN_WIDTH_1_ALL_VALUES = 7235;
     private static final int COLUMN_WIDTH_1_TOTALS = 4057;
     private static final int COLUMN_WIDTH_2 = 2323;
@@ -95,6 +110,7 @@ public class GetSystemReportValuesCommand implements Command {
     private static final float ROW_HEIGHT_SURVEY_TYPE_TOTALS = 30f;
     private static final float ROW_HEIGHT_SURVEY_TYPE_ALL_VALUES = 60f;
     private static final String ITEM_NAME_TOTAL = "Total";
+    private static final String ITEM_NAME_TOTAL_AVATAR = "Core Total";
     private static final String MULTI_SELECT_ALL = "_FOC_NULL";
     private static final String SHEET_NAME_ALL_VALUES = "ICEP QA vs iCare1";
     private static final String SHEET_NAME_TOTALS = "ICEP Prod vs QA";
@@ -108,23 +124,68 @@ public class GetSystemReportValuesCommand implements Command {
     private static final String LABEL_TOTALS_B = "QA";
     private static final String NO_DATA_CELL_VALUE = "N/D";
     private static final ReportValueAdapter REPORT_VALUE_ADAPTER = new ReportValueAdapter();
+    private static final String OUTPUT_FOLDER_NAME = "Output\\";
+    private static final String SCREENSHOTS_FOLDER_NAME = "Screenshots\\";
+    private static final String LOGS_FOLDER_NAME = "Logs\\";
 
     private final String inputCSVFilename;
     private final String outputXLSXFilename;
+    private final String screenshotsFolderName;
+    private final String logsFolderName;
+    private final String logFileName;
 
-    private final BlockingQueue<User> users;
+    private final Map<Environment, BlockingQueue<User>> users;
 
     private Font boldRedFont;
     private Font redFont;
 
     public GetSystemReportValuesCommand(@NotNull final String inputCSVFilename, @NotNull final String outputXLSXFilename) {
+        String dataChecksStartTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm"));
         this.inputCSVFilename = inputCSVFilename;
         this.outputXLSXFilename = outputXLSXFilename;
-        this.users = new ArrayBlockingQueue<>(NUMBER_OF_RECORD_THREADS);
-        for (int i = 1; i <= NUMBER_OF_RECORD_THREADS; ++i) {
-            if (i == 2) continue;
-            this.users.add(new User(String.format(USERNAME_TEMPLATE, i), PASSWORD));
+        this.users = new HashMap<>();
+
+        int maxUsersAvailable = Math.min(NUMBER_OF_RECORD_THREADS, NUMBER_OF_AVAILABLE_USERS);
+
+        for (Environment environment : Environment.values()) {
+            this.users.put(environment, new ArrayBlockingQueue<User>(maxUsersAvailable));
+
+            for (int i = 1; i <= maxUsersAvailable; ++i) {
+                this.users.get(environment).add(new User(String.format(USERNAME_TEMPLATE, i), PASSWORD));
+            }
         }
+
+        this.logsFolderName = String.format("%s%s", OUTPUT_FOLDER_NAME, LOGS_FOLDER_NAME);
+        this.logFileName = String.format("%s%s-%s", this.logsFolderName,
+            dataChecksStartTime, this.inputCSVFilename.replace(".csv", ".txt"));
+
+        this.screenshotsFolderName = String.format("%s%s%s-%s", OUTPUT_FOLDER_NAME, SCREENSHOTS_FOLDER_NAME,
+                dataChecksStartTime, this.inputCSVFilename.replace(".csv", ""));
+
+        File screenshots = new File(this.screenshotsFolderName);
+        File logs = new File(this.logsFolderName);
+        File logFile = new File(this.logFileName);
+
+        if (!screenshots.exists())
+            if (!screenshots.mkdirs()) {
+                log.error("Screenshots folder creation failed.");
+            }
+        if (!logs.exists())
+            if (!logs.mkdirs()) {
+                log.error("Logs folder creation failed.");
+            }
+
+/*
+        try {
+            if (logFile.createNewFile()) {
+                FileOutputStream fos = new FileOutputStream(logFile);
+                PrintStream ps = new PrintStream(fos);
+                System.setOut(ps);
+            }
+        } catch (IOException exception) {
+            log.warn("Redirect of console output to local file was not possible.");
+        }
+*/
     }
 
     /**
@@ -132,30 +193,126 @@ public class GetSystemReportValuesCommand implements Command {
      * @return HashMap<Integer, ReportValuesSearchSpec>
      * @throws Exception
      */
-    private HashMap<Integer, ReportValuesSearchSpec> loadAndValidateInputCSV() throws ParseException, IOException {
+    private Map<Environment, Map<String, List<ReportValuesSearchSpec>>> loadAndValidateInputCSV() throws ParseException, IOException {
         boolean parsingErrorFound = false;
-        HashMap<Integer, ReportValuesSearchSpec> recordsMap = new HashMap<>();
+
         File inputCSVFile = new File(this.inputCSVFilename);
         CSVParser parser = CSVParser.parse(inputCSVFile, Charset.forName("UTF-8"), CSVFormat.EXCEL);
         List<CSVRecord> records = parser.getRecords();
 
-        int recordNumber = 0;
+        long rowNumberInCSV = 1;
+        long recordNumber = 1;
+        Map<Environment, Map<String, List<ReportValuesSearchSpec>>> listMapPerEnvironment = new EnumMap<>(Environment.class);
+
+        //Sort by system only for now
+        Collections.sort(records, new Comparator<CSVRecord>() {
+            @Override
+            public int compare(CSVRecord r1, CSVRecord r2) {
+                return r1.get(CSVParameters.SYSTEM_CODE_POSITION.GetValue()).compareTo(
+                        r2.get(CSVParameters.SYSTEM_CODE_POSITION.GetValue()));
+            }
+        });
 
         for (CSVRecord record : records) {
             try {
                 for (ReportValuesSearchSpec searchSpec : this.getSearchSpec(inputCSVFile, record)) {
-                    recordsMap.put(++recordNumber, searchSpec);
+                    PopulateEnvironmentsMap(rowNumberInCSV, recordNumber, listMapPerEnvironment, searchSpec);
+
+                    recordNumber++;
                 }
+
+                rowNumberInCSV++;
             }
             catch (ParseException e) {
                 parsingErrorFound = true;
-                log.error("CSV File: " + inputCSVFile + ", record #" + recordNumber + " - " + e.getMessage());
+                log.error("CSV File: " + inputCSVFile + ", record #" + rowNumberInCSV + " - " + e.getMessage());
             }
         }
 
         if (parsingErrorFound) throw new ParseException("Invalid input CSV.");
 
-        return recordsMap;
+        return listMapPerEnvironment;
+    }
+
+    private void PopulateEnvironmentsMap(long rowNumberInCSV, long recordNumber, Map<Environment, Map<String, List<ReportValuesSearchSpec>>> listMapPerEnvironment, ReportValuesSearchSpec searchSpec) throws ParseException {
+        searchSpec.setRowNumberInCSV(rowNumberInCSV);
+        searchSpec.setRecordNumber(recordNumber);
+        String systemCode = searchSpec.getSystemCode();
+
+        for (Environment environment : searchSpec.getEnvironments()) {
+            if (!listMapPerEnvironment.containsKey(environment))
+                listMapPerEnvironment.put(environment, new HashMap<String, List<ReportValuesSearchSpec>>());
+
+            ReportValuesSearchSpec clone = searchSpec.clone();
+            clone.setEnvironments(environment.name());
+
+            if (!listMapPerEnvironment.get(environment).containsKey(systemCode))
+                listMapPerEnvironment.get(environment).put(systemCode, new ArrayList<ReportValuesSearchSpec>());
+
+            listMapPerEnvironment.get(environment).get(systemCode).add(clone);
+        }
+    }
+
+    ValueFetcherThreadPool threadPool = new ValueFetcherThreadPool();
+
+    public List<Future<Map<ReportValuesSearchSpec, DataSetReportValues>>> Submit(Map<Environment, Map<String, List<ReportValuesSearchSpec>>> environmentSearchSpecs) {
+        List<Future<Map<ReportValuesSearchSpec, DataSetReportValues>>> results = new ArrayList<>();
+
+        for (Map.Entry<Environment, Map<String, List<ReportValuesSearchSpec>>> envEntry : environmentSearchSpecs.entrySet()) {
+            Environment env = envEntry.getKey();
+            Map<String, List<ReportValuesSearchSpec>> systemSearchSpecs = envEntry.getValue();
+
+            for (Map.Entry<String, List<ReportValuesSearchSpec>> sysEntry : systemSearchSpecs.entrySet()) {
+                String sys = sysEntry.getKey();
+                List<ReportValuesSearchSpec> list = sysEntry.getValue();
+
+                Future<Map<ReportValuesSearchSpec, DataSetReportValues>> result = threadPool.submit(env, sys, list);
+
+                results.add(result);
+            }
+        }
+
+        return results;
+    }
+
+    public Map<Long, DecoratedOverviewValues> collate(List<Future<Map<ReportValuesSearchSpec, DataSetReportValues>>> results) throws FetchSystemTotalsException {
+//    public List<DecoratedOverviewValues> collate(List<Future<Map<ReportValuesSearchSpec, DataSetReportValues>>> results) throws FetchSystemTotalsException {
+//        Set<DecoratedOverviewValues> collatedResults = new TreeSet<>();
+        Environment env = null;
+
+        Map<Long, DecoratedOverviewValues> groupedResults = new HashMap<>();
+
+        for (Future<Map<ReportValuesSearchSpec, DataSetReportValues>> futureMap : results) {
+            try {
+                for (Map.Entry<ReportValuesSearchSpec, DataSetReportValues> entry : futureMap.get().entrySet()) {
+                    ReportValuesSearchSpec searchSpec = entry.getKey();
+                    DataSetReportValues dataSetReportValues = entry.getValue();
+                    env = searchSpec.getEnvironments().get(0);
+
+//                    CrossEnvironmentReportValues crossEnvironmentReportValues = new CrossEnvironmentReportValues();
+//                    crossEnvironmentReportValues.set(env, dataSetReportValues);
+
+//                    collatedResults.add(new DecoratedOverviewValues(searchSpec, crossEnvironmentReportValues));
+
+                    if (!groupedResults.containsKey(searchSpec.getRecordNumber())) {
+                        CrossEnvironmentReportValues crossEnvironmentReportValues = new CrossEnvironmentReportValues();
+                        crossEnvironmentReportValues.set(env, dataSetReportValues);
+                        groupedResults.put(searchSpec.getRecordNumber(), new DecoratedOverviewValues(searchSpec, crossEnvironmentReportValues));
+                    } else {
+                        DecoratedOverviewValues pair = groupedResults.get(searchSpec.getRecordNumber());
+                        pair.searchSpec.getEnvironments().addAll(searchSpec.getEnvironments());
+                        pair.crossEnvironmentReportValues.set(env, dataSetReportValues);
+                    }
+                }
+            } catch (ExecutionException exception) {
+                log.warn("Error while fetching values for a record", exception);
+            } catch (InterruptedException exception) {
+                throw new FetchSystemTotalsException("While fetching a record's values", exception);
+            }
+        }
+
+//        return new ArrayList<>(collatedResults);
+        return groupedResults;
     }
 
     /**
@@ -165,70 +322,221 @@ public class GetSystemReportValuesCommand implements Command {
      */
     @Override
     public void execute() throws Exception {
-        HashMap<Integer, ReportValuesSearchSpec> records = loadAndValidateInputCSV();
+        log.info("Avatar Data Checks execution started...");
+
+        Map<Environment, Map<String, List<ReportValuesSearchSpec>>> environmentSearchSpecs = loadAndValidateInputCSV();
+
+        threadPool.init(environmentSearchSpecs);
+
+//        final int environmentExecs = environmentSearchSpecs.size();
 
         Workbook workbook = new XSSFWorkbook();
         Sheet totalsSheet = this.createSheet(workbook, SHEET_NAME_TOTALS, COLUMN_WIDTH_1_TOTALS);
         Sheet allValuesSheet = this.createSheet(workbook, SHEET_NAME_ALL_VALUES, COLUMN_WIDTH_1_ALL_VALUES);
         this.createFonts(workbook);
 
-        final ExecutorService recordThreadPool = Executors.newFixedThreadPool(NUMBER_OF_RECORD_THREADS);
+//        final ExecutorService recordThreadPool = Executors.newFixedThreadPool(Environment.values().length);
+//
+        List<Future<Map<ReportValuesSearchSpec, DataSetReportValues>>> futures = Submit(environmentSearchSpecs);
 
-        List<Future<DecoratedOverviewValues>> futures = new ArrayList<>(records.size());
-        for (Map.Entry<Integer, ReportValuesSearchSpec> record : records.entrySet()) {
-            final ReportValuesSearchSpec searchSpec = record.getValue();
-            final int rNumber = record.getKey();
-            futures.add(recordThreadPool.submit(new Callable<DecoratedOverviewValues>() {
+/*        for (final Map.Entry<Environment, Map<String, List<ReportValuesSearchSpec>>> environmentSearchMap : environmentSearchSpecs.entrySet()) {
+            //By environment
+            futures.add(recordThreadPool.submit(new Callable<List<DecoratedOverviewValues>>() {
                 @Override
-                public DecoratedOverviewValues call() throws Exception {
-                    DecoratedOverviewValues values = null;
+                public List<DecoratedOverviewValues> call() throws Exception {
                     boolean done = false;
                     int trial = 0;
+
+                    List<DecoratedOverviewValues> values = null;
+
                     while (!done && trial++ < RETRIES) {
-                        User user = users.poll(TIMEOUT_SECS_FETCH_VALUES, TimeUnit.SECONDS);
                         try {
-                            // XLSX Format testing:
-                            // return new DecoratedOverviewValues(
-                            // rNumber, searchSpec,
-                            // new CrossEnvironmentReportValues());
-                            values = new DecoratedOverviewValues(rNumber, searchSpec, fetchValues(user, searchSpec));
+                            values = fetchValuesPerEnvironment(environmentSearchMap);
+
                             done = true;
-                        } catch (ElementNotLoadedException
-                                | WebDriverException exception) {
-                            log.warn("Error fetching values for (record: " + rNumber + ") " + searchSpec + ", trial number: " + trial, exception);
-                        } finally {
-                            users.offer(user);
+                        } catch (Exception e) {
+                            done = false;
+                            log.error("Trial #: " + trial + ". Failed fetching values for environment thread " + environmentSearchMap.getKey(), e);
                         }
                     }
+
                     if (values == null) {
                         recordThreadPool.shutdown();
-                        log.error("Failed fetching values for (record: " + rNumber + ") " + searchSpec);
-                        throw new FetchSystemTotalsException("Error fetching values for (record: " + rNumber + ") " + searchSpec);
+                        log.error("Failed fetching values for environment <X>");
+                        throw new FetchSystemTotalsException("Error fetching values for environment " + environmentSearchMap.getKey());
                     }
+
                     return values;
                 }
             }));
+        }*/
+
+        Map<Long, DecoratedOverviewValues> collatedResults;
+        try {
+            collatedResults = collate(futures);
+        } finally {
+            threadPool.shutdown();
         }
+
         Date today = new Date();
         int totalsTabRowNumber = 0;
         int specificOrgsTabRowNumber = 0;
-        for (Future<DecoratedOverviewValues> future : futures) {
-            try {
-                DecoratedOverviewValues decoratedOverviewValues = future.get();
-                if (decoratedOverviewValues.searchSpec.getSheetNumber() == 0) {
-                    totalsTabRowNumber = this.writeTotals(workbook, totalsSheet, totalsTabRowNumber, decoratedOverviewValues.searchSpec, decoratedOverviewValues.crossEnvironmentReportValues, today);
-                } else {
-                    specificOrgsTabRowNumber = this.writeAllOverviewValues(workbook, allValuesSheet, specificOrgsTabRowNumber, decoratedOverviewValues.searchSpec, decoratedOverviewValues.crossEnvironmentReportValues, today);
+
+        List<Long> keys = new ArrayList<>(collatedResults.keySet());
+        keys.sort(new Comparator<Long>() {
+            @Override
+            public int compare(Long r1, Long r2) {
+                return r1.compareTo(r2);
+            }
+        });
+
+//        for (Future<List<DecoratedOverviewValues>> future : futures) {
+//            try {
+//                List<DecoratedOverviewValues> decoratedOverviewValues = future.get();
+
+//                for (DecoratedOverviewValues values : decoratedOverviewValues) {
+                for (Long key : keys) {
+                    DecoratedOverviewValues decor = collatedResults.get(key);
+                    if (decor.searchSpec.getSheetNumber() == 0) {
+                        totalsTabRowNumber = this.writeTotals(workbook, totalsSheet, totalsTabRowNumber, decor.searchSpec, decor.crossEnvironmentReportValues, today);
+                    } else {
+                        specificOrgsTabRowNumber = this.writeAllOverviewValues(workbook, allValuesSheet, specificOrgsTabRowNumber, decor.searchSpec, decor.crossEnvironmentReportValues, today);
+                    }
+
+                    try {
+                        this.writeWorkbook(workbook, outputXLSXFilename);
+                    } catch (FileNotFoundException e) {
+                        log.warn("The output file probably exists and it's taken by another process. Trying saving with and incremented renaming.");
+                        log.warn("You have one retry only, please release the file and hit a key to try to save again.");
+                        System.in.read();
+                        this.writeWorkbook(workbook, outputXLSXFilename);
+                    }
                 }
-                this.writeWorkbook(workbook, outputXLSXFilename);
+//            } catch (ExecutionException exception) {
+//                log.warn("Error while fetching values for a record");
+//            } catch (IOException | InterruptedException exception) {
+//                recordThreadPool.shutdown();
+//                throw new FetchSystemTotalsException("While fetching a record's values", exception);
+//            }
+//        }
+//        recordThreadPool.shutdown();
+
+        log.info("...Avatar Data Checks execution finished.");
+    }
+
+    private List<DecoratedOverviewValues> fetchValuesPerEnvironment(Map.Entry<Environment, Map<String, List<ReportValuesSearchSpec>>> searchSpecListByEnvironment) throws FetchSystemTotalsException {
+        List<DecoratedOverviewValues> values = new ArrayList<>();
+
+        //Predefined threads count
+        final ExecutorService envThreadPool = Executors.newFixedThreadPool(NUMBER_OF_RECORD_THREADS);
+        //One future for each system
+        HashMap<String, Future<Map<ReportValuesSearchSpec, DataSetReportValues>>> futures = new HashMap<>();
+
+        //Web driver engine
+        //TODO: Send this to a property, even consider the possibility of choosing which driver to use per search spec
+        System.setProperty("webdriver.chrome.driver", "C:\\Users\\eyoon\\Downloads\\Selenium\\Drivers\\Chrome\\chromedriver.exe");
+        //driver = new ExtendedRemoteWebDriver(new FirefoxDriver());
+
+        final GetSystemReportValuesCommand self = this;
+
+        for (final Map.Entry<String, List<ReportValuesSearchSpec>> systemSearchEntry : searchSpecListByEnvironment.getValue().entrySet()) {
+            futures.put(systemSearchEntry.getKey(), envThreadPool.submit(new Callable<Map<ReportValuesSearchSpec, DataSetReportValues>>() {
+                @Override
+                public Map<ReportValuesSearchSpec, DataSetReportValues> call() throws Exception {
+                    Map<ReportValuesSearchSpec, DataSetReportValues> result = new HashMap<>();
+                    boolean done = false;
+
+                    int trial = 0;
+                    int successRecordIndex = 0;
+
+                    List<ReportValuesSearchSpec> searchSpecList = systemSearchEntry.getValue();
+                    Environment searchEnvironment = searchSpecList.get(0).getEnvironments().get(0);
+                    ReportValuesSearchSpec searchSpec = null;
+
+                    //Tries per system
+                    while (!done && trial++ < RETRIES) {
+                        User user = users.get(searchEnvironment).poll(TIMEOUT_SECS_FETCH_VALUES, TimeUnit.SECONDS);
+
+                        //TODO: Part of the previous TODO, set the web driver and configs by properties
+                        final ExtendedRemoteWebDriver driver = new ExtendedRemoteWebDriver(new ChromeDriver());
+
+                        PatientExperienceIFrame patientExperienceIFrame = self.loadPatientExperience(driver, searchEnvironment.getURLRoot(), user.getUsername(), user.getPassword(), searchEnvironment);
+
+                        try {
+                            for (int recordIndex = successRecordIndex; recordIndex < searchSpecList.size(); recordIndex++) {
+                                searchSpec = searchSpecList.get(recordIndex);
+
+                                final ReportFilter reportFilter = self.buildReportFilter(searchSpec);
+
+                                //TODO: This should be implemented correctly in page objects for QA
+                                final ReportFilter reportFilterByEnvironment = reportFilter.clone();
+
+                                if (searchSpec.getSurveyType().compareToIgnoreCase("Avatar") == 0 && searchSpec.getEnvironments().contains(Environment.QA)) {
+                                    reportFilterByEnvironment.setItemsToIncludeCore(true);
+                                    reportFilterByEnvironment.setItemsToIncludeCustom(false);
+                                    reportFilterByEnvironment.setItemsToIncludeAncillary(false);
+                                }
+
+                                result.put(searchSpec, fetchValues(driver, patientExperienceIFrame, searchSpec, reportFilterByEnvironment));
+
+                                successRecordIndex++;
+                            }
+                            done = true;
+                        } catch (ElementNotLoadedException
+                                | WebDriverException exception) {
+                            if (exception instanceof UnhandledAlertException) {
+                                log.error("Error by unexpected alert open. Must retry.");
+                                log.warn("Trial #: " + trial + ". Error fetching values for " + searchSpec);
+                            } else if (exception instanceof NoSuchElementException) {
+
+                            } else
+                                log.warn("Trial #: " + trial + ". Error fetching values for " + searchSpec, exception);
+                        } catch (Exception exception) {
+                            log.error("Failed fetching values for " + searchSpec, exception);
+                            throw exception;
+                        } finally {
+                            try {
+                                users.get(searchEnvironment).offer(user);
+
+                                if (driver != null) {
+                                    driver.quit();
+                                }
+                            } catch (WebDriverException ignored) {
+                                log.error("Unable to make driver quit.");
+                            }
+                        }
+                    }
+
+                    if (result == null) {
+                        log.error("Failed fetching values for " + searchSpec);
+                        throw new FetchSystemTotalsException("Error fetching values for " + searchSpec);
+                    }
+
+                    return result;
+                }
+            }));
+        }
+
+        for (Map.Entry<String, Future<Map<ReportValuesSearchSpec, DataSetReportValues>>> futureEntry : futures.entrySet()) {
+            String ifExceptionMessage = "Can't iterate report values";
+            try {
+                for (Map.Entry<ReportValuesSearchSpec, DataSetReportValues> data : futureEntry.getValue().get().entrySet()) {
+                    ReportValuesSearchSpec searchSpec = data.getKey();
+                    ifExceptionMessage = searchSpec.toString();
+
+                    CrossEnvironmentReportValues crossEnvironmentReportValues = new CrossEnvironmentReportValues();
+                    crossEnvironmentReportValues.set(searchSpec.getEnvironments().get(0), data.getValue());
+                    values.add(new DecoratedOverviewValues(searchSpec, crossEnvironmentReportValues));
+                }
             } catch (ExecutionException exception) {
-                log.warn("Error while fetching values for a record");
-            } catch (IOException | InterruptedException exception) {
-                recordThreadPool.shutdown();
-                throw new FetchSystemTotalsException("While fetching a record's values", exception);
+                log.error("Error while fetching a pair of value maps for " + ifExceptionMessage);
+            } catch (InterruptedException exception) {
+                throw new FetchSystemTotalsException("While fetching " + ifExceptionMessage, exception);
             }
         }
-        recordThreadPool.shutdown();
+        envThreadPool.shutdown();
+
+        return values.size() > 0? values : null;
     }
 
     /**
@@ -275,96 +583,35 @@ public class GetSystemReportValuesCommand implements Command {
         return sheet;
     }
 
-    private CrossEnvironmentReportValues fetchValues(final User user, final ReportValuesSearchSpec searchSpec) throws FetchSystemTotalsException {
-        CrossEnvironmentReportValues crossEnvironmentReportValues = new CrossEnvironmentReportValues();
-        final ReportFilter reportFilter = this.buildReportFilter(searchSpec);
-        final ExecutorService envThreadPool = Executors.newFixedThreadPool(searchSpec.getEnvironments().size());
-        EnumMap<Environment, Future<DataSetReportValues>> futures = new EnumMap<>(Environment.class);
-        for (final Environment environment : searchSpec.getEnvironments()) {
-            futures.put(environment, envThreadPool.submit(new Callable<DataSetReportValues>() {
-                @Override
-                public DataSetReportValues call() throws Exception {
-                    DataSetReportValues result = null;
-                    boolean done = false;
-                    int trial = 0;
-                    while (!done && trial++ < RETRIES) {
-                        try {
-                            result = fetchValues(environment, user.getUsername(), user.getPassword(), searchSpec, reportFilter);
-                            done = true;
-                        } catch (ElementNotLoadedException
-                                | WebDriverException exception) {
-                            log.warn("Error fetching values for " + searchSpec + ", " + environment + ", trial number: " + trial, exception);
-                        } catch (Exception exception) {
-                            log.error("Failed fetching values for " + searchSpec + ", " + environment, exception);
-                            throw exception;
-                        }
-                    }
-                    if (result == null) {
-                        log.error("Failed fetching values for " + searchSpec + ", " + environment);
-                        throw new FetchSystemTotalsException("Error fetching values for " + searchSpec + ", " + environment);
-                    }
-                    return result;
-                }
-            }));
-        }
-        for (Map.Entry<Environment, Future<DataSetReportValues>> futureEntry : futures.entrySet()) {
-            Environment environment = futureEntry.getKey();
-            try {
-                crossEnvironmentReportValues.set(futureEntry.getKey(), futureEntry.getValue().get());
-            } catch (ExecutionException exception) {
-                log.error("Error while fetching a pair of value maps for " + searchSpec + " on " + environment);
-            } catch (InterruptedException exception) {
-                throw new FetchSystemTotalsException("While fetching " + searchSpec + " on " + environment, exception);
-            }
-        }
-        envThreadPool.shutdown();
-        return crossEnvironmentReportValues;
-    }
-
     /**
      * TODO: Split this method.
      *
-     * @param environment  Environment spec.
-     * @param username     Username.
-     * @param password     Password.
      * @param searchSpec   Search specification for overview values.
      * @param reportFilter "Template" report filter.
      * @return Overview values for all data-sets.
      */
-    private DataSetReportValues fetchValues(Environment environment, String username, String password, ReportValuesSearchSpec searchSpec, ReportFilter reportFilter) {
-        log.info("Fetching values for " + searchSpec + ", " + environment);
+    private DataSetReportValues fetchValues(ExtendedRemoteWebDriver driver, PatientExperienceIFrame patientExperienceIFrame, ReportValuesSearchSpec searchSpec, ReportFilter reportFilter) {
+        log.info("Fetching values for " + searchSpec);
         DataSetReportValues result = new DataSetReportValues();
-        ExtendedRemoteWebDriver driver = null;
-        try {
-            ReportTab reportTab = this.getReportTab(searchSpec);
-            DataSet dataSet = DataSet.ALL;
-            //driver = new ExtendedRemoteWebDriver(new FirefoxDriver());
-            System.setProperty("webdriver.chrome.driver", "C:\\Users\\eyoon\\Downloads\\Selenium\\Drivers\\Chrome\\chromedriver.exe");
-            driver = new ExtendedRemoteWebDriver(new ChromeDriver());
-            ReportFilter myReportFilter = reportFilter.clone();
+
+        ReportTab reportTab = this.getReportTab(searchSpec);
+        DataSet dataSet = DataSet.ALL;
+        ReportFilter myReportFilter = reportFilter.clone();
+        myReportFilter.setDataSet(dataSet);
+        Environment searchEnvironment = searchSpec.getEnvironments().get(0);
+        ReportValues valuesAll = patientExperienceIFrame.accessPanelFrame().changeSystem(myReportFilter).configureFilters(myReportFilter, searchEnvironment).applyConfiguredFilters().waitForElementsToLoad(searchEnvironment).openReportTab(reportTab).waitForElementsToLoad().getValues(searchSpec);
+        result.set(dataSet, valuesAll);
+        log.info("ReportValues (" + dataSet + "), " + searchSpec.toStringShort() + " = " + valuesAll);
+        this.takeScreenshot(driver, searchSpec, searchEnvironment, dataSet);
+        if (searchSpec.isQualifiedEnabled()) {
+            dataSet = DataSet.QUALIFIED;
             myReportFilter.setDataSet(dataSet);
-            PatientExperienceIFrame patientExperienceIFrame = this.loadPatientExperience(driver, environment.getURLRoot(), username, password);
-            ReportValues valuesAll = patientExperienceIFrame.accessPanelFrame().changeSystem(myReportFilter).configureFilters(myReportFilter).applyConfiguredFilters().waitForElementsToLoad().openReportTab(reportTab).waitForElementsToLoad().getValues();
-            result.set(dataSet, valuesAll);
-            log.info("ReportValues (" + environment + ", " + dataSet + ") = " + valuesAll);
-            this.takeScreenshot(driver, searchSpec, environment, dataSet);
-            if (searchSpec.isQualifiedEnabled()) {
-                dataSet = DataSet.QUALIFIED;
-                myReportFilter.setDataSet(dataSet);
-                ReportValues valuesQualified = patientExperienceIFrame.configureCalculationFilter(myReportFilter).applyConfiguredFilters().waitForElementsToLoad().openReportTab(reportTab).waitForElementsToLoad().getValues();
-                result.set(dataSet, valuesQualified);
-                log.info("ReportValues (" + environment + ", " + dataSet + ") = " + valuesQualified);
-                this.takeScreenshot(driver, searchSpec, environment, dataSet);
-            }
-        } finally {
-            try {
-                if (driver != null) {
-                    driver.quit();
-                }
-            } catch (WebDriverException ignored) {
-                log.error("Unable to make driver quit.");
-            }
+            ReportValues valuesQualified = patientExperienceIFrame.configureCalculationFilter(myReportFilter, searchEnvironment).applyConfiguredFilters().waitForElementsToLoad(searchEnvironment).openReportTab(reportTab).waitForElementsToLoad().getValues(searchSpec);
+            result.set(dataSet, valuesQualified);
+            log.info("ReportValues (" + dataSet + "), " + searchSpec.toStringShort() + " = " + valuesQualified);
+            this.takeScreenshot(driver, searchSpec, searchEnvironment, dataSet);
         }
+
         return result;
     }
 
@@ -395,19 +642,31 @@ public class GetSystemReportValuesCommand implements Command {
 
     private void takeScreenshot(ExtendedRemoteWebDriver driver, ReportValuesSearchSpec searchSpec, Environment environment, DataSet dataSet) {
         File csvFile = searchSpec.getCsvFile();
-        File dir = csvFile.getParentFile();
         String csvFilename = csvFile.getName();
-        StringBuilder screenshotFilename = new StringBuilder(csvFilename.replace(".csv", ""));
-        screenshotFilename.append('.').append(searchSpec.getRecordNumber()).append('-').append(environment).append('-').append(dataSet).append(".png");
+        StringBuilder screenshotFilename = new StringBuilder(csvFilename.replace(".csv", "-"));
+        screenshotFilename.append(searchSpec.getRecordNumber()).append('-').
+            append(environment).append('-').
+            append(dataSet).append('-').
+            append(searchSpec.getSectionTitle()).append('-').
+            append(searchSpec.getSurveyType()).append('-').
+            append(searchSpec.getFromMonthSpec().getYear() +
+                String.format("%02d", searchSpec.getFromMonthSpec().getMonth().getValue()) + '-').
+            append(searchSpec.getToMonthSpec().getYear() +
+                String.format("%02d", searchSpec.getToMonthSpec().getMonth().getValue()) + '-').
+            append(".png");
         try {
-            driver.takeScreenshot(new File(dir, screenshotFilename.toString()));
+            driver.takeScreenshot(new File(this.screenshotsFolderName, screenshotFilename.toString()));
         } catch (IOException exception) {
             log.error("Failed taking screenshot for " + searchSpec, exception);
         }
     }
 
     private PatientExperienceIFrame loadPatientExperience(final ExtendedRemoteWebDriver driver, final String urlRoot, final String username, final String password) {
-        PatientExperienceIFrame patientExperienceIFrame = new LoginPage(driver, urlRoot).open().login(username, password).navigateToPatientExperienceTab().waitForElementsToLoad();
+        return loadPatientExperience(driver, urlRoot, username, password, Environment.PRODUCTION);
+    }
+
+    private PatientExperienceIFrame loadPatientExperience(final ExtendedRemoteWebDriver driver, final String urlRoot, final String username, final String password, Environment env) {
+        PatientExperienceIFrame patientExperienceIFrame = new LoginPage(driver, urlRoot).open().login(username, password).navigateToPatientExperienceTab().waitForElementsToLoad(env);
         patientExperienceIFrame.openOverviewTab().waitForElementsToLoad();
         return patientExperienceIFrame;
     }
@@ -739,14 +998,18 @@ public class GetSystemReportValuesCommand implements Command {
         boolean qualified = searchSpec.isQualifiedEnabled();
         Object valueA = null, valueB = null;
         if (qualified) {
-            valueA = this.getValue(crossEnvironmentReportValues, Environment.PRODUCTION, DataSet.QUALIFIED, ITEM_NAME_TOTAL);
-            valueB = this.getValue(crossEnvironmentReportValues, Environment.QA, DataSet.QUALIFIED, ITEM_NAME_TOTAL);
+            valueA = this.getValue(crossEnvironmentReportValues, Environment.PRODUCTION, DataSet.QUALIFIED,
+                    ITEM_NAME_TOTAL);
+            valueB = this.getValue(crossEnvironmentReportValues, Environment.QA, DataSet.QUALIFIED,
+                    searchSpec.getSurveyType().compareToIgnoreCase(SurveyType.AVATAR.getValue()) == 0? ITEM_NAME_TOTAL_AVATAR : ITEM_NAME_TOTAL);
         }
         this.writeDataSetCount(qualified, sheet, rowNumber++, valueA, valueB, "Qualified");
 
         // All
-        valueA = this.getValue(crossEnvironmentReportValues, Environment.PRODUCTION, DataSet.ALL, ITEM_NAME_TOTAL);
-        valueB = this.getValue(crossEnvironmentReportValues, Environment.QA, DataSet.ALL, ITEM_NAME_TOTAL);
+        valueA = this.getValue(crossEnvironmentReportValues, Environment.PRODUCTION, DataSet.ALL,
+                ITEM_NAME_TOTAL);
+        valueB = this.getValue(crossEnvironmentReportValues, Environment.QA, DataSet.ALL,
+                searchSpec.getSurveyType().compareToIgnoreCase(SurveyType.AVATAR.getValue()) == 0? ITEM_NAME_TOTAL_AVATAR : ITEM_NAME_TOTAL);
         this.writeDataSetCount(true, sheet, rowNumber, valueA, valueB, "All");
 
         this.writeFinalBorders(workbook, sheet, startingRowNumber, dateRangeRowNumber, rowNumber++);
@@ -760,13 +1023,13 @@ public class GetSystemReportValuesCommand implements Command {
         fileOut.close();
     }
 
-    private static class DecoratedOverviewValues {
-        public final int recordNumber;
+    private static class DecoratedOverviewValues implements Comparable<DecoratedOverviewValues> {
+        public final long recordNumber;
         public final ReportValuesSearchSpec searchSpec;
         public final CrossEnvironmentReportValues crossEnvironmentReportValues;
 
-        public DecoratedOverviewValues(final int recordNumber, final ReportValuesSearchSpec searchSpec, final CrossEnvironmentReportValues crossEnvironmentReportValues) {
-            this.recordNumber = recordNumber;
+        public DecoratedOverviewValues(final ReportValuesSearchSpec searchSpec, final CrossEnvironmentReportValues crossEnvironmentReportValues) {
+            this.recordNumber = searchSpec.getRecordNumber();
             this.searchSpec = searchSpec;
             this.crossEnvironmentReportValues = crossEnvironmentReportValues;
         }
@@ -779,6 +1042,187 @@ public class GetSystemReportValuesCommand implements Command {
             sb.append(", values=").append(crossEnvironmentReportValues);
             sb.append('}');
             return sb.toString();
+        }
+
+        @Override
+        public int compareTo(DecoratedOverviewValues other) {
+            final int BEFORE = -1;
+            final int EQUAL = 0;
+            final int AFTER = 1;
+
+            if (this == other) return EQUAL;
+
+            if (this.recordNumber < other.recordNumber) return BEFORE;
+            if (this.recordNumber > other.recordNumber) return AFTER;
+
+            assert this.equals(other) : "compareTo inconsistent with equals.";
+
+            return EQUAL;
+        }
+    }
+
+    private class ValueFetcherThreadPool {
+        Map<Environment, ExecutorService> threadPools = new HashMap<>();
+
+        public void init(Map<Environment, Map<String, List<ReportValuesSearchSpec>>> environmentSearchSpecs) {
+            for (Map.Entry<Environment, Map<String, List<ReportValuesSearchSpec>>> envEntry : environmentSearchSpecs.entrySet()) {
+                Environment env = envEntry.getKey();
+                Map<String, List<ReportValuesSearchSpec>> systemSearchSpecs = envEntry.getValue();
+
+                threadPools.put(env, Executors.newFixedThreadPool(users.get(env).size()));
+            }
+        }
+
+        private ExecutorService getPool(Environment env, String sys) {
+            return threadPools.get(env);
+        }
+
+        public void shutdown() {
+            for (ExecutorService executor : threadPools.values()) {
+                executor.shutdown();
+            }
+        }
+
+        Future<Map<ReportValuesSearchSpec, DataSetReportValues>> submit(Environment env, String sys, List<ReportValuesSearchSpec> searchSpecs) {
+            return getPool(env, sys).submit(new ValueFetcherPerEnvSys(env, sys, searchSpecs));
+        }
+    }
+
+    class ValueFetcherPerEnvSys implements Callable<Map<ReportValuesSearchSpec, DataSetReportValues>> {
+        final Environment env;
+        final String sys;
+        final List<ReportValuesSearchSpec> searchSpecs;
+
+        public ValueFetcherPerEnvSys(Environment env, String sys, List<ReportValuesSearchSpec> searchSpecs) {
+            this.env = env;
+            this.sys = sys;
+            this.searchSpecs = searchSpecs;
+        }
+
+        private ExtendedRemoteWebDriver initWebDriver() {
+            return new ExtendedRemoteWebDriver(new ChromeDriver());
+        }
+
+        private PatientExperienceIFrame GetPatientExperience(ExtendedRemoteWebDriver driver, User user) {
+            return loadPatientExperience(driver, env.getURLRoot(), user.getUsername(), user.getPassword(), env);
+        }
+
+        private boolean isAlertPresent(ExtendedRemoteWebDriver driver) {
+            try {
+                Alert alert = driver.switchTo().alert();
+                log.warn("Closing the following alert message: " + alert.getText());
+
+                return true;
+            } catch (NoAlertPresentException Exception) {
+                return false;
+            }
+        }
+
+        private void CloseAlerts(ExtendedRemoteWebDriver driver) {
+            while(isAlertPresent(driver))
+            {
+                try
+                {
+                    driver.switchTo().alert().accept();
+                }
+                catch (Exception exception)
+                {
+                    log.error("Couldn't close alert message/s.", exception);
+                }
+            }
+        }
+
+        @Override
+        public Map<ReportValuesSearchSpec, DataSetReportValues> call() throws Exception {
+            User user = users.get(env).poll(TIMEOUT_SECS_FETCH_VALUES, TimeUnit.SECONDS);
+            int recordsCounter = -1;
+
+            ExtendedRemoteWebDriver driver = initWebDriver();
+
+            Map<ReportValuesSearchSpec, DataSetReportValues> results = new HashMap<>();
+            DataSetReportValues fetchResult = null;
+            PatientExperienceIFrame patientExperience = null;
+
+            for (ReportValuesSearchSpec searchSpec : searchSpecs) {
+                boolean done = false;
+                int trial = 0;
+                int alertTrial = 0;
+                recordsCounter++;
+
+                while (!done && trial++ < RETRIES && alertTrial < ALERT_RETRIES) {
+                    try {
+                        if(recordsCounter == 0)
+                            patientExperience = GetPatientExperience(driver, user);
+
+                        //TODO: This should be implemented correctly in page objects for QA
+                        final ReportFilter reportFilterByEnvironment = buildReportFilter(searchSpec);
+
+                        if (searchSpec.getSurveyType().compareToIgnoreCase("Avatar") == 0 && searchSpec.getEnvironments().contains(Environment.QA)) {
+                            reportFilterByEnvironment.setItemsToIncludeCore(true);
+                            reportFilterByEnvironment.setItemsToIncludeCustom(false);
+                            reportFilterByEnvironment.setItemsToIncludeAncillary(false);
+                        }
+
+                        fetchResult = fetchValues(driver, patientExperience, searchSpec, reportFilterByEnvironment);
+
+                        done = true;
+                    } catch (ElementNotLoadedException
+                            | WebDriverException exception) {
+                        if (exception instanceof UnhandledAlertException) {
+                            log.warn("(1)Error by unexpected alert open. Must retry.");
+                            //Alert exception does not count as a retry iteration.
+                            trial = Math.max(0, --trial);
+                            alertTrial++;
+
+                            CloseAlerts(driver);
+
+                            log.warn("Retrying...");
+                            log.warn("Fetching values for " + searchSpec.toStringShort());
+                        } else
+                            log.warn("(2)Trial #: " + trial + ". Error fetching values for " + searchSpec.toStringShort(), exception);
+
+                        users.get(env).offer(user);
+
+                        try {
+                            if (driver != null) {
+                                if (trial < 3) {
+                                    patientExperience = GetPatientExperience(driver, user);
+                                }
+                            }
+                        } catch (WebDriverException ignored) {
+                            log.error("Unable to make driver quit.");
+                        }
+                    } catch (Exception exception) {
+                        log.error("(3)Trial #: " + trial + ". Failed fetching values for " + searchSpec.toStringShort(), exception);
+
+                        users.get(env).offer(user);
+
+                        try {
+                            if (driver != null) {
+                                if (trial < 3) {
+                                    patientExperience = GetPatientExperience(driver, user);
+                                }
+                            }
+                        } catch (WebDriverException ignored) {
+                            log.error("Unable to make driver quit.");
+                        }
+                    }
+                }
+
+                if (fetchResult == null) {
+                    fetchResult =  new DataSetReportValues();
+                }
+
+                results.put(searchSpec, fetchResult);
+            }
+
+            users.get(env).offer(user);
+
+            if (driver != null) {
+                driver.quit();
+            }
+
+            return results;
         }
     }
 }

@@ -2,12 +2,15 @@ package com.olenick.avatar.main;
 
 import com.olenick.avatar.main.commands.ExecuteFeatureCommand;
 import com.olenick.avatar.main.commands.GetSystemReportValuesCommand;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO: Split this per command. it doesn't make sense having the same jar for
  * the both of them.
  */
 public class Avatar_v3_0 {
+    private static final Logger log = LoggerFactory.getLogger(GetSystemReportValuesCommand.class);
     private static final int ERROR_IN_ARGUMENTS = -1;
 
     private static void printUsage(String errorMessage, int returnValue) {
@@ -28,25 +31,29 @@ public class Avatar_v3_0 {
 
     public static void main(String[] args) throws Exception {
         // TODO: Clean this mental stuff up.
-        if (args.length < 1 || args[0] == null) {
-            printUsage("No arguments provided.", ERROR_IN_ARGUMENTS);
-        }
+        try {
+            if (args.length < 1 || args[0] == null) {
+                printUsage("No arguments provided.", ERROR_IN_ARGUMENTS);
+            }
 
-        if (args[0].toLowerCase().endsWith(".xml")) {
-            if (args.length != 1) {
-                printUsage("Too many arguments.", ERROR_IN_ARGUMENTS);
+            if (args[0].toLowerCase().endsWith(".xml")) {
+                if (args.length != 1) {
+                    printUsage("Too many arguments.", ERROR_IN_ARGUMENTS);
+                }
+                new ExecuteFeatureCommand(args[0]).execute();
+            } else if (args[0].toLowerCase().endsWith(".csv")) {
+                if (args.length < 2 || args[1] == null) {
+                    printUsage("No Excel filename provided.", ERROR_IN_ARGUMENTS);
+                } else if (args.length > 2) {
+                    printUsage("Too many arguments.", ERROR_IN_ARGUMENTS);
+                }
+                new GetSystemReportValuesCommand(args[0], args[1]).execute();
+            } else {
+                printUsage("Unexpected argument" + (args.length > 1 ? "s" : "") + ".", ERROR_IN_ARGUMENTS);
             }
-            new ExecuteFeatureCommand(args[0]).execute();
-        } else if (args[0].toLowerCase().endsWith(".csv")) {
-            if (args.length < 2 || args[1] == null) {
-                printUsage("No Excel filename provided.", ERROR_IN_ARGUMENTS);
-            } else if (args.length > 2) {
-                printUsage("Too many arguments.", ERROR_IN_ARGUMENTS);
-            }
-            new GetSystemReportValuesCommand(args[0], args[1]).execute();
-        } else {
-            printUsage("Unexpected argument" + (args.length > 1 ? "s" : "")
-                    + ".", ERROR_IN_ARGUMENTS);
+        } catch (Exception e) {
+            log.error("... Avatar Data Checks execution failed.");
+            throw e;
         }
     }
 }

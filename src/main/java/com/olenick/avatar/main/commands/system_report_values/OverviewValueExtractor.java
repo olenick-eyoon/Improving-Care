@@ -9,10 +9,11 @@ import com.olenick.avatar.model.report_values.OverviewValue;
  */
 public class OverviewValueExtractor implements ReportValueExtractor<OverviewValue> {
     private static final String TOTAL = "Total";
+    private static final String TOTAL_AVATAR = "Core Total";
 
     public Number getValue(@NotNull final String itemName,
             @NotNull final OverviewValue overviewValue) {
-        if (TOTAL.equals(itemName)) {
+        if (TOTAL.equals(itemName) || TOTAL_AVATAR.equals(itemName)) {
             return overviewValue.getCount();
         } else {
             return overviewValue.getTopBoxPercentage();

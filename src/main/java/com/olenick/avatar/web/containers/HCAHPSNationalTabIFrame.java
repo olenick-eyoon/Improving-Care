@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import com.olenick.avatar.model.Environment;
+import com.olenick.avatar.model.report_values.ReportValuesSearchSpec;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -55,6 +57,25 @@ public class HCAHPSNationalTabIFrame extends
     @Override
     public HCAHPSNationalTabIFrame exportToPDF() {
         throw new RuntimeException("Not implemented yet");
+    }
+
+    public ReportValues getValues(ReportValuesSearchSpec searchSpec) {
+        ReportValues result = new ReportValues();
+        if (this.dataAvailable) {
+            for (WebElement row : this.getRows()) {
+                String itemName = row
+                        .findElement(By.xpath(XPATH_RELATIVE_ITEM_NAME))
+                        .getText().trim();
+                float adjustedScore = Float.valueOf(row
+                        .findElement(
+                                By.xpath(XPATH_RELATIVE_ADJUSTED_SCORE))
+                        .getText().trim());
+                result.set(itemName, new HCAHPSNationalValue(adjustedScore));
+            }
+        } else {
+            result.setDataAvailable(false);
+        }
+        return result;
     }
 
     public ReportValues getValues() {

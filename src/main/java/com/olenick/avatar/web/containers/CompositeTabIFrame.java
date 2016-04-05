@@ -2,6 +2,8 @@ package com.olenick.avatar.web.containers;
 
 import javax.validation.constraints.NotNull;
 
+import com.olenick.avatar.model.Environment;
+import com.olenick.avatar.model.report_values.ReportValuesSearchSpec;
 import org.openqa.selenium.By;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,6 +79,10 @@ public class CompositeTabIFrame extends
                 .click();
         this.handlePDFNewWindow();
         return this;
+    }
+
+    public ReportValues getValues(ReportValuesSearchSpec searchSpec) {
+        throw new UnsupportedOperationException("Not needed yet.");
     }
 
     @Override

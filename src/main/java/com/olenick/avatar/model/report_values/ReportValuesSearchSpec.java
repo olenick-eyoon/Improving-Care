@@ -36,6 +36,7 @@ public class ReportValuesSearchSpec {
 
     private File csvFile;
     private Long recordNumber;
+    private Long rowNumberInCSV;
     private Integer sheetNumber;
     private String sectionTitle;
     private String systemCode;
@@ -52,13 +53,14 @@ public class ReportValuesSearchSpec {
         this.environments = new ArrayList<>();
     }
 
-    public ReportValuesSearchSpec(File csvFile, long recordNumber,
+    public ReportValuesSearchSpec(File csvFile, long recordNumber, long rowNumberInCSV,
                                   int sheetNumber, String sectionTitle, String systemCode,
                                   String organizationCode, String surveyType, String patientType,
                                   MonthSpec fromMonthSpec, MonthSpec toMonthSpec,
                                   List<String> items, String environments) throws ParseException {
         this.setCsvFile(csvFile);
         this.setRecordNumber(recordNumber);
+        this.setRowNumberInCSV(rowNumberInCSV);
         this.setSheetNumber(sheetNumber);
         this.setSectionTitle(sectionTitle);
         this.setSystemCode(systemCode);
@@ -71,13 +73,14 @@ public class ReportValuesSearchSpec {
         this.setEnvironments(environments);
     }
 
-    public ReportValuesSearchSpec(File csvFile, long recordNumber,
+    public ReportValuesSearchSpec(File csvFile, long recordNumber, long rowNumberInCSV,
                                   int sheetNumber, String sectionTitle, String systemCode,
                                   String organizationCode, String surveyType, String patientType,
                                   MonthSpec fromMonthSpec, MonthSpec toMonthSpec,
                                   List<String> items, List<Environment> environments) throws ParseException {
         this.setCsvFile(csvFile);
         this.setRecordNumber(recordNumber);
+        this.setRowNumberInCSV(rowNumberInCSV);
         this.setSheetNumber(sheetNumber);
         this.setSectionTitle(sectionTitle);
         this.setSystemCode(systemCode);
@@ -90,12 +93,12 @@ public class ReportValuesSearchSpec {
         this.setEnvironments(environments);
     }
 
-    public ReportValuesSearchSpec(File csvFile, long recordNumber,
+    public ReportValuesSearchSpec(File csvFile, long recordNumber, long rowNumberInCSV,
                                   int sheetNumber, String sectionTitle, String systemCode,
                                   String organizationCode, String surveyType, String patientType,
                                   String fromYear, String fromMonth, String toYear, String toMonth,
                                   String items, String environments) throws ParseException {
-        this(csvFile, recordNumber, sheetNumber, sectionTitle, systemCode,
+        this(csvFile, recordNumber, rowNumberInCSV, sheetNumber, sectionTitle, systemCode,
                 organizationCode, surveyType, patientType, buildMonthSpec(
                         fromYear, fromMonth), buildMonthSpec(toYear, toMonth),
                 Arrays.asList(items.split(ITEMS_SEPARATOR)), environments);
@@ -128,6 +131,14 @@ public class ReportValuesSearchSpec {
 
     public void setRecordNumber(Long recordNumber) {
         this.recordNumber = recordNumber;
+    }
+
+    public Long getRowNumberInCSV() {
+        return recordNumber;
+    }
+
+    public void setRowNumberInCSV(Long rowNumber) {
+        this.rowNumberInCSV = rowNumber;
     }
 
     public Integer getSheetNumber() {
@@ -250,6 +261,8 @@ public class ReportValuesSearchSpec {
             throw new ParseException("Environment list parameter has duplicated values: " + environments);
         }
 
+        this.environments.clear();
+
         //Check for invalid options not available in VALID_ENVIRONMENTS
         for (String env : environmentList) {
             try {
@@ -287,6 +300,9 @@ public class ReportValuesSearchSpec {
         if (recordNumber != null ? !recordNumber.equals(that.recordNumber)
                 : that.recordNumber != null)
             return false;
+        if (rowNumberInCSV != null ? !rowNumberInCSV.equals(that.rowNumberInCSV)
+                : that.rowNumberInCSV != null)
+            return false;
         if (sheetNumber != null ? !sheetNumber.equals(that.sheetNumber)
                 : that.sheetNumber != null)
             return false;
@@ -323,6 +339,8 @@ public class ReportValuesSearchSpec {
         result = 31 * result
                 + (recordNumber != null ? recordNumber.hashCode() : 0);
         result = 31 * result
+                + (rowNumberInCSV != null ? rowNumberInCSV.hashCode() : 0);
+        result = 31 * result
                 + (sheetNumber != null ? sheetNumber.hashCode() : 0);
         result = 31 * result
                 + (sectionTitle != null ? sectionTitle.hashCode() : 0);
@@ -347,6 +365,7 @@ public class ReportValuesSearchSpec {
         final StringBuilder sb = new StringBuilder("ReportValuesSearchSpec{");
         sb.append("csv=").append(csvFile);
         sb.append(", recNo=").append(recordNumber);
+        sb.append(", rowNoInCSV=").append(rowNumberInCSV);
         sb.append(", sheetNo=").append(sheetNumber);
         sb.append(", title='").append(sectionTitle).append('\'');
         sb.append(", sysCode='").append(systemCode).append('\'');
@@ -356,6 +375,17 @@ public class ReportValuesSearchSpec {
         sb.append(", from=").append(fromMonthSpec);
         sb.append(", to=").append(toMonthSpec);
         sb.append(", items=").append(items);
+        sb.append(", environments=").append(environments);
+        sb.append('}');
+        return sb.toString();
+    }
+
+    public String toStringShort() {
+        final StringBuilder sb = new StringBuilder("SearchSpec{");
+        sb.append("title='").append(sectionTitle).append('\'');
+        sb.append(", survey='").append(surveyType).append('\'');
+        sb.append(", from=").append(fromMonthSpec);
+        sb.append(", to=").append(toMonthSpec);
         sb.append(", environments=").append(environments);
         sb.append('}');
         return sb.toString();
@@ -381,6 +411,7 @@ public class ReportValuesSearchSpec {
             clone = new ReportValuesSearchSpec(
                 new File(this.csvFile.getPath()),
                 this.getRecordNumber(),
+                this.getRowNumberInCSV(),
                 this.getSheetNumber(),
                 this.getSectionTitle(),
                 this.getSystemCode(),

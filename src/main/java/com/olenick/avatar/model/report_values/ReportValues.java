@@ -1,6 +1,7 @@
 package com.olenick.avatar.model.report_values;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -42,8 +43,11 @@ public class ReportValues {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("ReportValues{");
-        sb.append("values=").append(values);
-        sb.append(", dataAvailable=").append(dataAvailable);
+        sb.append("\r\n\tvalues=");
+        for (Map.Entry<String, ReportValue> entry : this.values.entrySet()) {
+            sb.append("\r\n\t\t" + entry.getKey() + "=" + entry.getValue());
+        }
+        sb.append(", \r\n\tdataAvailable=").append(dataAvailable);
         sb.append('}');
         return sb.toString();
     }

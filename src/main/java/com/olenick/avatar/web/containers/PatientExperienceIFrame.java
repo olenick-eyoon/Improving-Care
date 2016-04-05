@@ -6,8 +6,10 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import com.olenick.avatar.model.Environment;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoAlertPresentException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
@@ -34,13 +36,13 @@ import com.olenick.selenium.elements.ExtendedWebElement;
  */
 public class PatientExperienceIFrame extends
         WelcomePageIFrame<PatientExperienceIFrame> {
-    private final static Logger log = LoggerFactory
-            .getLogger(PatientExperienceIFrame.class);
+    private final static Logger log = LoggerFactory.getLogger(PatientExperienceIFrame.class);
 
     private static final String ATTRIBUTE_NAME_VALUE = "value";
     private static final String ELEMENT_ID_APPLY_BUTTON = "button2";
     private static final String ELEMENT_ID_CALCULATION_ITEM_TO_INCLUDE_CORE = "corecustom_0";
     private static final String ELEMENT_ID_CALCULATION_ITEM_TO_INCLUDE_CUSTOM = "corecustom_1";
+    private static final String ELEMENT_ID_CALCULATION_ITEM_TO_INCLUDE_ANCILLARY = "corecustom_2";
     private static final String ELEMENT_ID_CALCULATION_MEAN_RADIO = "top_box_0";
     private static final String ELEMENT_ID_CALCULATION_TOP_BOX_RADIO = "top_box_1";
     private static final String ELEMENT_ID_CANCEL_BUTTON = "button4";
@@ -80,6 +82,7 @@ public class PatientExperienceIFrame extends
     private static final String ELEMENT_ID_SURVEY_TYPE_SELECT = "surveytype";
     private static final String ELEMENT_ID_SYSTEM_SELECT = "system";
     private static final String XPATH_RELATIVE_ALL_REPORT_TABS = "../span";
+    private static final int STALE_RETRIES = 3;
 
     private final LoggedInWelcomePage parent;
 
@@ -87,48 +90,35 @@ public class PatientExperienceIFrame extends
     private ExtendedWebElement changeSystemButton;
 
     // Report Level
-    private AvatarMultiselectWebElement systemSelect, organizationSelect,
-            departmentSelect, locationSelect;
+    private AvatarMultiselectWebElement systemSelect, organizationSelect, departmentSelect, locationSelect;
 
     // Survey Selection
-    private AvatarMultiselectWebElement surveyTypeSelect, patientTypeSelect,
-            compositeSelect, itemSelect;
+    private AvatarMultiselectWebElement surveyTypeSelect, patientTypeSelect, compositeSelect, itemSelect;
 
     // Date Range
-    private ExtendedWebElement dateRangeDischargeVisitRadio,
-            dateRangeSurveyReturnRadio, dateRangeFromSpan, dateRangeToSpan;
-    private ExtendedSelectWebElement dateRangeFromMonthSelect,
-            dateRangeFromYearSelect, dateRangeToMonthSelect,
-            dateRangeToYearSelect, dateRangeGroupBySelect;
+    private ExtendedWebElement dateRangeDischargeVisitRadio, dateRangeSurveyReturnRadio, dateRangeFromSpan, dateRangeToSpan;
+    private ExtendedSelectWebElement dateRangeFromMonthSelect, dateRangeFromYearSelect, dateRangeToMonthSelect, dateRangeToYearSelect, dateRangeGroupBySelect;
     private ExclusiveGroup<DateKey> dateKeyGroup;
 
     // Calculation
-    private ExtendedWebElement calculationMeanRadio, calculationTopBoxRadio,
-            dataSetQualifiedRadio, dataSetAllRadio, demographicsFilterLink,
-            responseFilterLink, providerFilterLink;
+    private ExtendedWebElement calculationMeanRadio, calculationTopBoxRadio, dataSetQualifiedRadio, dataSetAllRadio, demographicsFilterLink, responseFilterLink, providerFilterLink, calculationItemToIncludeCore, calculationItemToIncludeCustom, calculationItemToIncludeAncillary;
     private ExclusiveGroup<Calculation> calculationGroup;
     private ExclusiveGroup<DataSet> dataSetGroup;
 
     // Buttons and checkboxes of "REPORT FILTERS" tab
-    private ExtendedWebElement applyButton, cancelButton, resetButton,
-            keepVisibleCheckbox, saveSelectionsCheckbox, selectionsNameInput,
-            setSelectionsAsDefaultCheckbox, shareSelectionsCheckbox,
-            saveSelectionsButton;
+    private ExtendedWebElement applyButton, cancelButton, resetButton, keepVisibleCheckbox, saveSelectionsCheckbox, selectionsNameInput, setSelectionsAsDefaultCheckbox, shareSelectionsCheckbox, saveSelectionsButton;
 
     private FilterByDemographicsPanel filterByDemographicsPanel;
     private FilterByProviderPanel filterByProviderPanel;
     private FilterByResponsePanel filterByResponsePanel;
 
     // Actual report tabs
-    private ExtendedWebElement overviewTab, compositeTab, sideBySideTab,
-            demographicsTab, hcahpsNationalTab;
+    private ExtendedWebElement overviewTab, compositeTab, sideBySideTab, demographicsTab, hcahpsNationalTab;
     private ExclusiveGroup<ReportTab> tabs;
     private EnumMap<ReportTab, ReportGraphsTabIFrame<?>> tabIFrames;
 
     // TODO: Divide this into chunks
-    public PatientExperienceIFrame(
-            @NotNull final ExtendedRemoteWebDriver driver,
-            @NotNull final LoggedInWelcomePage parent) {
+    public PatientExperienceIFrame(@NotNull final ExtendedRemoteWebDriver driver, @NotNull final LoggedInWelcomePage parent) {
         super(driver);
         this.parent = parent;
 
@@ -143,30 +133,63 @@ public class PatientExperienceIFrame extends
     }
 
     public PatientExperienceIFrame applyConfiguredFilters() {
-        this.applyButton.click();
+        int rebindingTrials = 0;
+
+        while(rebindingTrials < STALE_RETRIES) {
+            try {
+                this.applyButton.click();
+
+                break;
+            } catch (StaleElementReferenceException exception) {
+                log.warn("Got stale applyConfiguredFilters");
+                log.warn("Rebinding applyConfiguredFilters. Waiting...");
+                waitForButtonsToLoad();
+                rebindingTrials++;
+                log.warn("Rebinding applyConfiguredFilters. Done #" + rebindingTrials);
+            }
+        }
+
         return this;
     }
 
     public PatientExperienceIFrame changeSystem(ReportFilter reportFilter) {
+        return changeSystem(reportFilter, Environment.PRODUCTION);
+    }
+
+    public PatientExperienceIFrame changeSystem(ReportFilter reportFilter, Environment env) {
         this.accessPanelFrame();
-        if (!this.systemSelect.getFirstSelectedOption()
-                .getAttribute(ATTRIBUTE_NAME_VALUE)
-                .equals(reportFilter.getSystem())) {
-            return this.openChangeSystemPanel()
-                    .chooseSystem(reportFilter.getSystem(), null, null)
-                    .waitForElementsToLoad().navigateToPatientExperienceTab()
-                    .waitForElementsToLoad();
-        } else {
-            return this;
+
+        int rebindingTrials = 0;
+
+        while(rebindingTrials < STALE_RETRIES) {
+            try {
+                if (!this.systemSelect.getFirstSelectedOption().getAttribute(ATTRIBUTE_NAME_VALUE).equals(reportFilter.getSystem())) {
+                    return this.openChangeSystemPanel().chooseSystem(reportFilter.getSystem(), null, null).waitForElementsToLoad().navigateToPatientExperienceTab().waitForElementsToLoad(env);
+                }
+
+                break;
+            } catch (StaleElementReferenceException exception) {
+                log.warn("Got stale changingSystem");
+                log.warn("Rebinding changingSystem. Waiting...");
+                waitForReportLevelToLoad();
+                rebindingTrials++;
+                log.warn("Rebinding changingSystem. Done #" + rebindingTrials);
+            }
         }
+
+        return this;
     }
 
     public PatientExperienceIFrame configureFilters(ReportFilter reportFilter) {
+        return configureFilters(reportFilter, Environment.PRODUCTION);
+    }
+
+    public PatientExperienceIFrame configureFilters(ReportFilter reportFilter, Environment env) {
         if (reportFilter != null) {
             this.configureReportLevelFilter(reportFilter);
-            this.configureSurveySelectionFilter(reportFilter);
+            this.configureSurveySelectionFilter(reportFilter).configureCalculationFilter(reportFilter, env);
             this.configureDateRangeFilter(reportFilter);
-            this.configureCalculationFilter(reportFilter);
+
             // Filter Panels
             PatientDemographics demographics = reportFilter.getDemographics();
             if (demographics != null) {
@@ -187,77 +210,148 @@ public class PatientExperienceIFrame extends
         return this;
     }
 
-    public PatientExperienceIFrame configureReportLevelFilter(
-            ReportFilter reportFilter) {
+    public PatientExperienceIFrame configureReportLevelFilter(ReportFilter reportFilter) {
         if (reportFilter != null) {
-            this.systemSelect.safeSelectByValue(reportFilter.getSystem());
-            loadCombos("system", reportFilter.getSystem());
-            this.organizationSelect.safeSelectByValue(true,
-                    reportFilter.getOrganizations());
-            loadCombos("organization", reportFilter.getOrganizations());
-            this.departmentSelect.safeSelectByValue(true,
-                    reportFilter.getDepartments());
-            loadCombos("department", reportFilter.getDepartments());
-            this.locationSelect.safeSelectByValue(true,
-                    reportFilter.getLocations());
-            loadCombos("location", reportFilter.getLocations());
-            this.scrollUp();
+            boolean doneRebinding = false;
+            int rebindingTrials = 0;
+
+            while(!doneRebinding && rebindingTrials < STALE_RETRIES) {
+                try {
+                    this.systemSelect.safeSelectByValue(reportFilter.getSystem());
+                    loadCombos("system", reportFilter.getSystem());
+                    this.organizationSelect.safeSelectByValue(true, reportFilter.getOrganizations());
+                    loadCombos("organization", reportFilter.getOrganizations());
+                    this.departmentSelect.safeSelectByValue(true, reportFilter.getDepartments());
+                    loadCombos("department", reportFilter.getDepartments());
+                    this.locationSelect.safeSelectByValue(true, reportFilter.getLocations());
+                    loadCombos("location", reportFilter.getLocations());
+                    this.scrollUp();
+
+                    doneRebinding = true;
+                } catch (StaleElementReferenceException exception) {
+                    log.warn("Got stale applying SurveySelectionFilter");
+                    log.warn("Rebinding SurveySelectionFilter. Waiting...");
+                    waitForReportLevelToLoad();
+                    rebindingTrials++;
+                    log.warn("Rebinding SurveySelectionFilter. Done #" + rebindingTrials);
+                }
+            }
         }
+
         return this;
     }
 
     public PatientExperienceIFrame configureSurveySelectionFilter(
             ReportFilter reportFilter) {
-        if (reportFilter != null) {
-            this.accessPanelFrame();
-            // TODO: THESE NEXT THREE LINES ARE A BIT RIDICULOUS,
-            // BUT IT DOESN'T WORK OTHERWISE...
-            this.surveyTypeSelect.sendKeys(reportFilter.getSurveyType());
-            this.surveyTypeSelect.click();
-            this.surveyTypeSelect.click();
-            loadCombos("surveyType", reportFilter.getSurveyType());
-            new Select(this.getDriver().findElement(
-                    By.id(ELEMENT_ID_SURVEY_TYPE_SELECT)))
-                    .selectByValue(reportFilter.getSurveyType());
-            this.patientTypeSelect.safeSelectByValue(true,
-                    reportFilter.getPatientTypes());
-            loadCombos("patientType", reportFilter.getPatientTypes());
-            this.compositeSelect.safeSelectByValue(true,
-                    reportFilter.getFactorComposites());
-            loadCombos("composite", reportFilter.getFactorComposites());
-            this.itemSelect.safeSelectByValue(true,
-                    reportFilter.getItemQuestions());
-            loadCombos("item", reportFilter.getItemQuestions());
-            this.scrollUp();
-        }
-        return this;
-    }
+            if (reportFilter != null) {
+                this.accessPanelFrame();
 
-    public PatientExperienceIFrame configureDateRangeFilter(
-            ReportFilter reportFilter) {
-        if (reportFilter != null) {
-            this.accessPanelFrame();
-            this.dateKeyGroup.safeSelect(reportFilter.getDateKey());
-            this.openDatePickerFrom().waitForElementsToLoad()
-                    .safePick(reportFilter.getFrom());
-            this.openDatePickerTo().waitForElementsToLoad()
-                    .safePick(reportFilter.getTo());
-            DateRangeGroupBy groupBy = reportFilter.getGroupBy();
-            if (groupBy != null) {
-                this.dateRangeGroupBySelect.safeSelectByValue(groupBy
-                        .getValue());
+                boolean doneRebinding = false;
+                int rebindingTrials = 0;
+
+                while(!doneRebinding && rebindingTrials < STALE_RETRIES) {
+                    try {
+                        // TODO: THESE NEXT THREE LINES ARE A BIT RIDICULOUS,
+                        // BUT IT DOESN'T WORK OTHERWISE...
+                        this.surveyTypeSelect.sendKeys(reportFilter.getSurveyType());
+                        this.surveyTypeSelect.click();
+                        this.surveyTypeSelect.click();
+                        loadCombos("surveyType", reportFilter.getSurveyType());
+                        new Select(this.getDriver().findElement(By.id(ELEMENT_ID_SURVEY_TYPE_SELECT))).selectByValue(reportFilter.getSurveyType());
+                        this.patientTypeSelect.safeSelectByValue(true, reportFilter.getPatientTypes());
+                        loadCombos("patientType", reportFilter.getPatientTypes());
+                        this.compositeSelect.safeSelectByValue(true, reportFilter.getFactorComposites());
+                        loadCombos("composite", reportFilter.getFactorComposites());
+                        this.itemSelect.safeSelectByValue(true, reportFilter.getItemQuestions());
+                        loadCombos("item", reportFilter.getItemQuestions());
+
+
+                        this.scrollUp();
+
+                        doneRebinding = true;
+                    } catch (StaleElementReferenceException exception) {
+                        log.warn("Got stale applying SurveySelectionFilter");
+                        log.warn("Rebinding SurveySelectionFilter. Waiting...");
+                        waitForSurveySelectionToLoad();
+                        rebindingTrials++;
+                        log.warn("Rebinding SurveySelectionFilter. Done #" + rebindingTrials);
+                    }
+                }
             }
-            this.scrollUp();
-        }
+
         return this;
     }
 
-    public PatientExperienceIFrame configureCalculationFilter(
-            ReportFilter reportFilter) {
+    public PatientExperienceIFrame configureDateRangeFilter(ReportFilter reportFilter) {
         if (reportFilter != null) {
             this.accessPanelFrame();
-            this.calculationGroup.safeSelect(reportFilter.getCalculation());
-            this.dataSetGroup.safeSelect(reportFilter.getDataSet());
+
+            boolean doneRebinding = false;
+            int rebindingTrials = 0;
+
+            while(!doneRebinding && rebindingTrials < STALE_RETRIES) {
+                try {
+                    this.dateKeyGroup.safeSelect(reportFilter.getDateKey());
+                    this.openDatePickerFrom().waitForElementsToLoad().safePick(reportFilter.getFrom());
+                    this.openDatePickerTo().waitForElementsToLoad().safePick(reportFilter.getTo());
+                    DateRangeGroupBy groupBy = reportFilter.getGroupBy();
+                    if (groupBy != null) {
+                        this.dateRangeGroupBySelect.safeSelectByValue(groupBy.getValue());
+                    }
+                    this.scrollUp();
+
+                    doneRebinding = true;
+                } catch (StaleElementReferenceException exception) {
+                    log.warn("Got stale applying DateRangeFilter");
+                    log.warn("Rebinding DateRangeFilter. Waiting...");
+                    waitForDateRangeToLoad();
+                    rebindingTrials++;
+                    log.warn("Rebinding DateRangeFilter. Done #" + rebindingTrials);
+                }
+            }
+        }
+
+        return this;
+    }
+
+    public PatientExperienceIFrame configureCalculationFilter(ReportFilter reportFilter) {
+        return configureCalculationFilter(reportFilter, Environment.PRODUCTION);
+    }
+
+    public PatientExperienceIFrame configureCalculationFilter(ReportFilter reportFilter, Environment env) {
+        if (reportFilter != null) {
+            this.accessPanelFrame();
+
+            boolean doneRebinding = false;
+            int rebindingTrials = 0;
+
+            while(!doneRebinding && rebindingTrials < STALE_RETRIES) {
+                try {
+                    this.calculationGroup.safeSelect(reportFilter.getCalculation());
+                    this.dataSetGroup.safeSelect(reportFilter.getDataSet());
+
+                    //TODO: Remove this shitty code from here which is duplicated from GetSystemReportValuesCommand.java
+                    if (reportFilter.getSurveyType().compareToIgnoreCase("Avatar") == 0 && env.equals(Environment.QA)) {
+                        //At least one checkbox must be selected, that's a site design requirement
+                        if (this.calculationItemToIncludeCore.isSelected() || this.calculationItemToIncludeCustom.isSelected() || this.calculationItemToIncludeAncillary.isSelected()) {
+                            if (reportFilter.getItemsToIncludeCore() && !this.calculationItemToIncludeCore.isSelected() || !reportFilter.getItemsToIncludeCore() && this.calculationItemToIncludeCore.isSelected())
+                                this.calculationItemToIncludeCore.click();
+                            if (reportFilter.getItemsToIncludeCustom() && !this.calculationItemToIncludeCustom.isSelected() || !reportFilter.getItemsToIncludeCustom() && this.calculationItemToIncludeCustom.isSelected())
+                                this.calculationItemToIncludeCustom.click();
+                            if (reportFilter.getItemsToIncludeAncillary() && !this.calculationItemToIncludeAncillary.isSelected() || !reportFilter.getItemsToIncludeAncillary() && this.calculationItemToIncludeAncillary.isSelected())
+                                this.calculationItemToIncludeAncillary.click();
+                        }
+                    }
+
+                    doneRebinding = true;
+                } catch(StaleElementReferenceException exception) {
+                    log.warn("Got stale applying CalculationFilter");
+                    log.warn("Rebinding CalculationFilter. Waiting...");
+                    waitForCalculationToLoad();
+                    rebindingTrials++;
+                    log.warn("Rebinding CalculationFilter. Done #" + rebindingTrials);
+                }
+            }
         }
         return this;
     }
@@ -346,6 +440,10 @@ public class PatientExperienceIFrame extends
 
     @Override
     public PatientExperienceIFrame waitForElementsToLoad() {
+        return waitForElementsToLoad(Environment.PRODUCTION);
+    }
+
+    public PatientExperienceIFrame waitForElementsToLoad(Environment env) {
         this.accessPanelFrame();
         this.ensureIFrameLoaded();
 
@@ -353,7 +451,7 @@ public class PatientExperienceIFrame extends
         this.waitForReportLevelToLoad();
         this.waitForSurveySelectionToLoad();
         this.waitForDateRangeToLoad();
-        this.waitForCalculationToLoad();
+        this.waitForCalculationToLoad(env);
         this.waitForButtonsToLoad();
         this.waitForReportTabsToLoad();
 
@@ -378,6 +476,9 @@ public class PatientExperienceIFrame extends
         this.dataSetGroup = new ExclusiveGroup<>(DataSet.class);
         this.dataSetGroup.add(DataSet.ALL, this.dataSetAllRadio).add(
                 DataSet.QUALIFIED, this.dataSetQualifiedRadio);
+        this.calculationItemToIncludeCore = new ExtendedWebElement(this);
+        this.calculationItemToIncludeCustom = new ExtendedWebElement(this);
+        this.calculationItemToIncludeAncillary = new ExtendedWebElement(this);
     }
 
     private void initDateRangeElements() {
@@ -499,10 +600,13 @@ public class PatientExperienceIFrame extends
     }
 
     protected void waitForCalculationToLoad() {
+        waitForCalculationToLoad(Environment.PRODUCTION);
+    }
+
+    protected void waitForCalculationToLoad(Environment env) {
         this.setElements(this.calculationMeanRadio,
-                this.calculationTopBoxRadio, this.dataSetQualifiedRadio,
-                this.dataSetAllRadio, this.demographicsFilterLink,
-                this.responseFilterLink, this.providerFilterLink).byId(true,
+                this.calculationTopBoxRadio, this.dataSetQualifiedRadio, this.dataSetAllRadio,
+                this.demographicsFilterLink, this.responseFilterLink, this.providerFilterLink).byId(true,
                 ELEMENT_ID_CALCULATION_MEAN_RADIO,
                 ELEMENT_ID_CALCULATION_TOP_BOX_RADIO,
                 ELEMENT_ID_DATA_SET_QUALIFIED_RADIO,
@@ -510,6 +614,14 @@ public class PatientExperienceIFrame extends
                 ELEMENT_ID_DEMOGRAPHICS_FILTER_LINK,
                 ELEMENT_ID_RESPONSE_FILTER_LINK,
                 ELEMENT_ID_PROVIDER_FILTER_LINK);
+
+        if (env.equals(Environment.QA)) {
+            this.setElements(this.calculationItemToIncludeCore, this.calculationItemToIncludeCustom,
+                    this.calculationItemToIncludeAncillary).byId(false,
+                    ELEMENT_ID_CALCULATION_ITEM_TO_INCLUDE_CORE,
+                    ELEMENT_ID_CALCULATION_ITEM_TO_INCLUDE_CUSTOM,
+                    ELEMENT_ID_CALCULATION_ITEM_TO_INCLUDE_ANCILLARY);
+        }
     }
 
     protected void waitForDateRangeToLoad() {

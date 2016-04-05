@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.olenick.avatar.model.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,12 +119,16 @@ public class FeatureExecutor {
         return new XMLPatientExperienceFeatureParser().parse(xmlFileURL);
     }
 
-    private PatientExperienceIFrame loadPatientExperience(
-            LoggedInWelcomePage welcomePage)
+    private PatientExperienceIFrame loadPatientExperience(LoggedInWelcomePage welcomePage)
+            throws FeatureExecutorListenerException {
+        return loadPatientExperience(welcomePage, Environment.PRODUCTION);
+    }
+
+    private PatientExperienceIFrame loadPatientExperience(LoggedInWelcomePage welcomePage, Environment env)
             throws FeatureExecutorListenerException {
         this.notifyListeners(FeatureExecutorEvent.PATIENT_EXPERIENCE_STARTED);
         PatientExperienceIFrame patientExperienceIFrame = welcomePage
-                .navigateToPatientExperienceTab().waitForElementsToLoad();
+                .navigateToPatientExperienceTab().waitForElementsToLoad(env);
         patientExperienceIFrame.openOverviewTab().waitForElementsToLoad();
         this.notifyListeners(FeatureExecutorEvent.PATIENT_EXPERIENCE_ENDED);
         return patientExperienceIFrame;

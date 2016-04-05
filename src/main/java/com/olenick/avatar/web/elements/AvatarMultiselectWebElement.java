@@ -226,8 +226,7 @@ public class AvatarMultiselectWebElement extends ExtendedSelectWebElement {
         this.safeSelectByValue(false, values);
     }
 
-    public void safeSelectByValue(final boolean clearBefore,
-            final List<String> values) {
+    public void safeSelectByValue(final boolean clearBefore, final List<String> values) {
         log.trace("safeSelectByValue({}, {})", clearBefore, values);
         if (values != null) {
             this.beforeAction();
@@ -449,12 +448,18 @@ public class AvatarMultiselectWebElement extends ExtendedSelectWebElement {
 
     public void retryDeselectAll() {
         log.trace("retryDeselectAll()");
-        this.sendKeys(Keys.ENTER);
-        this.sendKeys(Keys.TAB);
-        this.overwriteSelect();
-        this.beforeAction();
-        ((AvatarSelect) this.safeGetSelect()).tryDeselectAll();
-        // this.afterAction();
+
+        try {
+            this.sendKeys(Keys.ENTER);
+            this.sendKeys(Keys.TAB);
+            this.overwriteSelect();
+            this.beforeAction();
+            ((AvatarSelect) this.safeGetSelect()).tryDeselectAll();
+            // this.afterAction();
+        }catch (StaleElementReferenceException e){
+            log.warn("Got StaleElementReferenceException on the retry of deselecting all options");
+            throw e;
+        }
     }
 
     protected static class AvatarSelect extends Select {

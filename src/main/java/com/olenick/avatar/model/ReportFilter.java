@@ -14,8 +14,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class ReportFilter implements Cloneable {
     private Calculation calculation;
-    private DateKey dateKey;
     private DataSet dataSet;
+    private Boolean itemsToIncludeCore;
+    private Boolean itemsToIncludeCustom;
+    private Boolean itemsToIncludeAncillary;
+    private DateKey dateKey;
     private DateRangeGroupBy groupBy;
     private String surveyType;
     private String system;
@@ -32,6 +35,12 @@ public class ReportFilter implements Cloneable {
     private ProviderFilter providerFilter;
     private ResponseFilter responseFilter;
 
+    public ReportFilter() {
+        this.itemsToIncludeCore = false;
+        this.itemsToIncludeCustom = false;
+        this.itemsToIncludeAncillary = false;
+    }
+
     public Calculation getCalculation() {
         return calculation;
     }
@@ -41,15 +50,6 @@ public class ReportFilter implements Cloneable {
         this.calculation = calculation;
     }
 
-    public DateKey getDateKey() {
-        return dateKey;
-    }
-
-    @XmlElement(name = "date-key")
-    public void setDateKey(DateKey dateKey) {
-        this.dateKey = dateKey;
-    }
-
     public DataSet getDataSet() {
         return dataSet;
     }
@@ -57,6 +57,42 @@ public class ReportFilter implements Cloneable {
     @XmlElement(name = "data-set")
     public void setDataSet(DataSet dataSet) {
         this.dataSet = dataSet;
+    }
+
+    public boolean getItemsToIncludeCore() {
+        return this.itemsToIncludeCore;
+    }
+
+    @XmlElement(name = "items-to-include-core")
+    public void setItemsToIncludeCore(Boolean check) {
+        this.itemsToIncludeCore = check;
+    }
+
+    public Boolean getItemsToIncludeCustom() {
+        return this.itemsToIncludeCustom;
+    }
+
+    @XmlElement(name = "items-to-include-custom")
+    public void setItemsToIncludeCustom(Boolean check) {
+        this.itemsToIncludeCustom = check;
+    }
+
+    public Boolean getItemsToIncludeAncillary() {
+        return this.itemsToIncludeAncillary;
+    }
+
+    @XmlElement(name = "items-to-include-ancillary")
+    public void setItemsToIncludeAncillary(Boolean check) {
+        this.itemsToIncludeAncillary = check;
+    }
+
+    public DateKey getDateKey() {
+        return dateKey;
+    }
+
+    @XmlElement(name = "date-key")
+    public void setDateKey(DateKey dateKey) {
+        this.dateKey = dateKey;
     }
 
     public DateRangeGroupBy getGroupBy() {
@@ -234,8 +270,11 @@ public class ReportFilter implements Cloneable {
     public ReportFilter clone() {
         ReportFilter clone = new ReportFilter();
         clone.setCalculation(this.calculation);
-        clone.setDateKey(this.dateKey);
         clone.setDataSet(this.dataSet);
+        clone.setItemsToIncludeCore(this.itemsToIncludeCore);
+        clone.setItemsToIncludeCustom(this.itemsToIncludeCustom);
+        clone.setItemsToIncludeAncillary(this.itemsToIncludeAncillary);
+        clone.setDateKey(this.dateKey);
         clone.setGroupBy(this.groupBy);
         clone.setSurveyType(surveyType);
         clone.setSystem(system);
@@ -295,6 +334,12 @@ public class ReportFilter implements Cloneable {
             return false;
         if (dataSet != that.dataSet)
             return false;
+        if (itemsToIncludeCore != that.itemsToIncludeCore)
+            return false;
+        if (itemsToIncludeCustom != that.itemsToIncludeCustom)
+            return false;
+        if (itemsToIncludeAncillary != that.itemsToIncludeAncillary)
+            return false;
         if (dateKey != that.dateKey)
             return false;
         if (demographics != null ? !demographics.equals(that.demographics)
@@ -345,8 +390,11 @@ public class ReportFilter implements Cloneable {
     @Override
     public int hashCode() {
         int result = calculation != null ? calculation.hashCode() : 0;
-        result = 31 * result + (dateKey != null ? dateKey.hashCode() : 0);
         result = 31 * result + (dataSet != null ? dataSet.hashCode() : 0);
+        result = 31 * result + (itemsToIncludeCore != null ? itemsToIncludeCore.hashCode() : 0);
+        result = 31 * result + (itemsToIncludeCustom != null ? itemsToIncludeCustom.hashCode() : 0);
+        result = 31 * result + (itemsToIncludeAncillary != null ? itemsToIncludeAncillary.hashCode() : 0);
+        result = 31 * result + (dateKey != null ? dateKey.hashCode() : 0);
         result = 31 * result + (groupBy != null ? groupBy.hashCode() : 0);
         result = 31 * result + (surveyType != null ? surveyType.hashCode() : 0);
         result = 31 * result + (system != null ? system.hashCode() : 0);
@@ -377,8 +425,11 @@ public class ReportFilter implements Cloneable {
     public String toString() {
         final StringBuilder sb = new StringBuilder("ReportFilter{");
         sb.append("calculation=").append(calculation);
-        sb.append(", dateKey=").append(dateKey);
         sb.append(", dataSet=").append(dataSet);
+        sb.append(", itemsToIncludeCore=").append(itemsToIncludeCore);
+        sb.append(", itemsToIncludeCustom=").append(itemsToIncludeCustom);
+        sb.append(", itemsToIncludeAncillary=").append(itemsToIncludeAncillary);
+        sb.append(", dateKey=").append(dateKey);
         sb.append(", groupBy=").append(groupBy);
         sb.append(", surveyType='").append(surveyType).append('\'');
         sb.append(", system='").append(system).append('\'');

@@ -5,6 +5,8 @@ import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 
+import com.olenick.avatar.model.Environment;
+import com.olenick.avatar.model.report_values.ReportValuesSearchSpec;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -109,6 +111,7 @@ public abstract class ReportGraphsTabIFrame<T extends ReportGraphsTabIFrame<T>>
 
     public abstract T exportToPDF();
 
+    public abstract ReportValues getValues(ReportValuesSearchSpec searchSpec);
     public abstract ReportValues getValues();
 
     protected void handlePDFNewWindow() {
